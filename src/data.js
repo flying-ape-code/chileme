@@ -90,7 +90,7 @@ export const funnyPhrases = [
   '协议已达成：你的胃将归属于它。'
 ];
 
-export const getRandomItems = (category, count = 8) => {
+export const getRandomItems = (category, count = 6) => {
   const allItems = [...foodData[category]];
   for (let i = allItems.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
