@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { mealTypes, getRandomItems } from './data';
 import Wheel from './components/Wheel';
 import CelebrationModal from './components/CelebrationModal';
+import WeatherInsight from './components/WeatherInsight';
 
 function App() {
   const [selectedMealId, setSelectedMealId] = useState(mealTypes[0].id);
@@ -53,6 +54,7 @@ function App() {
         <p className="text-cyber-cyan/80 font-mono text-xs tracking-[0.4em] uppercase">
           [ 命运算法启动中... ]
         </p>
+        <WeatherInsight temperature={6} condition="小雨" />
       </header>
 
       <nav className="flex flex-wrap justify-center gap-3 relative z-20">

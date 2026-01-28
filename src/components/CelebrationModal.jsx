@@ -39,7 +39,19 @@ const CelebrationModal = ({ food, category, onClose }) => {
           "{phrase}"
         </p>
 
-        <button 
+        {food.promoUrl && (
+          <a
+            href={food.promoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-3 mb-3 bg-cyber-pink/10 border border-cyber-pink text-cyber-pink font-black tracking-[0.2em] text-xs uppercase hover:bg-cyber-pink hover:text-white transition-all duration-300 shadow-[0_0_10px_rgba(255,0,234,0.5)] active:scale-95 block text-center"
+            style={{ clipPath: 'polygon(5px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 5px) 100%, 0 100%, 0 10px)' }}
+          >
+            去点餐
+          </a>
+        )}
+
+        <button
           onClick={onClose}
           className="w-full py-3 bg-transparent border border-cyber-cyan text-cyber-cyan font-black tracking-[0.2em] text-xs uppercase hover:bg-cyber-cyan hover:text-cyber-dark transition-all duration-300 shadow-[0_0_10px_rgba(0,247,255,0.5)] active:scale-95"
           style={{ clipPath: 'polygon(5px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 5px) 100%, 0 100%, 0 10px)' }}

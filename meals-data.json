@@ -1,0 +1,162 @@
+{
+  "breakfast": [
+    {
+      "name": "小笼包",
+      "img": "https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246591.html?msource=AppShare"
+    },
+    {
+      "name": "煎饼果子",
+      "img": "https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246592.html?msource=AppShare"
+    },
+    {
+      "name": "皮蛋瘦肉粥",
+      "img": "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246593.html?msource=AppShare"
+    },
+    {
+      "name": "小馄饨",
+      "img": "https://images.unsplash.com/photo-1615557960916-5f4791effe9d?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246594.html?msource=AppShare"
+    },
+    {
+      "name": "热干面",
+      "img": "https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246595.html?msource=AppShare"
+    },
+    {
+      "name": "生煎包",
+      "img": "https://images.unsplash.com/photo-1534422298391-e4f8c170db06?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246596.html?msource=AppShare"
+    }
+  ],
+  "lunch": [
+    {
+      "name": "黄焖鸡米饭",
+      "img": "https://images.unsplash.com/photo-1541832676-9b763b0239ab?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246597.html?msource=AppShare"
+    },
+    {
+      "name": "兰州牛肉面",
+      "img": "https://images.unsplash.com/photo-1582878826629-29b7ad1ccd2d?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246598.html?msource=AppShare"
+    },
+    {
+      "name": "麻辣香锅",
+      "img": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246599.html?msource=AppShare"
+    },
+    {
+      "name": "卤肉饭",
+      "img": "https://images.unsplash.com/photo-1544333346-64e4fe182747?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246600.html?msource=AppShare"
+    },
+    {
+      "name": "酸菜鱼",
+      "img": "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246601.html?msource=AppShare"
+    },
+    {
+      "name": "海南鸡饭",
+      "img": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246602.html?msource=AppShare"
+    }
+  ],
+  "afternoon-tea": [
+    {
+      "name": "杨枝甘露",
+      "img": "https://images.unsplash.com/photo-1544333346-64e4fe182747?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246603.html?msource=AppShare"
+    },
+    {
+      "name": "珍珠奶茶",
+      "img": "https://images.unsplash.com/photo-1544333346-64e4fe182747?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246604.html?msource=AppShare"
+    },
+    {
+      "name": "葡式蛋挞",
+      "img": "https://images.unsplash.com/photo-1599785209707-3b73cde7cba7?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246605.html?msource=AppShare"
+    },
+    {
+      "name": "抹茶千层",
+      "img": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246606.html?msource=AppShare"
+    },
+    {
+      "name": "提拉米苏",
+      "img": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246607.html?msource=AppShare"
+    },
+    {
+      "name": "酥皮泡芙",
+      "img": "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246608.html?msource=AppShare"
+    }
+  ],
+  "dinner": [
+    {
+      "name": "重庆火锅",
+      "img": "https://images.unsplash.com/photo-1552611052-33e04de081de?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246609.html?msource=AppShare"
+    },
+    {
+      "name": "北京烤鸭",
+      "img": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246610.html?msource=AppShare"
+    },
+    {
+      "name": "日式拉面",
+      "img": "https://images.unsplash.com/photo-1582878826629-29b7ad1ccd2d?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246611.html?msource=AppShare"
+    },
+    {
+      "name": "黑椒牛排",
+      "img": "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246612.html?msource=AppShare"
+    },
+    {
+      "name": "糖醋排骨",
+      "img": "https://images.unsplash.com/photo-1541832676-9b763b0239ab?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246613.html?msource=AppShare"
+    },
+    {
+      "name": "意式披萨",
+      "img": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246614.html?msource=AppShare"
+    }
+  ],
+  "night-snack": [
+    {
+      "name": "麻辣小龙虾",
+      "img": "https://images.unsplash.com/photo-1559740064-0248b7147435?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246615.html?msource=AppShare"
+    },
+    {
+      "name": "炭烤串串",
+      "img": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246616.html?msource=AppShare"
+    },
+    {
+      "name": "炸鸡啤酒",
+      "img": "https://images.unsplash.com/photo-1562967914-608f82629710?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246617.html?msource=AppShare"
+    },
+    {
+      "name": "螺蛳粉",
+      "img": "https://images.unsplash.com/photo-1582878826629-29b7ad1ccd2d?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246618.html?msource=AppShare"
+    },
+    {
+      "name": "关东煮",
+      "img": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246619.html?msource=AppShare"
+    },
+    {
+      "name": "章鱼小丸子",
+      "img": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/awp/hfe/branch/brand-home/8246620.html?msource=AppShare"
+    }
+  ]
+}
