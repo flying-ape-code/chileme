@@ -29,7 +29,36 @@
 
 ## 使用说明
 
-### 添加/更新推广链接
+### 方法 1：使用数据管理工具（推荐）
+
+使用命令行工具方便地管理商品数据：
+
+```bash
+# 查看统计
+node scripts/manage-meals.cjs stats
+
+# 列出商品
+node scripts/manage-meals.cjs list breakfast
+
+# 添加商品（交互式）
+node scripts/manage-meals.cjs add breakfast
+
+# 删除商品
+node scripts/manage-meals.cjs delete breakfast 3
+
+# 导出为 CSV
+node scripts/manage-meals.cjs export my-meals.csv
+
+# 从 CSV 导入
+node scripts/manage-meals.cjs import my-meals.csv
+
+# 验证数据
+node scripts/manage-meals.cjs validate
+```
+
+详细文档见：[scripts/README.md](scripts/README.md)
+
+### 方法 2：手动编辑 JSON 文件
 
 编辑 `meals-data.json` 文件，更新对应商品的 `promoUrl` 字段：
 
@@ -50,7 +79,7 @@
 1. 打开美团 App 或网页版
 2. 找到目标商品/店铺
 3. 复制链接（包含推广参数）
-4. 粘贴到 `meals-data.json` 对应项的 `promoUrl` 字段
+4. 使用工具添加或直接编辑 `meals-data.json` 对应项的 `promoUrl` 字段
 
 ### 数据结构
 
@@ -74,12 +103,18 @@
 ## 未来改进
 
 - 考虑添加饿了么数据支持
-- 自动化数据获取（爬虫）
-- 数据验证和错误处理
+- 添加 Web 管理界面
+- 支持数据版本管理和回滚
 - 添加更多商品选项
 
 ## 开发记录
 
 完成时间：2026年1月28日
-开发者：Moltbot + OpenCode
+开发者：Moltbot
 任务状态：✅ 已完成
+
+**更新记录：**
+- ✅ 2026-01-28: 创建数据管理工具（scripts/manage-meals.cjs）
+- ✅ 2026-01-28: 添加批量导入/导出功能（CSV 支持）
+- ✅ 2026-01-28: 添加数据验证功能
+- ✅ 2026-01-28: 自动备份机制
