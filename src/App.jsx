@@ -39,8 +39,15 @@ function App() {
     setRotation(newRotation);
 
     setTimeout(() => {
+      const winnerItem = currentItems[winnerIndex];
+      console.log('Winner selected:', {
+        index: winnerIndex,
+        name: winnerItem.name,
+        img: winnerItem.img,
+        weirdName: winnerItem.weirdName
+      });
       setIsSpinning(false);
-      setWinner(currentItems[winnerIndex]);
+      setWinner(winnerItem);
       setShowModal(true);
     }, 4000);
   };

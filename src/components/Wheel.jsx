@@ -42,9 +42,11 @@ const Wheel = ({ items, rotation, isSpinning }) => {
             >
               <div className="mt-4 md:mt-8 flex flex-col items-center pointer-events-auto">
                 <div className="w-20 h-20 md:w-32 md:h-32 rounded-full overflow-hidden border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.8)] z-10">
-                  <div 
+                  <div
                     className="w-full h-full bg-cover bg-center transition-transform hover:scale-110 duration-500"
-                    style={{ backgroundImage: `url(${item.img})` }}
+                    style={{
+                      backgroundImage: `url(${item.img || 'https://via.placeholder.com/400x400/050505/00f7ff?text=No+Image'})`,
+                    }}
                   />
                 </div>
                 

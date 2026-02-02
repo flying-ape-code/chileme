@@ -4,10 +4,15 @@ import { funnyPhrases } from '../data';
 const CelebrationModal = ({ food, category, onClose }) => {
   if (!food) return null;
 
-  const phrase = useMemo(() => 
-    funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)], 
+  const phrase = useMemo(() =>
+    funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)],
     []
   );
+
+  // 处理推广链接：空链接时隐藏，移动端链接转换为PC端
+  const promoUrl = food.promoUrl && food.promoUrl.trim() !== ''
+    ? food.promoUrl.replace('i.meituan.com', 'meituan.com')
+    : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cyber-dark/80 backdrop-blur-md animate-in fade-in duration-300">
@@ -25,10 +30,14 @@ const CelebrationModal = ({ food, category, onClose }) => {
         </p>
         
         <div className="relative border border-cyber-pink overflow-hidden mb-4 aspect-square shadow-[0_0_15px_rgba(255,0,234,0.2)]">
-          <img 
-            src={food.img} 
-            alt={food.name} 
+          <img
+            src={food.img}
+            alt={food.name}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.src = 'https://via.placeholder.com/400x400/ff00ea/ffffff?text=Image+Error';
+              console.error('Image load error:', food.img);
+            }}
           />
           <div className="absolute bottom-0 inset-x-0 bg-cyber-dark/90 border-t border-cyber-pink p-2">
             <span className="text-cyber-pink text-lg font-black tracking-widest uppercase">{food.name}</span>
@@ -39,9 +48,9 @@ const CelebrationModal = ({ food, category, onClose }) => {
           "{phrase}"
         </p>
 
-        {food.promoUrl && (
+        {promoUrl && (
           <a
-            href={food.promoUrl}
+            href={promoUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full py-3 mb-3 bg-cyber-pink/10 border border-cyber-pink text-cyber-pink font-black tracking-[0.2em] text-xs uppercase hover:bg-cyber-pink hover:text-white transition-all duration-300 shadow-[0_0_10px_rgba(255,0,234,0.5)] active:scale-95 block text-center"
