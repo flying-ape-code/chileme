@@ -1,0 +1,168 @@
+{
+  "project": "chileme-app (吃了么)",
+  "version": "2.0.0",
+  "updated_at": "2026-02-01T22:30:00Z",
+  "developer": "Robin & AI Assistant",
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "添加历史记录功能",
+      "description": "实现抽奖历史记录、统计功能、数据持久化",
+      "status": "in_progress",
+      "created_at": "2026-02-01T22:30:00Z",
+      "updated_at": "2026-02-01T22:45:00Z",
+      "assigned_to": "AI Assistant",
+      "dependencies": [],
+      "files": [
+        "src/history.js",
+        "src/components/History.jsx"
+      ]
+    },
+    {
+      "id": "task-2",
+      "title": "优化性能和类型安全",
+      "description": "将 .jsx 转换为 .tsx，添加 TypeScript 类型定义",
+      "status": "pending",
+      "created_at": "2026-02-01T22:30:00Z",
+      "updated_at": null,
+      "assigned_to": "AI Assistant",
+      "dependencies": [
+        "task-1"
+      ],
+      "files": [
+        "tsconfig.json",
+        "package.json"
+      ]
+    },
+    {
+      "id": "task-3",
+      "title": "添加分享功能",
+      "description": "实现分享到社交媒体的功能（Twitter、微博、朋友圈）",
+      "status": "pending",
+      "created_at": "2026-02-01T22:30:00Z",
+      "updated_at": null,
+      "assigned_to": "AI Assistant",
+      "dependencies": [
+        "task-1"
+      ],
+      "files": [
+        "src/components/ShareModal.jsx",
+        "src/lib/share.js"
+      ]
+    },
+    {
+      "id": "task-4",
+      "title": "添加个性化设置",
+      "description": "主题颜色、动画速度、音效开关",
+      "status": "pending",
+      "created_at": "2026-02-01T22:30:00Z",
+      "updated_at": null,
+      "assigned_to": "AI Assistant",
+      "dependencies": [],
+      "files": [
+        "src/components/SettingsModal.jsx",
+        "src/lib/settings.js"
+      ]
+    },
+    {
+      "id": "task-5",
+      "title": "移动端响应式优化",
+      "description": "优化移动端、平板显示，适配不同屏幕尺寸",
+      "status": "pending",
+      "created_at": "2026-02-01T22:30:00Z",
+      "updated_at": null,
+      "assigned_to": "AI Assistant",
+      "dependencies": [],
+      "files": [
+        "src/styles/responsive.css",
+        "tailwind.config.js"
+      ]
+    },
+    {
+      "id": "task-6",
+      "title": "功能测试",
+      "description": "使用浏览器自动化测试所有功能",
+      "status": "pending",
+      "created_at": "2026-02-01T22:30:00Z",
+      "updated_at": null,
+      "assigned_to": "AI Assistant",
+      "dependencies": [
+        "task-1",
+        "task-2",
+        "task-3",
+        "task-4"
+      ],
+      "files": []
+    },
+    {
+      "id": "task-7",
+      "title": "部署到 Vercel",
+      "description": "部署生产环境，配置域名",
+      "status": "pending",
+      "created_at": "2026-02-01T22:30:00Z",
+      "updated_at": null,
+      "assigned_to": "AI Assistant",
+      "dependencies": [
+        "task-1",
+        "task-2",
+        "task-3",
+        "task-4",
+        "task-5",
+        "task-6"
+      ],
+      "files": [
+        "vercel.json",
+        ".vercelignore"
+      ]
+    },
+    {
+      "id": "task-8",
+      "title": "创建 Pull Request",
+      "description": "提交代码到 GitHub，创建 PR",
+      "status": "pending",
+      "created_at": "2026-02-01T22:30:00Z",
+      "updated_at": null,
+      "assigned_to": "AI Assistant",
+      "dependencies": [
+        "task-7"
+      ],
+      "files": []
+    },
+    {
+      "id": "task-9",
+      "title": "更新 Notion 任务状态",
+      "description": "将开发任务状态同步到 Notion（需要新 Token）",
+      "status": "pending",
+      "created_at": "2026-02-01T22:30:00Z",
+      "updated_at": null,
+      "assigned_to": "AI Assistant",
+      "dependencies": [],
+      "files": []
+    },
+    {
+      "id": "task-10",
+      "title": "标记项目完成",
+      "description": "所有开发任务完成，项目上线",
+      "status": "pending",
+      "created_at": "2026-02-01T22:30:00Z",
+      "updated_at": null,
+      "assigned_to": "AI Assistant",
+      "dependencies": [
+        "task-1",
+        "task-2",
+        "task-3",
+        "任务-4",
+        "task-5",
+        "任务-6",
+        "task-7",
+        "task-8"
+      ],
+      "files": []
+    }
+  ],
+  "settings": {
+    "notion_token": "INVALID - need new token",
+    "notion_database_id": "8d7665c507b54eb79d2b8fc90a1b4dad",
+    "auto_sync": false
+  }
+}
