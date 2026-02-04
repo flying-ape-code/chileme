@@ -19,7 +19,7 @@ export const logout = () => {
 export const isLoggedIn = () => {
   const loggedIn = localStorage.getItem('adminLoggedIn') === 'true';
   const loginTime = localStorage.getItem('adminLoginTime');
-  
+
   // 24小时后自动登出
   if (loggedIn && loginTime) {
     const hoursElapsed = (Date.now() - parseInt(loginTime)) / (1000 * 60 * 60);
@@ -28,16 +28,6 @@ export const isLoggedIn = () => {
       return false;
     }
   }
-  
-  return loggedIn;
-};
 
-export const withAuth = (Component) => {
-  return (props) => {
-    if (!isLoggedIn()) {
-      window.location.href = '/login';
-      return null;
-    }
-    return <Component {...props} />;
-  };
+  return loggedIn;
 };

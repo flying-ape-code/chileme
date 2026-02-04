@@ -108,7 +108,7 @@ export const importProducts = (jsonData) => {
     const data = JSON.parse(jsonData);
     const result = saveProducts(data);
     return result;
-  } catch (error) {
+  } catch {
     return { success: false, message: '数据格式错误' };
   }
 };

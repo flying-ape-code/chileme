@@ -39,6 +39,7 @@ function ProductList({ products, category, categoryName, onEdit, onDelete }) {
                 </p>
               )}
               <p className="text-cyber-cyan/30 font-mono text-[10px] mt-1">
+                {/* eslint-disable-next-line react-hooks/purity */}
                 {new Date(product.createdAt || Date.now()).toLocaleDateString()}
               </p>
             </div>

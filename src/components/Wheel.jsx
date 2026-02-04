@@ -4,8 +4,10 @@ const Wheel = ({ items, rotation, isSpinning }) => {
   const segmentAngle = items.length > 0 ? 360 / items.length : 0;
 
   return (
-    <div className="relative w-80 h-80 sm:w-96 sm:h-96 md:w-[500px] md:h-[500px] transition-transform duration-[4000ms] cubic-bezier(0.15, 0, 0.15, 1)"
-         style={{ transform: `rotate(${rotation}deg)` }}>
+    <div
+      className={`relative w-80 h-80 sm:w-96 sm:h-96 md:w-[500px] md:h-[500px] transition-transform duration-[4000ms] cubic-bezier(0.15, 0, 0.15, 1) ${isSpinning ? 'animate-pulse' : ''}`}
+      style={{ transform: `rotate(${rotation}deg)` }}
+    >
       
       <div className="absolute inset-0 rounded-full border-[3px] border-cyber-cyan shadow-[0_0_30px_rgba(0,247,255,0.4)] z-20 pointer-events-none"></div>
 

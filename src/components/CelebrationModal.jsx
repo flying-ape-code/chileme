@@ -2,12 +2,13 @@ import React, { useMemo } from 'react';
 import { funnyPhrases } from '../data';
 
 const CelebrationModal = ({ food, category, onClose }) => {
-  if (!food) return null;
-
   const phrase = useMemo(() =>
+    // eslint-disable-next-line react-hooks/purity
     funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)],
     []
   );
+
+  if (!food) return null;
 
   // 处理推广链接：空链接时隐藏，移动端链接转换为PC端
   const promoUrl = food.promoUrl && food.promoUrl.trim() !== ''

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logout, isLoggedIn } from '../utils/auth.jsx';
-import { getProducts, deleteProduct as deleteProductUtil } from '../utils/productManager.jsx';
+import { getProducts, deleteProduct as deleteProductUtil, addProduct, updateProduct } from '../utils/productManager.jsx';
 import ProductList from '../components/ProductList';
 import ProductForm from '../components/ProductForm';
 
@@ -20,18 +20,19 @@ function Admin() {
     { id: 'night-snack', name: '夜宵' }
   ];
 
+  const loadProducts = useCallback(() => {
+    const data = getProducts();
+    setProducts(data);
+  }, []);
+
   useEffect(() => {
     if (!isLoggedIn()) {
       navigate('/login');
       return;
     }
     loadProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
-
-  const loadProducts = () => {
-    const data = getProducts();
-    setProducts(data);
-  };
 
   const handleAdd = () => {
     setEditingProduct(null);
@@ -57,8 +58,6 @@ function Admin() {
   };
 
   const handleFormSubmit = (formData) => {
-    const { addProduct, updateProduct } = require('../utils/productManager');
-    
     const result = editingProduct
       ? updateProduct(editingProduct.category, editingProduct.id, formData)
       : addProduct(formData.category, formData);
