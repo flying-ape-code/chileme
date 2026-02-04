@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { mealTypes, getRandomItems } from '../data';
+import { mealTypes, getRandomItems } from './data';
 import Wheel from './components/Wheel';
 import CelebrationModal from './components/CelebrationModal';
 import WeatherInsight from './components/WeatherInsight';
@@ -23,6 +23,11 @@ function App() {
     setCurrentItems(getRandomItems(selectedMealId));
   }, [selectedMealId]);
 
+  // Helper function to get random winner index
+  const getRandomWinnerIndex = (itemsCount) => {
+    return Math.floor(Math.random() * itemsCount);
+  };
+
   const handleSpin = () => {
     if (isSpinning) return;
 
@@ -31,7 +36,7 @@ function App() {
     setShowModal(false);
     setShowHistory(false); // 关闭历史记录
 
-    const winnerIndex = Math.floor(Math.random() * currentItems.length);
+    const winnerIndex = getRandomWinnerIndex(currentItems.length);
     const spins = 5; 
     const segmentAngle = 360 / currentItems.length;
     const centerOffset = segmentAngle / 2;

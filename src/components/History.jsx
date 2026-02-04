@@ -9,10 +9,13 @@ function History({ isOpen, onClose }) {
 
   useEffect(() => {
     if (isOpen) {
-      const currentHistory = getRecentHistory(20);
-      const currentStats = getHistoryStats();
-      setHistory(currentHistory);
-      setStats(currentStats);
+      // Defer state updates to avoid cascading renders warning
+      requestAnimationFrame(() => {
+        const currentHistory = getRecentHistory(20);
+        const currentStats = getHistoryStats();
+        setHistory(currentHistory);
+        setStats(currentStats);
+      });
     }
   }, [isOpen]);
 

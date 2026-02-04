@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
 /**
- * 美团热门商品爬虫
- * 用途：爬取美团最新热门商品，更新到 meals-data.json
+ * 吃了么商品数据管理器
+ * 用途：每小时验证数据完整性并备份，支持手动更新商品数据
+ * 模式：自动验证 + 手动更新
  */
 
-import puppeteer from 'puppeteer';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -15,41 +15,103 @@ const CONFIG = {
   dataFilePath: path.join(process.cwd(), 'meals-data.json'),
   // 备份路径
   backupPath: path.join(process.cwd(), 'meals-data.json.backup'),
-  // 类别映射
-  categoryMapping: {
-    'breakfast': 'breakfast',
-    'lunch': 'lunch',
-    'dinner': 'dinner',
-    'snack': 'night-snack',
-    'drink': 'afternoon-tea'
-  },
-  // Unsplash图片模板
-  imageTemplate: 'https://images.unsplash.com/photo-{id}?w=400&h=400&fit=crop',
-  // Unsplash图片ID池
-  imageIds: [
-    '1619096252214-ef06c45683e3', // 煎饼果子
-    '1625220194771-7ebdea0b70b9', // 皮蛋瘦肉粥
-    '1541696432-82c6da8ce7bf', // 小笼包
-    '1526318896980-cf78c088247c', // 小馄饨
-    '1526777563695-e8467e7c5952', // 热干面
-    '1534422298391-e4f8c170db06', // 生煎包
-    '1541832676-9b763b0239ab', // 黄焖鸡米饭
-    '1625657101903-3f71b3a0794e', // 兰州牛肉面
-    '1623341214825-9f4f963727da', // 麻辣香锅
-  ]
+  // 日志目录
+  logDir: path.join(process.cwd(), 'logs'),
+  // 备份保留数量
+  maxBackups: 24, // 保留24小时内的备份
 };
 
 /**
- * 备份当前数据
+ * 验证数据完整性
+ */
+function validateData(data) {
+  const errors = [];
+  const warnings = [];
+  const stats = {};
+
+  for (const [category, items] of Object.entries(data)) {
+    if (!Array.isArray(items)) {
+      errors.push(`${category}: 不是数组`);
+      continue;
+    }
+
+    stats[category] = items.length;
+
+    items.forEach((item, index) => {
+      // 验证必填字段
+      if (!item.name || typeof item.name !== 'string' || item.name.trim() === '') {
+        errors.push(`${category}[${index + 1}]: 缺少名称`);
+      }
+
+      if (!item.img || typeof item.img !== 'string' || item.img.trim() === '') {
+        errors.push(`${category}[${index + 1}]: 缺少图片 URL`);
+      } else if (!item.img.match(/^https?:\/\//)) {
+        warnings.push(`${category}[${index + 1}]: 图片 URL 格式可能无效`);
+      }
+
+      if (!item.promoUrl || typeof item.promoUrl !== 'string' || item.promoUrl.trim() === '') {
+        warnings.push(`${category}[${index + 1}]: 缺少推广链接`);
+      }
+    });
+  }
+
+  return { errors, warnings, stats };
+}
+
+/**
+ * 创建带时间戳的备份
  */
 async function backupData() {
   try {
     const data = await fs.readFile(CONFIG.dataFilePath, 'utf8');
+    const timestamp = Date.now();
+    const backupFilePath = path.join(
+      path.dirname(CONFIG.dataFilePath),
+      `meals-data-backup-${timestamp}.json`
+    );
+
+    await fs.writeFile(backupFilePath, data);
     await fs.writeFile(CONFIG.backupPath, data);
-    console.log('✅ 数据备份成功');
+
+    console.log(`✅ 数据备份成功: ${path.basename(backupFilePath)}`);
+
+    // 清理旧备份
+    await cleanupOldBackups();
+
     return true;
   } catch (error) {
     console.error('❌ 数据备份失败:', error.message);
+    return false;
+  }
+}
+
+/**
+ * 清理旧备份文件
+ */
+async function cleanupOldBackups() {
+  try {
+    const dir = path.dirname(CONFIG.dataFilePath);
+    const files = await fs.readdir(dir);
+    const backupFiles = files
+      .filter(f => f.startsWith('meals-data-backup-') && f.endsWith('.json'))
+      .map(f => ({
+        name: f,
+        path: path.join(dir, f),
+        time: parseInt(f.match(/meals-data-backup-(\d+)/)?.[1] || '0')
+      }))
+      .sort((a, b) => b.time - a.time);
+
+    // 保留最新的 N 个备份
+    const toDelete = backupFiles.slice(CONFIG.maxBackups);
+
+    for (const file of toDelete) {
+      await fs.unlink(file.path);
+      console.log(`🗑️  清理旧备份: ${file.name}`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('⚠️  清理旧备份失败:', error.message);
     return false;
   }
 }
@@ -86,97 +148,69 @@ async function saveData(data) {
 }
 
 /**
- * 爬取美团热门商品
- * 注意：这是一个基础框架，需要根据实际页面结构调整
+ * 验证和记录数据状态
+ * 注意：这是混合模式，自动验证数据，手动更新内容
  */
-async function crawlMeituanProducts() {
-  console.log('🚀 开始爬取美团热门商品...');
-
-  let browser = null;
+async function validateAndRecordData(currentData) {
+  console.log('🔍 开始验证数据完整性...');
 
   try {
-    // 启动浏览器
-    browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage'
-      ]
-    });
+    // 验证数据
+    const { errors, warnings, stats } = validateData(currentData);
 
-    const page = await browser.newPage();
+    // 显示统计信息
+    console.log('📊 数据统计:');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    for (const [category, count] of Object.entries(stats)) {
+      const categoryNames = {
+        'breakfast': '早餐',
+        'lunch': '午餐',
+        'afternoon-tea': '下午茶',
+        'dinner': '晚餐',
+        'night-snack': '夜宵'
+      };
+      console.log(`  ${categoryNames[category] || category} (${category}): ${count} 个商品`);
+    }
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log(`  总计: ${Object.values(stats).reduce((a, b) => a + b, 0)} 个商品`);
 
-    // 设置用户代理
-    await page.setUserAgent(
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    );
+    // 显示警告
+    if (warnings.length > 0) {
+      console.log('⚠️  警告:');
+      warnings.forEach(warning => console.log(`   ${warning}`));
+    }
 
-    // 访问美团首页
-    console.log('📍 访问美团首页...');
-    await page.goto('https://www.meituan.com/', {
-      waitUntil: 'networkidle2',
-      timeout: 30000
-    });
+    // 显示错误
+    if (errors.length > 0) {
+      console.log('❌ 错误:');
+      errors.forEach(error => console.log(`   ${error}`));
+      return false;
+    }
 
-    // 等待页面加载
-    await page.waitForTimeout(3000);
-
-    // 获取页面标题
-    const title = await page.title();
-    console.log('📄 页面标题:', title);
-
-    // TODO: 根据实际页面结构编写爬取逻辑
-    // 这里需要分析美团热门商品页面的具体URL和DOM结构
-
-    console.log('⚠️  爬虫框架已创建，需要根据实际页面结构完善爬取逻辑');
-    console.log('💡 建议：使用浏览器开发者工具分析目标页面的DOM结构');
-
-    // 返回示例数据（用于测试）
-    return {
-      breakfast: [
-        {
-          name: '新爬取商品1',
-          img: CONFIG.imageTemplate.replace('{id}', CONFIG.imageIds[0]),
-          promoUrl: 'https://i.meituan.com/example1'
-        }
-      ],
-      lunch: [
-        {
-          name: '新爬取商品2',
-          img: CONFIG.imageTemplate.replace('{id}', CONFIG.imageIds[1]),
-          promoUrl: 'https://i.meituan.com/example2'
-        }
-      ]
-    };
+    console.log('✅ 数据验证通过');
+    return true;
 
   } catch (error) {
-    console.error('❌ 爬取失败:', error.message);
-    return null;
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
+    console.error('❌ 验证失败:', error.message);
+    return false;
   }
 }
 
 /**
- * 更新商品数据
- * 策略：保留现有数据，只更新指定类别
+ * 写入日志
  */
-function updateMealsData(currentData, newProducts, category) {
-  if (!currentData) {
-    console.error('❌ 当前数据为空');
-    return null;
+async function writeLog(message) {
+  try {
+    await fs.mkdir(CONFIG.logDir, { recursive: true });
+
+    const logFile = path.join(CONFIG.logDir, `crawler-${new Date().toISOString().split('T')[0]}.log`);
+    const timestamp = new Date().toISOString();
+    const logEntry = `[${timestamp}] ${message}\n`;
+
+    await fs.appendFile(logFile, logEntry, 'utf8');
+  } catch (error) {
+    console.error('⚠️  写入日志失败:', error.message);
   }
-
-  // 更新指定类别的商品
-  const updatedData = {
-    ...currentData,
-    [category]: newProducts
-  };
-
-  return updatedData;
 }
 
 /**
@@ -184,45 +218,54 @@ function updateMealsData(currentData, newProducts, category) {
  */
 async function main() {
   console.log('========================================');
-  console.log('美团热门商品爬虫');
+  console.log('吃了么 - 商品数据管理器（自动验证 + 手动更新模式）');
   console.log('========================================');
 
-  // 备份当前数据
-  await backupData();
+  const startTime = Date.now();
 
   // 加载当前数据
   const currentData = await loadCurrentData();
   if (!currentData) {
     console.error('❌ 无法加载当前数据，退出');
+    await writeLog('ERROR: 无法加载当前数据');
     process.exit(1);
   }
 
   console.log('📊 当前数据类别:', Object.keys(currentData).join(', '));
 
-  // 爬取新数据
-  const newProducts = await crawlMeituanProducts();
+  // 验证数据
+  const isValid = await validateAndRecordData(currentData);
 
-  if (newProducts) {
-    console.log('✅ 成功爬取数据');
-
-    // 更新数据（这里需要根据实际需求选择更新的类别）
-    const updatedData = updateMealsData(currentData, newProducts, 'breakfast');
-
-    if (updatedData) {
-      // 保存更新后的数据
-      await saveData(updatedData);
-      console.log('🎉 数据更新完成！');
-    }
-  } else {
-    console.log('❌ 爬取失败，数据未更新');
+  if (!isValid) {
+    console.log('❌ 数据验证失败');
+    await writeLog('ERROR: 数据验证失败');
+    process.exit(1);
   }
 
+  // 备份数据
+  const backupSuccess = await backupData();
+
+  if (!backupSuccess) {
+    console.log('❌ 数据备份失败');
+    await writeLog('ERROR: 数据备份失败');
+    process.exit(1);
+  }
+
+  const endTime = Date.now();
+  const duration = ((endTime - startTime) / 1000).toFixed(2);
+
   console.log('========================================');
-  console.log('执行完成');
+  console.log(`✅ 执行完成 (耗时: ${duration}秒)`);
+  console.log(`📝 日志: ${CONFIG.logDir}`);
+  console.log('💡 提示: 使用 `node scripts/manage-meals.cjs` 来更新商品数据');
+
+  await writeLog(`SUCCESS: 数据验证和备份完成 (耗时: ${duration}秒)`);
 }
 
 // 执行主函数
 main().catch(error => {
   console.error('❌ 程序异常:', error);
-  process.exit(1);
+  writeLog(`ERROR: 程序异常 - ${error.message}`).then(() => {
+    process.exit(1);
+  });
 });

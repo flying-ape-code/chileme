@@ -1,13 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { funnyPhrases } from '../data';
 
 const CelebrationModal = ({ food, category, onClose }) => {
-  if (!food) return null;
+  const [phrase, setPhrase] = useState('');
 
-  const phrase = useMemo(() => 
-    funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)], 
-    []
-  );
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      setPhrase(funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)]);
+    });
+  }, [food]); // Regenerate phrase when food changes
+
+  if (!food) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cyber-dark/80 backdrop-blur-md animate-in fade-in duration-300">

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Wheel = ({ items, rotation, isSpinning }) => {
+const Wheel = ({ items, rotation }) => {
   const segmentAngle = items.length > 0 ? 360 / items.length : 0;
 
   return (

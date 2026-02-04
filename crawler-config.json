@@ -1,15 +1,17 @@
 {
   "enabled": true,
-  "autoUpdate": false,
+  "autoUpdate": true,
   "categories": ["breakfast", "lunch", "afternoon-tea", "dinner", "night-snack"],
   "updateInterval": "0 * * * *",
   "dataSource": {
-    "type": "manual",
-    "description": "手动维护的商品数据，未来可扩展为自动爬取"
+    "type": "hybrid",
+    "description": "混合模式：自动验证数据完整性，手动更新商品内容"
   },
-  "lastUpdate": "2026-02-02T00:00:00Z",
+  "lastUpdate": "2026-02-04T15:00:00Z",
   "notes": [
-    "由于美团外卖需要登录且反爬严格，目前采用手动维护数据的方式",
+    "由于美团外卖需要登录且反爬严格，目前采用自动验证+手动更新的混合模式",
+    "调度器每小时运行一次，验证数据完整性并备份",
+    "商品内容更新使用 scripts/manage-meals.cjs 工具",
     "如需自动爬取，建议使用Selenium或Playwright进行浏览器自动化",
     "或者与美团合作获取官方API接口"
   ]
