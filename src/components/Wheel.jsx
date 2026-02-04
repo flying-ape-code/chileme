@@ -47,6 +47,10 @@ const Wheel = ({ items, rotation, isSpinning }) => {
                     style={{
                       backgroundImage: `url(${item.img || 'https://via.placeholder.com/400x400/050505/00f7ff?text=No+Image'})`,
                     }}
+                    onError={(e) => {
+                      e.target.style.backgroundImage = 'url(https://via.placeholder.com/400x400/050505/00f7ff?text=Image+Error)';
+                      console.error('Image load error:', item.img);
+                    }}
                   />
                 </div>
                 
