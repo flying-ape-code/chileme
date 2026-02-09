@@ -23,9 +23,10 @@ interface CelebrationModalProps {
   food: FoodItem | null;
   category: MealType;
   onClose: () => void;
+  onShare?: () => void;
 }
 
-const CelebrationModal = ({ food, category, onClose }: CelebrationModalProps) => {
+const CelebrationModal = ({ food, category, onClose, onShare }: CelebrationModalProps) => {
   const [phrase, setPhrase] = useState<string>('');
 
   useEffect(() => {
@@ -80,13 +81,24 @@ const CelebrationModal = ({ food, category, onClose }: CelebrationModalProps) =>
           </a>
         )}
 
-        <button
-          onClick={onClose}
-          className="w-full py-3 bg-transparent border border-cyber-cyan text-cyber-cyan font-black tracking-[0.2em] text-xs uppercase hover:bg-cyber-cyan hover:text-cyber-dark transition-all duration-300 shadow-[0_0_10px_rgba(0,247,255,0.5)] active:scale-95"
-          style={{ clipPath: 'polygon(5px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 5px) 100%, 0 100%, 0 10px)' }}
-        >
-          确认注入营养
-        </button>
+        <div className="flex gap-2 mb-3">
+          {onShare && (
+            <button
+              onClick={onShare}
+              className="flex-1 py-3 bg-cyber-cyan/10 border border-cyber-cyan text-cyber-cyan font-black tracking-[0.2em] text-xs uppercase hover:bg-cyber-cyan hover:text-cyber-dark transition-all duration-300 shadow-[0_0_10px_rgba(0,247,255,0.5)] active:scale-95"
+              style={{ clipPath: 'polygon(5px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 5px) 100%, 0 100%, 0 10px)' }}
+            >
+              📤 分享
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 bg-transparent border border-cyber-pink text-cyber-pink font-black tracking-[0.2em] text-xs uppercase hover:bg-cyber-pink hover:text-white transition-all duration-300 shadow-[0_0_10px_rgba(255,0,234,0.5)] active:scale-95"
+            style={{ clipPath: 'polygon(5px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 5px) 100%, 0 100%, 0 10px)' }}
+          >
+            关闭
+          </button>
+        </div>
       </div>
     </div>
   );

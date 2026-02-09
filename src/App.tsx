@@ -4,6 +4,7 @@ import Wheel from './components/Wheel';
 import CelebrationModal from './components/CelebrationModal';
 import WeatherInsight from './components/WeatherInsight';
 import History from './components/History';
+import ShareModal from './components/ShareModal';
 
 // 类型定义
 interface MealType {
@@ -39,6 +40,7 @@ function App() {
   const [winner, setWinner] = useState<FoodItem | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showHistory, setShowHistory] = useState<boolean>(false);
+  const [showShare, setShowShare] = useState<boolean>(false);
 
   const selectedMeal = useMemo(() =>
     mealTypes.find(m => m.id === selectedMealId) || mealTypes[0],
@@ -60,6 +62,7 @@ function App() {
     setWinner(null);
     setShowModal(false);
     setShowHistory(false);
+    setShowShare(false);
 
     const winnerIndex = getRandomWinnerIndex(currentItems.length);
     const spins = 5;
@@ -100,6 +103,11 @@ function App() {
     } catch (error) {
       console.error('保存历史记录失败：', error);
     }
+  };
+
+  const handleShare = () => {
+    setShowModal(false);
+    setShowShare(true);
   };
 
   return (
@@ -173,6 +181,7 @@ function App() {
           food={winner}
           category={selectedMeal}
           onClose={() => setShowModal(false)}
+          onShare={handleShare}
         />
       )}
 
@@ -181,6 +190,16 @@ function App() {
         <History
           isOpen={showHistory}
           onClose={() => setShowHistory(false)}
+        />
+      )}
+
+      {/* Share Modal */}
+      {showShare && winner && (
+        <ShareModal
+          isOpen={showShare}
+          food={winner}
+          category={selectedMeal}
+          onClose={() => setShowShare(false)}
         />
       )}
     </div>
