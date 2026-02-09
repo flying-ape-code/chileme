@@ -3,19 +3,45 @@ import { mealTypes, getRandomItems } from './data';
 import Wheel from './components/Wheel';
 import CelebrationModal from './components/CelebrationModal';
 import WeatherInsight from './components/WeatherInsight';
-import History from './components/History'; // 新增：历史记录组件
+import History from './components/History';
+
+// 类型定义
+interface MealType {
+  id: string;
+  name: string;
+  emoji: string;
+}
+
+interface FoodItem {
+  name: string;
+  emoji: string;
+  weirdName: string;
+  weirdEmoji: string;
+  description?: string;
+}
+
+interface HistoryEntry {
+  id: number;
+  timestamp: string;
+  category: string;
+  categoryEmoji: string;
+  winner: string;
+  winnerEmoji: string;
+  items: string[];
+  spinCount: number;
+}
 
 function App() {
-  const [selectedMealId, setSelectedMealId] = useState(mealTypes[0].id);
-  const [currentItems, setCurrentItems] = useState([]);
-  const [rotation, setRotation] = useState(0);
-  const [isSpinning, setIsSpinning] = useState(false);
-  const [winner, setWinner] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [showHistory, setShowHistory] = useState(false); // 新增：历史记录显示状态
+  const [selectedMealId, setSelectedMealId] = useState<string>(mealTypes[0].id);
+  const [currentItems, setCurrentItems] = useState<FoodItem[]>([]);
+  const [rotation, setRotation] = useState<number>(0);
+  const [isSpinning, setIsSpinning] = useState<boolean>(false);
+  const [winner, setWinner] = useState<FoodItem | null>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [showHistory, setShowHistory] = useState<boolean>(false);
 
-  const selectedMeal = useMemo(() => 
-    mealTypes.find(m => m.id === selectedMealId), 
+  const selectedMeal = useMemo(() =>
+    mealTypes.find(m => m.id === selectedMealId) || mealTypes[0],
     [selectedMealId]
   );
 
@@ -23,8 +49,7 @@ function App() {
     setCurrentItems(getRandomItems(selectedMealId));
   }, [selectedMealId]);
 
-  // Helper function to get random winner index
-  const getRandomWinnerIndex = (itemsCount) => {
+  const getRandomWinnerIndex = (itemsCount: number): number => {
     return Math.floor(Math.random() * itemsCount);
   };
 
@@ -34,45 +59,43 @@ function App() {
     setIsSpinning(true);
     setWinner(null);
     setShowModal(false);
-    setShowHistory(false); // 关闭历史记录
+    setShowHistory(false);
 
     const winnerIndex = getRandomWinnerIndex(currentItems.length);
-    const spins = 5; 
+    const spins = 5;
     const segmentAngle = 360 / currentItems.length;
     const centerOffset = segmentAngle / 2;
     const topArrowPosition = 270;
     const targetOffset = topArrowPosition - (winnerIndex * segmentAngle + centerOffset);
     const newRotation = rotation + (360 * spins) + targetOffset - (rotation % 360);
-    
+
     setRotation(newRotation);
 
     setTimeout(() => {
       setIsSpinning(false);
       setWinner(currentItems[winnerIndex]);
       setShowModal(true);
-      // 保存抽奖历史
-      saveSpinHistory(selectedMeal, winner);
+      saveSpinHistory(selectedMeal, currentItems[winnerIndex]);
     }, 4000);
   };
 
-  // 新增：保存抽奖历史的函数
-  const saveSpinHistory = (category, winner) => {
+  const saveSpinHistory = (category: MealType, winner: FoodItem): void => {
     try {
-      const history = JSON.parse(localStorage.getItem('spinHistory') || '[]');
-      const newEntry = {
+      const history = JSON.parse(localStorage.getItem('spinHistory') || '[]') as HistoryEntry[];
+      const newEntry: HistoryEntry = {
         id: Date.now(),
         timestamp: new Date().toISOString(),
         category: category.name,
         categoryEmoji: category.emoji,
         winner: winner.name,
         winnerEmoji: winner.emoji,
-        items: winner.name,
+        items: [winner.name],
         spinCount: 1
       };
-      
+
       const updatedHistory = [newEntry, ...history].slice(0, 49);
       localStorage.setItem('spinHistory', JSON.stringify(updatedHistory));
-      
+
       console.log('历史记录已保存');
     } catch (error) {
       console.error('保存历史记录失败：', error);
@@ -94,36 +117,18 @@ function App() {
 
       {/* Navigation */}
       <nav className="flex flex-wrap justify-center gap-3 relative z-20">
-        <button
-          onClick={() => !isSpinning && setSelectedMealId(mealTypes[0].id)}
-          disabled={isSpinning}
-          className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-cyber-cyan/20 text-cyber-cyan hover:bg-cyber-cyan hover:shadow-[0_0_15px_#00f7ff]"
-        >
-          {mealTypes[0].name}
-        </button>
-        <button
-          onClick={() => !isSpinning && setSelectedMealId(mealTypes[1].id)}
-          disabled={isSpinning}
-          className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-cyber-cyan/20 text-cyber-cyan hover:bg-cyber-cyan hover:shadow-[0_0_15px_#00f7ff]"
-        >
-          {mealTypes[1].name}
-        </button>
-        <button
-          onClick={() => !isSpinning && setSelectedMealId(mealTypes[2].id)}
-          disabled={isSpinning}
-          className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-cyber-cyan/20 text-cyber-cyan hover:bg-cyber-cyan hover:shadow-[0_0_15px_#00f7ff]"
-        >
-          {mealTypes[2].name}
-        </button>
-        <button
-          onClick={() => !isSpinning && setSelectedMealId(mealTypes[3].id)}
-          disabled={isSpinning}
-          className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-cyber-cyan/20 text-cyber-cyan hover:bg-cyber-cyan hover:shadow-[0_0_15px_#00f7ff]"
-        >
-          {mealTypes[3].name}
-        </button>
-        
-        {/* 新增：历史记录按钮 */}
+        {mealTypes.map((meal) => (
+          <button
+            key={meal.id}
+            onClick={() => !isSpinning && setSelectedMealId(meal.id)}
+            disabled={isSpinning}
+            className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-cyber-cyan/20 text-cyber-cyan hover:bg-cyber-cyan hover:shadow-[0_0_15px_#00f7ff]"
+          >
+            {meal.name}
+          </button>
+        ))}
+
+        {/* 历史记录按钮 */}
         <button
           onClick={() => !isSpinning && setShowHistory(true)}
           disabled={isSpinning}
@@ -140,10 +145,10 @@ function App() {
 
         {/* Wheel Container */}
         <div className="p-1 rounded-full border border-cyber-cyan/10 shadow-[0_0_30px_rgba(0,247,255,0.1)] bg-black/40 backdrop-blur-sm transform scale-[0.75] sm:scale-90 md:scale-100 origin-center">
-          <Wheel 
-            items={currentItems} 
-            rotation={rotation} 
-            isSpinning={isSpinning} 
+          <Wheel
+            items={currentItems}
+            rotation={rotation}
+            isSpinning={isSpinning}
           />
         </div>
 
@@ -164,18 +169,18 @@ function App() {
 
       {/* Celebration Modal */}
       {showModal && winner && (
-        <CelebrationModal 
-          food={winner} 
-          category={selectedMeal} 
-          onClose={() => setShowModal(false)} 
+        <CelebrationModal
+          food={winner}
+          category={selectedMeal}
+          onClose={() => setShowModal(false)}
         />
       )}
 
-      {/* 新增：History Modal */}
+      {/* History Modal */}
       {showHistory && (
-        <History 
+        <History
           isOpen={showHistory}
-          onClose={() => setShowHistory(false)} 
+          onClose={() => setShowHistory(false)}
         />
       )}
     </div>

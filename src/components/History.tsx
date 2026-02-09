@@ -1,15 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { getHistoryStats, getRecentHistory } from '../history';
+import { getHistoryStats, getRecentHistory, clearHistory as clearHistoryUtil } from '../history';
 
-function History({ isOpen, onClose }) {
-  const [history, setHistory] = useState([]);
-  const [stats, setStats] = useState({});
-  const [viewMode, setViewMode] = useState('list'); // 'list' 或 'stats'
-  const [selectedEntry, setSelectedEntry] = useState(null);
+// 类型定义
+interface HistoryEntry {
+  id: number;
+  timestamp: string;
+  category: string;
+  categoryEmoji: string;
+  winner: string;
+  winnerEmoji: string;
+  items: string[];
+  spinCount: number;
+}
+
+interface HistoryStats {
+  totalSpins: number;
+  mostFrequent: Record<string, number>;
+  categoryBreakdown: Record<string, number>;
+  moodBreakdown?: Record<string, number>;
+}
+
+interface HistoryProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+function History({ isOpen, onClose }: HistoryProps) {
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [stats, setStats] = useState<HistoryStats>({});
+  const [viewMode, setViewMode] = useState<'list' | 'stats'>('list');
+  const [selectedEntry, setSelectedEntry] = useState<HistoryEntry | null>(null);
 
   useEffect(() => {
     if (isOpen) {
-      // Defer state updates to avoid cascading renders warning
       requestAnimationFrame(() => {
         const currentHistory = getRecentHistory(20);
         const currentStats = getHistoryStats();
@@ -21,22 +44,22 @@ function History({ isOpen, onClose }) {
 
   const handleClearHistory = () => {
     if (confirm('确定要清空所有历史记录吗？')) {
-      localStorage.removeItem('spinHistory');
+      clearHistoryUtil();
       setHistory([]);
       setStats({});
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     const now = new Date();
-    const diff = now - date;
-    
-    if (diff < 60000) { // 1小时内
+    const diff = now.getTime() - date.getTime();
+
+    if (diff < 60000) {
       return '刚刚';
-    } else if (diff < 86400000) { // 24小时内
+    } else if (diff < 86400000) {
       return `${Math.floor(diff / 3600000)}小时前`;
-    } else if (diff < 604800000) { // 7天内
+    } else if (diff < 604800000) {
       return `${Math.floor(diff / 86400000)}天前`;
     } else {
       return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
@@ -118,7 +141,7 @@ function History({ isOpen, onClose }) {
                   )}
                 </div>
               ))}
-              
+
               {history.length === 0 && (
                 <div className="text-center py-12 text-gray-500">
                   <div className="text-4xl mb-2">📭</div>
@@ -133,7 +156,7 @@ function History({ isOpen, onClose }) {
                 <h3 className="text-lg font-bold text-cyan-400 mb-4">
                   📊 统计数据
                 </h3>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gray-900 rounded-lg p-3">
                     <div className="text-sm text-gray-400 mb-1">总抽奖次数</div>
@@ -141,7 +164,7 @@ function History({ isOpen, onClose }) {
                       {stats.totalSpins || 0}
                     </div>
                   </div>
-                  
+
                   <div className="bg-gray-900 rounded-lg p-3">
                     <div className="text-sm text-gray-400 mb-1">今日抽奖</div>
                     <div className="text-2xl font-bold text-green-400">

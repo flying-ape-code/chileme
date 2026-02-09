@@ -1,7 +1,13 @@
 import React from 'react';
 
-const WeatherInsight = ({ temperature, condition }) => {
-  const getAdvice = () => {
+// 类型定义
+interface WeatherInsightProps {
+  temperature: number;
+  condition: string;
+}
+
+const WeatherInsight = ({ temperature, condition }: WeatherInsightProps) => {
+  const getAdvice = (): string => {
     if (temperature < 10) {
       return "外面才 6 度还下着雨，听猿哥一句劝，别整那冰美式了，来碗热腾腾的汤面才是正经事。";
     }

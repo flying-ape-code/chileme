@@ -1,14 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { funnyPhrases } from '../data';
 
-const CelebrationModal = ({ food, category, onClose }) => {
-  const [phrase, setPhrase] = useState('');
+// 类型定义
+export interface FoodItem {
+  id: string | number;
+  name: string;
+  emoji: string;
+  weirdName: string;
+  weirdEmoji: string;
+  img?: string;
+  description?: string;
+  promoUrl?: string;
+}
+
+export interface MealType {
+  id: string;
+  name: string;
+  emoji: string;
+}
+
+interface CelebrationModalProps {
+  food: FoodItem | null;
+  category: MealType;
+  onClose: () => void;
+}
+
+const CelebrationModal = ({ food, category, onClose }: CelebrationModalProps) => {
+  const [phrase, setPhrase] = useState<string>('');
 
   useEffect(() => {
-    requestAnimationFrame(() => {
-      setPhrase(funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)]);
-    });
-  }, [food]); // Regenerate phrase when food changes
+    if (food) {
+      requestAnimationFrame(() => {
+        setPhrase(funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)]);
+      });
+    }
+  }, [food]);
 
   if (!food) return null;
 
@@ -18,7 +44,7 @@ const CelebrationModal = ({ food, category, onClose }) => {
         <div className="absolute top-2 left-2 text-cyber-cyan font-mono text-[6px] opacity-50 uppercase tracking-tighter">
           Analysis Complete // Target Identified
         </div>
-        
+
         <div className="text-3xl mb-3 neon-text-pink">⚡</div>
         <h2 className="text-2xl font-black text-cyber-cyan mb-1 neon-text-cyan glitch-text" data-text="中奖啦！">
           中奖啦！
@@ -26,11 +52,11 @@ const CelebrationModal = ({ food, category, onClose }) => {
         <p className="text-cyber-cyan/70 font-mono text-[10px] mb-4 uppercase tracking-widest">
           {category.name}决选结果：
         </p>
-        
+
         <div className="relative border border-cyber-pink overflow-hidden mb-4 aspect-square shadow-[0_0_15px_rgba(255,0,234,0.2)]">
-          <img 
-            src={food.img} 
-            alt={food.name} 
+          <img
+            src={food.img || ''}
+            alt={food.name}
             className="w-full h-full object-cover"
           />
           <div className="absolute bottom-0 inset-x-0 bg-cyber-dark/90 border-t border-cyber-pink p-2">

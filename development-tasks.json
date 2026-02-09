@@ -1,30 +1,31 @@
 {
   "project": "chileme-app (吃了么)",
-  "version": "2.0.0",
-  "updated_at": "2026-02-01T22:30:00Z",
+  "version": "2.0.1",
+  "updated_at": "2026-02-09T22:14:00Z",
   "developer": "Robin & AI Assistant",
   "tasks": [
     {
       "id": "task-1",
       "title": "添加历史记录功能",
       "description": "实现抽奖历史记录、统计功能、数据持久化",
-      "status": "in_progress",
+      "status": "done",
       "created_at": "2026-02-01T22:30:00Z",
-      "updated_at": "2026-02-01T22:45:00Z",
+      "updated_at": "2026-02-09T22:14:00Z",
       "assigned_to": "AI Assistant",
       "dependencies": [],
       "files": [
         "src/history.js",
         "src/components/History.jsx"
-      ]
+      ],
+      "notes": "✅ 已完成：历史记录功能已实现并集成到主应用中。包括数据持久化、统计显示、列表视图等功能。"
     },
     {
       "id": "task-2",
       "title": "优化性能和类型安全",
       "description": "将 .jsx 转换为 .tsx，添加 TypeScript 类型定义",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-02-01T22:30:00Z",
-      "updated_at": null,
+      "updated_at": "2026-02-09T22:14:00Z",
       "assigned_to": "AI Assistant",
       "dependencies": [
         "task-1"
@@ -32,7 +33,8 @@
       "files": [
         "tsconfig.json",
         "package.json"
-      ]
+      ],
+      "notes": "🔄 进行中：开始 TypeScript 迁移工作。"
     },
     {
       "id": "task-3",
@@ -151,9 +153,9 @@
         "task-1",
         "task-2",
         "task-3",
-        "任务-4",
+        "task-4",
         "task-5",
-        "任务-6",
+        "task-6",
         "task-7",
         "task-8"
       ],
@@ -163,6 +165,7 @@
   "settings": {
     "notion_token": "INVALID - need new token",
     "notion_database_id": "8d7665c507b54eb79d2b8fc90a1b4dad",
-    "auto_sync": false
+    "auto_sync": false,
+    "reminders_access_issue": "AppleScript access to Reminders times out consistently. Using local task file as primary source."
   }
 }
