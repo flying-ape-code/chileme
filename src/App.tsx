@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { mealTypes, getRandomItems } from './data';
 import Wheel from './components/Wheel';
 import CelebrationModal from './components/CelebrationModal';
 import WeatherInsight from './components/WeatherInsight';
 import History from './components/History';
 import ShareModal from './components/ShareModal';
+import { addSpinHistory } from './history';
+import Admin from './pages/Admin';
+import Login from './pages/Login';
+import { isAuthenticated } from './utils/auth';
 
 // 类型定义
 interface MealType {
@@ -32,7 +37,9 @@ interface HistoryEntry {
   spinCount: number;
 }
 
-function App() {
+// 主页面组件
+function Home() {
+  const navigate = useNavigate();
   const [selectedMealId, setSelectedMealId] = useState<string>(mealTypes[0].id);
   const [currentItems, setCurrentItems] = useState<FoodItem[]>([]);
   const [rotation, setRotation] = useState<number>(0);
@@ -84,21 +91,8 @@ function App() {
 
   const saveSpinHistory = (category: MealType, winner: FoodItem): void => {
     try {
-      const history = JSON.parse(localStorage.getItem('spinHistory') || '[]') as HistoryEntry[];
-      const newEntry: HistoryEntry = {
-        id: Date.now(),
-        timestamp: new Date().toISOString(),
-        category: category.name,
-        categoryEmoji: category.emoji,
-        winner: winner.name,
-        winnerEmoji: winner.emoji,
-        items: [winner.name],
-        spinCount: 1
-      };
-
-      const updatedHistory = [newEntry, ...history].slice(0, 49);
-      localStorage.setItem('spinHistory', JSON.stringify(updatedHistory));
-
+      // 使用 history.ts 中的 addSpinHistory 函数
+      addSpinHistory(category, currentItems, winner);
       console.log('历史记录已保存');
     } catch (error) {
       console.error('保存历史记录失败：', error);
@@ -143,6 +137,15 @@ function App() {
           className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-cyber-pink/20 text-cyber-pink hover:bg-cyber-pink hover:shadow-[0_0_15px_#ff00ea]"
         >
           📋 历史
+        </button>
+
+        {/* 管理入口按钮 */}
+        <button
+          onClick={() => navigate('/admin')}
+          disabled={isSpinning}
+          className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-gray-700/20 text-gray-500 hover:bg-gray-700 hover:text-white hover:shadow-[0_0_15px_#6b7280]"
+        >
+          ⚙️ 管理
         </button>
       </nav>
 
@@ -203,6 +206,23 @@ function App() {
         />
       )}
     </div>
+  );
+}
+
+// App 组件，负责路由配置
+function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/admin"
+        element={
+          isAuthenticated() ? <Admin /> : <Navigate to="/login" replace />
+        }
+      />
+      <Route path="/" element={<Home />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 

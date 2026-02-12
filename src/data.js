@@ -1,11 +1,11 @@
 import mealsData from '../meals-data.json';
 
 export const mealTypes = [
-  { id: 'breakfast', name: '早餐' },
-  { id: 'lunch', name: '午餐' },
-  { id: 'afternoon-tea', name: '下午茶' },
-  { id: 'dinner', name: '晚餐' },
-  { id: 'night-snack', name: '夜宵' }
+  { id: 'breakfast', name: '早餐', emoji: '🌅' },
+  { id: 'lunch', name: '午餐', emoji: '🍜' },
+  { id: 'afternoon-tea', name: '下午茶', emoji: '☕' },
+  { id: 'dinner', name: '晚餐', emoji: '🍽️' },
+  { id: 'night-snack', name: '夜宵', emoji: '🌙' }
 ];
 
 // 使用 JSON 文件中的数据（包含推广链接）
