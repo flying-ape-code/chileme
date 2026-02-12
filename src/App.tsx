@@ -91,9 +91,34 @@ function Home() {
 
   const saveSpinHistory = (category: MealType, winner: FoodItem): void => {
     try {
+      console.log('开始保存历史记录...');
+      console.log('类别:', category);
+      console.log('获胜者:', winner);
+      console.log('商品列表:', currentItems);
+
+      // 验证数据
+      if (!category || !winner) {
+        console.error('保存失败：类别或获胜者为空');
+        return;
+      }
+
+      if (!Array.isArray(currentItems) || currentItems.length === 0) {
+        console.error('保存失败：商品列表无效');
+        return;
+      }
+
       // 使用 history.ts 中的 addSpinHistory 函数
-      addSpinHistory(category, currentItems, winner);
-      console.log('历史记录已保存');
+      const result = addSpinHistory(category, currentItems, winner);
+      console.log('历史记录已保存，当前记录数:', result.length);
+
+      // 验证保存是否成功
+      const saved = localStorage.getItem('spinHistory');
+      if (saved) {
+        const history = JSON.parse(saved);
+        console.log('验证：localStorage 中的记录数:', history.length);
+      } else {
+        console.error('验证失败：localStorage 中没有找到记录');
+      }
     } catch (error) {
       console.error('保存历史记录失败：', error);
     }
