@@ -22,10 +22,9 @@ const Wheel = ({ items, rotation, isSpinning = false }: WheelProps) => {
 
   return (
     <div
-      className={`relative w-80 h-80 sm:w-96 sm:h-96 md:w-[500px] md:h-[500px] transition-transform duration-[4000ms] cubic-bezier(0.15, 0, 0.15, 1) ${isSpinning ? 'animate-spin' : ''}`}
+      className={`relative w-80 h-80 sm:w-96 sm:h-96 md:w-[500px] md:h-[500px] transition-transform duration-[4000ms] cubic-bezier(0.15, 0, 0.15, 1) ${isSpinning ? 'animate-pulse' : ''}`}
       style={{ transform: `rotate(${rotation}deg)` }}
     >
-
       <div className="absolute inset-0 rounded-full border-[3px] border-cyber-cyan shadow-[0_0_30px_rgba(0,247,255,0.4)] z-20 pointer-events-none"></div>
 
       <div className="absolute inset-0 rounded-full overflow-hidden bg-black shadow-[inset_0_0_50px_rgba(0,0,0,1)]">
@@ -63,7 +62,13 @@ const Wheel = ({ items, rotation, isSpinning = false }: WheelProps) => {
                 <div className="w-20 h-20 md:w-32 md:h-32 rounded-full overflow-hidden border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.8)] z-10">
                   <div
                     className="w-full h-full bg-cover bg-center transition-transform hover:scale-110 duration-500"
-                    style={{ backgroundImage: `url(${item.img || ''})` }}
+                    style={{
+                      backgroundImage: `url(${item.img || 'https://via.placeholder.com/400x400/050505/00f7ff?text=No+Image'})`,
+                    }}
+                    onError={(e) => {
+                      e.target.style.backgroundImage = 'url(https://via.placeholder.com/400x400/050505/00f7ff?text=Image+Error)';
+                      console.error('Image load error:', item.img);
+                    }}
                   />
                 </div>
 
