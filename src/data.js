@@ -49,10 +49,25 @@ export const getRandomItems = (category, count = 6) => {
     [allItems[i], allItems[j]] = [allItems[j], allItems[i]];
   }
 
-  return allItems.slice(0, count).map((item, index) => ({
-    id: `${category}-${index}`,
-    ...item,
-    weirdName: weirdPlaceholders[Math.floor(Math.random() * weirdPlaceholders.length)],
-    color: index % 2 === 0 ? '#00f7ff' : '#ff00ea'
-  }));
+  return allItems.slice(0, count).map((item, index) => {
+    // 验证商品数据，确保有名称和图片
+    if (!item.name || !item.img) {
+      console.error('Invalid item data:', item);
+      return {
+        id: `${category}-${index}`,
+        name: '未知美食',
+        img: 'https://via.placeholder.com/400x400/050505/00f7ff?text=No+Image',
+        promoUrl: '',
+        weirdName: weirdPlaceholders[Math.floor(Math.random() * weirdPlaceholders.length)],
+        color: index % 2 === 0 ? '#00f7ff' : '#ff00ea'
+      };
+    }
+
+    return {
+      id: `${category}-${index}`,
+      ...item,
+      weirdName: weirdPlaceholders[Math.floor(Math.random() * weirdPlaceholders.length)],
+      color: index % 2 === 0 ? '#00f7ff' : '#ff00ea'
+    };
+  });
 };

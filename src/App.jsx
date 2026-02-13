@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { mealTypes, getRandomItems } from './data';
+import { mealTypes, weirdPlaceholders } from './data';
+import { getProductsByCategory } from './utils/productManager';
+import { migrateData } from './utils/dataMigration';
 import Wheel from './components/Wheel';
 import CelebrationModal from './components/CelebrationModal';
 import WeatherInsight from './components/WeatherInsight';
@@ -12,13 +14,59 @@ function App() {
   const [winner, setWinner] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  const selectedMeal = useMemo(() => 
-    mealTypes.find(m => m.id === selectedMealId), 
+  const selectedMeal = useMemo(() =>
+    mealTypes.find(m => m.id === selectedMealId),
     [selectedMealId]
   );
 
+  // 从 localStorage 加载随机商品
+  const getRandomItemsFromStorage = (category, count = 6) => {
+    const products = getProductsByCategory(category);
+
+    if (!products || products.length === 0) {
+      console.warn(`No products found for category: ${category}`);
+      return [];
+    }
+
+    // 随机打乱
+    const shuffled = [...products];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    return shuffled.slice(0, count).map((item, index) => {
+      if (!item.name || !item.img) {
+        console.error('Invalid item data:', item);
+        return {
+          id: `${category}-${index}`,
+          name: '未知美食',
+          img: 'https://via.placeholder.com/400x400/050505/00f7ff?text=No+Image',
+          promoUrl: '',
+          weirdName: weirdPlaceholders[Math.floor(Math.random() * weirdPlaceholders.length)],
+          color: index % 2 === 0 ? '#00f7ff' : '#ff00ea'
+        };
+      }
+
+      return {
+        id: item.id,
+        name: item.name,
+        img: item.img,
+        promoUrl: item.promoUrl || '',
+        weirdName: weirdPlaceholders[Math.floor(Math.random() * weirdPlaceholders.length)],
+        color: index % 2 === 0 ? '#00f7ff' : '#ff00ea'
+      };
+    });
+  };
+
   useEffect(() => {
-    setCurrentItems(getRandomItems(selectedMealId));
+    // 数据迁移（首次运行）
+    migrateData();
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentItems(getRandomItemsFromStorage(selectedMealId));
   }, [selectedMealId]);
 
   const handleSpin = () => {
@@ -39,8 +87,15 @@ function App() {
     setRotation(newRotation);
 
     setTimeout(() => {
+      const winnerItem = currentItems[winnerIndex];
+      console.log('Winner selected:', {
+        index: winnerIndex,
+        name: winnerItem.name,
+        img: winnerItem.img,
+        weirdName: winnerItem.weirdName
+      });
       setIsSpinning(false);
-      setWinner(currentItems[winnerIndex]);
+      setWinner(winnerItem);
       setShowModal(true);
     }, 4000);
   };
