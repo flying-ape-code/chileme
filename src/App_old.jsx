@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
 import { mealTypes, weirdPlaceholders } from './data';
+import { getProductsByCategory as getProductsFromSupabase } from './lib/productService';
 import { getProductsByCategory } from './utils/productManager';
 import { migrateData } from './utils/dataMigration';
 import Wheel from './components/Wheel';
@@ -7,6 +10,8 @@ import CelebrationModal from './components/CelebrationModal';
 import WeatherInsight from './components/WeatherInsight';
 
 function App() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [selectedMealId, setSelectedMealId] = useState(mealTypes[0].id);
   const [currentItems, setCurrentItems] = useState([]);
   const [rotation, setRotation] = useState(0);
@@ -102,6 +107,46 @@ function App() {
 
   return (
     <div className="h-screen flex flex-col items-center justify-between py-4 overflow-hidden font-sans bg-cyber-dark text-white relative z-10">
+      {/* 顶部导航栏 */}
+      <nav className="absolute top-4 right-4 z-30 flex gap-2">
+        {user ? (
+          <>
+            <span className="text-cyber-cyan/60 font-mono text-xs uppercase tracking-wider px-2 py-1">
+              {user.username}
+            </span>
+            {user.role === 'admin' && (
+              <button
+                onClick={() => navigate('/admin')}
+                className="px-3 py-1 border border-cyber-cyan/30 text-cyber-cyan/80 font-mono text-xs uppercase tracking-wider hover:bg-cyber-cyan/10 transition-all"
+              >
+                管理
+              </button>
+            )}
+            <button
+              onClick={logout}
+              className="px-3 py-1 border border-cyber-pink/30 text-cyber-pink/80 font-mono text-xs uppercase tracking-wider hover:bg-cyber-pink/10 transition-all"
+            >
+              退出
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => navigate('/login')}
+              className="px-3 py-1 border border-cyber-cyan/30 text-cyber-cyan/80 font-mono text-xs uppercase tracking-wider hover:bg-cyber-cyan/10 transition-all"
+            >
+              登录
+            </button>
+            <button
+              onClick={() => navigate('/register')}
+              className="px-3 py-1 border border-cyber-pink/30 text-cyber-pink/80 font-mono text-xs uppercase tracking-wider hover:bg-cyber-pink/10 transition-all"
+            >
+              注册
+            </button>
+          </>
+        )}
+      </nav>
+
       <header className="text-center animate-in slide-in-from-top duration-700">
         <h1 className="text-6xl md:text-7xl font-black mb-2 tracking-tighter glitch-text neon-text-cyan" data-text="吃了么 ?">
           吃了么 <span className="text-cyber-pink neon-text-pink">?</span>

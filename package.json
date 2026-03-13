@@ -12,6 +12,7 @@
     "scheduler": "node scripts/scheduler.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.99.1",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.7.9",
     "cheerio": "^1.0.0-rc.12",
