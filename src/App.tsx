@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
 import { mealTypes, getRandomItems } from './data';
 import Wheel from './components/Wheel';
 import CelebrationModal from './components/CelebrationModal';
@@ -10,7 +11,7 @@ import SettingsModal from './components/SettingsModal';
 import { addSpinHistory } from './history';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
-import { isAuthenticated } from './utils/auth';
+import Register from './pages/Register';
 import { getSettings, getThemeConfig, getAnimationDuration, type AppSettings } from './lib/settings';
 
 // 类型定义
@@ -28,20 +29,10 @@ interface FoodItem {
   description?: string;
 }
 
-interface HistoryEntry {
-  id: number;
-  timestamp: string;
-  category: string;
-  categoryEmoji: string;
-  winner: string;
-  winnerEmoji: string;
-  items: string[];
-  spinCount: number;
-}
-
 // 主页面组件
 function Home() {
   const navigate = useNavigate();
+  const { user, isAuthenticated, isAdmin } = useAuth();
   const [selectedMealId, setSelectedMealId] = useState<string>(mealTypes[0].id);
   const [currentItems, setCurrentItems] = useState<FoodItem[]>([]);
   const [rotation, setRotation] = useState<number>(0);
@@ -115,14 +106,6 @@ function Home() {
 
       const result = addSpinHistory(category, currentItems, winner);
       console.log('历史记录已保存，当前记录数:', result.length);
-
-      const saved = localStorage.getItem('spinHistory');
-      if (saved) {
-        const history = JSON.parse(saved);
-        console.log('验证：localStorage 中的记录数:', history.length);
-      } else {
-        console.error('验证失败：localStorage 中没有找到记录');
-      }
     } catch (error) {
       console.error('保存历史记录失败：', error);
     }
@@ -192,14 +175,38 @@ function Home() {
           ⚙️ 设置
         </button>
 
-        {/* 管理入口按钮 */}
-        <button
-          onClick={() => navigate('/admin')}
-          disabled={isSpinning}
-          className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-gray-700/20 text-gray-500 hover:bg-gray-700 hover:text-white hover:shadow-[0_0_15px_#6b7280]"
-        >
-          🔐 管理
-        </button>
+        {/* 用户/登录按钮 */}
+        {isAuthenticated ? (
+          <>
+            <span className={`px-6 py-1.5 font-mono text-xs border ${theme.bg} text-${theme.primary}`}>
+              👤 {user?.username || '用户'}
+            </span>
+            {isAdmin && (
+              <button
+                onClick={() => navigate('/admin')}
+                disabled={isSpinning}
+                className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-green-700/20 text-green-400 hover:bg-green-700 hover:text-white hover:shadow-[0_0_15px_#22c55e]"
+              >
+                🔐 管理
+              </button>
+            )}
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => navigate('/login')}
+              className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-gray-700/20 text-gray-400 hover:bg-gray-700 hover:text-white"
+            >
+              🔐 登录
+            </button>
+            <button
+              onClick={() => navigate('/register')}
+              className={`px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover}`}
+            >
+              📝 注册
+            </button>
+          </>
+        )}
       </nav>
 
       {/* Main Content */}
@@ -228,7 +235,7 @@ function Home() {
 
       {/* Footer */}
       <footer className="text-cyber-cyan/30 font-mono text-[8px] tracking-[0.2em] uppercase">
-        Ver 2.0.78 // Neural Link Established
+        Ver 2.1.0 // Supabase Auth Enabled
       </footer>
 
       {/* Celebration Modal */}
@@ -271,15 +278,24 @@ function Home() {
 
 // App 组件，负责路由配置
 function App() {
+  const { isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-cyber-dark text-white">
+        <div className="text-center">
+          <div className="text-2xl font-mono text-cyan-400 mb-2">加载用户信息...</div>
+          <div className="text-cyber-cyan/60 font-mono text-xs">[ Neural Link Initializing ]</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route
-        path="/admin"
-        element={
-          isAuthenticated() ? <Admin /> : <Navigate to="/login" replace />
-        }
-      />
+      <Route path="/register" element={<Register />} />
+      <Route path="/admin" element={<Admin />} />
       <Route path="/" element={<Home />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
