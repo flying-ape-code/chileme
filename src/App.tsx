@@ -149,13 +149,13 @@ function Home() {
   };
 
   return (
-    <div className="h-screen flex flex-col items-center justify-between py-4 overflow-hidden font-sans bg-cyber-dark text-white relative z-10">
+    <div className="h-screen flex flex-col items-center justify-between py-2 sm:py-4 overflow-hidden font-sans bg-cyber-dark text-white relative z-10">
       {/* Header */}
       <header className="text-center animate-in slide-in-from-top duration-700">
-        <h1 className="text-6xl md:text-7xl font-black mb-2 tracking-tighter glitch-text neon-text-cyan" data-text="吃了么 ?">
+        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black mb-2 tracking-tighter glitch-text neon-text-cyan" data-text="吃了么 ?">
           吃了么 <span className={`text-${theme.primary} neon-text-${theme.primary}`}>?</span>
         </h1>
-        <p className="text-cyber-cyan/80 font-mono text-xs tracking-[0.4em] uppercase">
+        <p className="text-cyber-cyan/80 font-mono text-xs tracking-[0.2em] sm:tracking-[0.4em] uppercase">
           [ 潜运算法启动中... ]
         </p>
         <WeatherInsight temperature={6} condition="小雨" />

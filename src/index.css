@@ -133,3 +133,136 @@
 .scale-up-center {
   animation: scale-up-center 0.4s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
 }
+
+@layer responsive {
+  /* 移动端优化 (max-width: 640px) */
+  @media (max-width: 640px) {
+    /* 标题缩放 */
+    h1 {
+      font-size: 2.5rem !important; /* 40px */
+    }
+    
+    /* 导航按钮优化 */
+    nav button {
+      padding: 0.375rem 0.75rem !important; /* px-3 py-1.5 */
+      font-size: 0.625rem !important; /* text-xs */
+      min-width: 4rem;
+    }
+    
+    /* 转盘缩放优化 */
+    .wheel-container {
+      transform: scale(0.6) !important;
+    }
+    
+    /* 按钮触摸优化 */
+    button {
+      min-height: 44px; /* iOS 最小触摸目标 */
+      min-width: 44px;
+    }
+    
+    /* 模态框优化 */
+    .modal-content {
+      width: 95% !important;
+      max-height: 85vh !important;
+    }
+  }
+
+  /* 平板优化 (641px - 1024px) */
+  @media (min-width: 641px) and (max-width: 1024px) {
+    h1 {
+      font-size: 4rem !important; /* 64px */
+    }
+    
+    .wheel-container {
+      transform: scale(0.85) !important;
+    }
+  }
+
+  /* 桌面优化 (min-width: 1025px) */
+  @media (min-width: 1025px) {
+    h1 {
+      font-size: 5rem !important; /* 80px */
+    }
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  /* 移除 hover 效果，改用 active */
+  .cyber-button:hover {
+    background: transparent;
+    box-shadow: 0 0 10px rgba(0, 247, 255, 0.3);
+  }
+  
+  .cyber-button:active {
+    background: rgba(0, 247, 255, 0.1);
+    box-shadow: 0 0 20px #00f7ff, inset 0 0 10px #00f7ff;
+  }
+  
+  /* 增大触摸目标 */
+  nav button {
+    min-height: 48px;
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* 横屏优化 */
+@media (orientation: landscape) and (max-height: 500px) {
+  h1 {
+    font-size: 2rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  nav {
+    gap: 0.5rem !important;
+  }
+  
+  nav button {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.5rem !important;
+  }
+  
+  main {
+    padding: 0.5rem !important;
+  }
+  
+  .wheel-container {
+    transform: scale(0.5) !important;
+  }
+}
+
+/* 安全区域适配 (iPhone X+) */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  nav {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #050505;
+  }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .glitch-text::after,
+  .glitch-text::before {
+    animation: none !important;
+  }
+}
