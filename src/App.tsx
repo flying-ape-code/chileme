@@ -6,10 +6,12 @@ import CelebrationModal from './components/CelebrationModal';
 import WeatherInsight from './components/WeatherInsight';
 import History from './components/History';
 import ShareModal from './components/ShareModal';
+import SettingsModal from './components/SettingsModal';
 import { addSpinHistory } from './history';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
 import { isAuthenticated } from './utils/auth';
+import { getSettings, getThemeConfig, getAnimationDuration, type AppSettings } from './lib/settings';
 
 // 类型定义
 interface MealType {
@@ -48,11 +50,16 @@ function Home() {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showHistory, setShowHistory] = useState<boolean>(false);
   const [showShare, setShowShare] = useState<boolean>(false);
+  const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [settings, setSettings] = useState<AppSettings>(getSettings());
 
   const selectedMeal = useMemo(() =>
     mealTypes.find(m => m.id === selectedMealId) || mealTypes[0],
     [selectedMealId]
   );
+
+  const theme = getThemeConfig(settings.themeColor);
+  const spinDuration = getAnimationDuration(settings.animationSpeed);
 
   useEffect(() => {
     setCurrentItems(getRandomItems(selectedMealId));
@@ -86,7 +93,7 @@ function Home() {
       setWinner(currentItems[winnerIndex]);
       setShowModal(true);
       saveSpinHistory(selectedMeal, currentItems[winnerIndex]);
-    }, 4000);
+    }, spinDuration + 500);
   };
 
   const saveSpinHistory = (category: MealType, winner: FoodItem): void => {
@@ -96,7 +103,6 @@ function Home() {
       console.log('获胜者:', winner);
       console.log('商品列表:', currentItems);
 
-      // 验证数据
       if (!category || !winner) {
         console.error('保存失败：类别或获胜者为空');
         return;
@@ -107,11 +113,9 @@ function Home() {
         return;
       }
 
-      // 使用 history.ts 中的 addSpinHistory 函数
       const result = addSpinHistory(category, currentItems, winner);
       console.log('历史记录已保存，当前记录数:', result.length);
 
-      // 验证保存是否成功
       const saved = localStorage.getItem('spinHistory');
       if (saved) {
         const history = JSON.parse(saved);
@@ -129,12 +133,27 @@ function Home() {
     setShowShare(true);
   };
 
+  const handleSettingsChange = (newSettings: AppSettings) => {
+    setSettings(newSettings);
+  };
+
+  // 动态生成主题类名
+  const themeClasses = {
+    primary: `text-${theme.primary}`,
+    border: `border-${theme.primary}`,
+    shadow: `shadow-${theme.primary}/50`,
+    gradient: `bg-gradient-to-r ${theme.gradient}`,
+    bg: `bg-${theme.primary}/20`,
+    hover: `hover:bg-${theme.primary}`,
+    neon: `neon-text-${theme.primary}`
+  };
+
   return (
     <div className="h-screen flex flex-col items-center justify-between py-4 overflow-hidden font-sans bg-cyber-dark text-white relative z-10">
       {/* Header */}
       <header className="text-center animate-in slide-in-from-top duration-700">
         <h1 className="text-6xl md:text-7xl font-black mb-2 tracking-tighter glitch-text neon-text-cyan" data-text="吃了么 ?">
-          吃了么 <span className="text-cyber-pink neon-text-pink">?</span>
+          吃了么 <span className={`text-${theme.primary} neon-text-${theme.primary}`}>?</span>
         </h1>
         <p className="text-cyber-cyan/80 font-mono text-xs tracking-[0.4em] uppercase">
           [ 潜运算法启动中... ]
@@ -149,7 +168,7 @@ function Home() {
             key={meal.id}
             onClick={() => !isSpinning && setSelectedMealId(meal.id)}
             disabled={isSpinning}
-            className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-cyber-cyan/20 text-cyber-cyan hover:bg-cyber-cyan hover:shadow-[0_0_15px_#00f7ff]"
+            className={`px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover} hover:shadow-[0_0_15px_rgba(0,247,255,0.5)]`}
           >
             {meal.name}
           </button>
@@ -164,20 +183,29 @@ function Home() {
           📋 历史
         </button>
 
+        {/* 设置按钮 */}
+        <button
+          onClick={() => !isSpinning && setShowSettings(true)}
+          disabled={isSpinning}
+          className={`px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover} hover:shadow-[0_0_15px_rgba(0,247,255,0.5)]`}
+        >
+          ⚙️ 设置
+        </button>
+
         {/* 管理入口按钮 */}
         <button
           onClick={() => navigate('/admin')}
           disabled={isSpinning}
           className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-gray-700/20 text-gray-500 hover:bg-gray-700 hover:text-white hover:shadow-[0_0_15px_#6b7280]"
         >
-          ⚙️ 管理
+          🔐 管理
         </button>
       </nav>
 
       {/* Main Content */}
       <main className="relative flex flex-col items-center flex-1 justify-center py-2 max-h-[70vh]">
         {/* Decorative Element */}
-        <div className="absolute top-[2%] z-50 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[24px] border-t-cyber-pink drop-shadow-[0_0_8px_#ff00ea] filter"></div>
+        <div className={`absolute top-[2%] z-50 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[24px] border-t-${theme.primary} drop-shadow-[0_0_8px_rgba(0,247,255,0.8)] filter`}></div>
 
         {/* Wheel Container */}
         <div className="p-1 rounded-full border border-cyber-cyan/10 shadow-[0_0_30px_rgba(0,247,255,0.1)] bg-black/40 backdrop-blur-sm transform scale-[0.75] sm:scale-90 md:scale-100 origin-center">
@@ -192,7 +220,7 @@ function Home() {
         <button
           onClick={handleSpin}
           disabled={isSpinning}
-          className="mt-4 cyber-button py-2 px-6 text-sm"
+          className={`mt-4 cyber-button py-2 px-6 text-sm bg-gradient-to-r ${theme.gradient} shadow-lg ${theme.shadow}`}
         >
           {isSpinning ? '计算中...' : '启动命运'}
         </button>
@@ -230,6 +258,13 @@ function Home() {
           onClose={() => setShowShare(false)}
         />
       )}
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        onSettingsChange={handleSettingsChange}
+      />
     </div>
   );
 }
