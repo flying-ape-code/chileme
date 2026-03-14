@@ -235,8 +235,47 @@ function Admin() {
     }
   };
 
-  if (!isAuthenticated || !isAdmin) {
-    return null;
+  // 加载状态
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-cyan-900 to-purple-900 flex items-center justify-center">
+        <div className="text-white text-xl">加载中...</div>
+      </div>
+    );
+  }
+
+  // 权限检查
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-cyan-900 to-purple-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-white text-xl mb-4">请先登录</div>
+          <button
+            onClick={() => navigate('/login')}
+            className="px-6 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700"
+          >
+            去登录
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-cyan-900 to-purple-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-400 text-xl mb-4">无权访问</div>
+          <div className="text-gray-400 mb-4">需要管理员权限</div>
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+          >
+            返回首页
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
