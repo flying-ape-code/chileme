@@ -24,6 +24,7 @@ function Admin() {
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
 
   // 表单状态
   const [formData, setFormData] = useState({
@@ -95,6 +96,107 @@ function Admin() {
       loadProducts();
     } catch (err: any) {
       setError('添加商品失败：' + err.message);
+    }
+  };
+
+
+  const handleBatchDelete = async () => {
+    if (selectedProducts.size === 0) {
+      setError('请先选择要删除的商品');
+      return;
+    }
+    
+    if (!confirm(`确定要删除选中的 ${selectedProducts.size} 个商品吗？`)) return;
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .in('id', Array.from(selectedProducts));
+      
+      if (error) throw error;
+      
+      setSelectedProducts(new Set());
+      loadProducts();
+      alert(`成功删除 ${selectedProducts.size} 个商品`);
+    } catch (err: any) {
+      setError('批量删除失败：' + err.message);
+    }
+  };
+
+  const handleBatchChangeCategory = async (newCategory: string) => {
+    if (selectedProducts.size === 0) {
+      setError('请先选择要修改分类的商品');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ category: newCategory })
+        .in('id', Array.from(selectedProducts));
+      
+      if (error) throw error;
+      
+      setSelectedProducts(new Set());
+      loadProducts();
+      alert(`成功修改 ${selectedProducts.size} 个商品的分类`);
+    } catch (err: any) {
+      setError('批量修改分类失败：' + err.message);
+    }
+  };
+
+  const handleExportJSON = () => {
+    const dataStr = JSON.stringify(products, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `products-${selectedCategory}-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportCSV = () => {
+    const headers = ['ID', '商品名称', '图片 URL', '推广链接', '分类', '创建时间'];
+    const rows = products.map(p => [
+      p.id,
+      `"${p.name}"`,
+      `"${p.img}"`,
+      `"${p.promo_url || ''}"`,
+      p.category,
+      p.created_at
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `products-${selectedCategory}-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const toggleProductSelection = (id: string) => {
+    const newSelected = new Set(selectedProducts);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedProducts(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedProducts.size === products.length) {
+      setSelectedProducts(new Set());
+    } else {
+      setSelectedProducts(new Set(products.map(p => p.id)));
     }
   };
 
@@ -193,6 +295,60 @@ function Admin() {
           ))}
         </div>
 
+        {/* Batch Actions */}
+        {selectedProducts.size > 0 && (
+          <div className="mb-6 p-4 bg-gray-800 rounded-lg border border-gray-700">
+            <div className="flex items-center gap-4 flex-wrap">
+              <span className="text-cyan-400 font-bold">
+                已选择 {selectedProducts.size} 个商品
+              </span>
+              <button
+                onClick={handleBatchDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+              >
+                批量删除
+              </button>
+              <select
+                onChange={(e) => {
+                  if (e.target.value) {
+                    handleBatchChangeCategory(e.target.value);
+                    e.target.value = '';
+                  }
+                }}
+                className="px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded text-sm"
+                defaultValue=""
+              >
+                <option value="" disabled>批量修改分类...</option>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+              <button
+                onClick={() => setSelectedProducts(new Set())}
+                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
+              >
+                取消选择
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Export Actions */}
+        <div className="mb-6 flex gap-2">
+          <button
+            onClick={handleExportJSON}
+            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm"
+          >
+            📥 导出 JSON
+          </button>
+          <button
+            onClick={handleExportCSV}
+            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm"
+          >
+            📥 导出 CSV
+          </button>
+        </div>
+
         {/* Add Product Button */}
         <button
           onClick={() => setShowAddModal(true)}
@@ -201,7 +357,21 @@ function Admin() {
           + 添加商品
         </button>
 
+        {/* Select All */}
+        {products.length > 0 && (
+          <div className="mb-4 flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={selectedProducts.size === products.length}
+              onChange={toggleSelectAll}
+              className="w-4 h-4 rounded"
+            />
+            <span className="text-gray-400 text-sm">全选 / 取消全选</span>
+          </div>
+        )}
+
         {/* Products Grid */}
+
         {isLoading ? (
           <div className="text-center text-gray-400 py-12">加载中...</div>
         ) : products.length === 0 ? (
@@ -213,9 +383,17 @@ function Admin() {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="bg-gray-800 rounded-lg p-4 border border-gray-700"
+                className={`bg-gray-800 rounded-lg p-4 border border-gray-700 ${
+                  selectedProducts.has(product.id) ? 'border-cyan-500 border-2' : ''
+                }`}
               >
-                <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-start gap-3 mb-4">
+                  <input
+                    type="checkbox"
+                    checked={selectedProducts.has(product.id)}
+                    onChange={() => toggleProductSelection(product.id)}
+                    className="w-4 h-4 rounded mt-1"
+                  />
                   <img
                     src={product.img}
                     alt={product.name}
