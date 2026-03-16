@@ -78,7 +78,7 @@ function Register() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <div className="mb-4">
             <label className="block text-gray-300 text-sm font-bold mb-2">
               用户名

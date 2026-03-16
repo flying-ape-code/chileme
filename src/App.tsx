@@ -235,7 +235,7 @@ function Home() {
 
       {/* Footer */}
       <footer className="text-cyber-cyan/30 font-mono text-[8px] tracking-[0.2em] uppercase">
-        Ver 2.1.0 // Supabase Auth Enabled
+        Ver 2.2.0 // Supabase Auth Enabled
       </footer>
 
       {/* Celebration Modal */}
