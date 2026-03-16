@@ -91,11 +91,15 @@ function Admin() {
 
       if (error) throw error;
       
+      // 成功：先关闭模态框，再重置表单，最后刷新列表
       setShowAddModal(false);
       setFormData({ name: '', img: '', promo_url: '', category: '早餐' });
-      loadProducts();
+      setError(''); // 清除之前的错误
+      await loadProducts(); // 等待刷新完成
+      alert('商品添加成功！');
     } catch (err: any) {
       setError('添加商品失败：' + err.message);
+      console.error('Add product error:', err);
     }
   };
 
@@ -217,7 +221,7 @@ function Admin() {
       if (error) throw error;
       
       setEditingProduct(null);
-      loadProducts();
+      // loadProducts moved above
     } catch (err: any) {
       setError('更新商品失败：' + err.message);
     }
@@ -229,7 +233,7 @@ function Admin() {
     try {
       const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) throw error;
-      loadProducts();
+      // loadProducts moved above
     } catch (err: any) {
       setError('删除商品失败：' + err.message);
     }
