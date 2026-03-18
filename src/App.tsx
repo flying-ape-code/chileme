@@ -13,7 +13,9 @@ import Admin from './pages/Admin';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import MyFeedbacks from './pages/MyFeedbacks';
+import FeedbackAdmin from './pages/FeedbackAdmin';
 import MyFeedbacks from './pages/MyFeedbacks';
+import FeedbackAdmin from './pages/FeedbackAdmin';
 import { getSettings, getThemeConfig, getAnimationDuration, type AppSettings } from './lib/settings';
 
 // 类型定义
