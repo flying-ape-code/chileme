@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { createFeedback, uploadFeedbackImage } from '../../lib/feedbackService';
+import { createFeedback, uploadFeedbackImages, saveFeedbackImages } from '../../lib/feedbackService';
 import { useAuth } from '../../context/AuthContext';
+import ImageUploader from './ImageUploader';
 
 interface FeedbackFormProps {
   onSuccess?: () => void;
@@ -47,10 +48,24 @@ export default function FeedbackForm({ onSuccess, onClose }: FeedbackFormProps) 
         throw new Error(result.error || '创建失败');
       }
 
+      const feedbackId = result.data.id;
+
       // 上传图片（如果有）
       if (images.length > 0) {
-        // TODO: 实现图片上传到 Supabase Storage
-        console.log('图片上传功能待实现', images);
+        // 上传到 Supabase Storage
+        const uploadResult = await uploadFeedbackImages(feedbackId, images);
+        
+        if (!uploadResult.success || !uploadResult.imageUrls) {
+          throw new Error(uploadResult.error || '图片上传失败');
+        }
+
+        // 保存图片记录到数据库
+        const saveResult = await saveFeedbackImages(feedbackId, uploadResult.imageUrls, images);
+        
+        if (!saveResult.success) {
+          console.error('保存图片记录失败:', saveResult.error);
+          // 不抛出错误，因为反馈已经成功提交，图片记录失败不影响主流程
+        }
       }
 
       // 成功
@@ -64,10 +79,8 @@ export default function FeedbackForm({ onSuccess, onClose }: FeedbackFormProps) 
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setImages(Array.from(e.target.files));
-    }
+  const handleImagesChange = (newImages: File[]) => {
+    setImages(newImages);
   };
 
   return (
@@ -160,19 +173,13 @@ export default function FeedbackForm({ onSuccess, onClose }: FeedbackFormProps) 
             <label className="block text-gray-300 text-sm font-bold mb-2">
               上传图片（可选）
             </label>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageChange}
-              className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded focus:outline-none focus:border-cyan-500"
+            <ImageUploader
+              images={images}
+              onImagesChange={handleImagesChange}
+              maxImages={3}
+              maxSizeMB={5}
               disabled={isSubmitting}
             />
-            {images.length > 0 && (
-              <p className="text-gray-400 text-sm mt-2">
-                已选择 {images.length} 张图片
-              </p>
-            )}
           </div>
 
           {/* 提交按钮 */}

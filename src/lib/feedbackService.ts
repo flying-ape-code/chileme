@@ -91,7 +91,86 @@ export const deleteFeedback = async (id: string): Promise<boolean> => {
   return !error;
 };
 
-// 上传图片
+// 上传图片到 Supabase Storage
+export const uploadImageToStorage = async (
+  file: File,
+  feedbackId: string
+): Promise<{ success: boolean; imageUrl?: string; error?: string }> => {
+  try {
+    // 生成唯一的文件名
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${feedbackId}/${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+    
+    // 上传到 Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('feedback-images')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) throw error;
+
+    // 获取公开访问 URL
+    const { data: urlData } = supabase.storage
+      .from('feedback-images')
+      .getPublicUrl(fileName);
+
+    return { success: true, imageUrl: urlData.publicUrl };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+// 批量上传图片
+export const uploadFeedbackImages = async (
+  feedbackId: string,
+  files: File[]
+): Promise<{ success: boolean; imageUrls?: string[]; error?: string }> => {
+  try {
+    const uploadPromises = files.map(file => uploadImageToStorage(file, feedbackId));
+    const results = await Promise.all(uploadPromises);
+    
+    // 检查是否有失败的上传
+    const failed = results.find(r => !r.success);
+    if (failed) {
+      return { success: false, error: failed.error };
+    }
+
+    const imageUrls = results.map(r => r.imageUrl!).filter(Boolean);
+    return { success: true, imageUrls };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+// 保存图片记录到数据库
+export const saveFeedbackImages = async (
+  feedbackId: string,
+  imageUrls: string[],
+  files: File[]
+): Promise<{ success: boolean; data?: FeedbackImage[]; error?: string }> => {
+  try {
+    const images = imageUrls.map((url, index) => ({
+      feedback_id: feedbackId,
+      image_url: url,
+      file_name: files[index]?.name,
+      file_size: files[index]?.size
+    }));
+
+    const { data, error } = await supabase
+      .from('feedback_images')
+      .insert(images)
+      .select();
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+// 上传图片并保存记录
 export const uploadFeedbackImage = async (
   feedbackId: string,
   imageUrl: string,
