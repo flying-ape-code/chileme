@@ -12,6 +12,8 @@ import { addSpinHistory } from './history';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import MyFeedbacks from './pages/MyFeedbacks';
+import MyFeedbacks from './pages/MyFeedbacks';
 import { getSettings, getThemeConfig, getAnimationDuration, type AppSettings } from './lib/settings';
 
 // 类型定义
@@ -235,7 +237,7 @@ function Home() {
 
       {/* Footer */}
       <footer className="text-cyber-cyan/30 font-mono text-[8px] tracking-[0.2em] uppercase">
-        Ver 2.2.0 // Supabase Auth Enabled
+        Ver 2.1.0 // Supabase Auth Enabled
       </footer>
 
       {/* Celebration Modal */}
@@ -295,6 +297,7 @@ function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/feedbacks" element={<MyFeedbacks />} />
       <Route path="/admin" element={<Admin />} />
       <Route path="/" element={<Home />} />
       <Route path="*" element={<Navigate to="/" replace />} />
