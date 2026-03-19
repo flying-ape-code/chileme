@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, Suspense, lazy } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { mealTypes, getRandomItems } from './data';
@@ -9,14 +9,15 @@ import History from './components/History';
 import ShareModal from './components/ShareModal';
 import SettingsModal from './components/SettingsModal';
 import { addSpinHistory } from './history';
-import Admin from './pages/Admin';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import MyFeedbacks from './pages/MyFeedbacks';
-import FeedbackAdmin from './pages/FeedbackAdmin';
-import MyFeedbacks from './pages/MyFeedbacks';
-import FeedbackAdmin from './pages/FeedbackAdmin';
 import { getSettings, getThemeConfig, getAnimationDuration, type AppSettings } from './lib/settings';
+
+// Lazy load heavy page components for code splitting
+const Admin = lazy(() => import('./pages/Admin'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const MyFeedbacks = lazy(() => import('./pages/MyFeedbacks'));
+const FeedbackAdmin = lazy(() => import('./pages/FeedbackAdmin'));
+const FeedbackStats = lazy(() => import('./pages/FeedbackStats'));
 
 // 类型定义
 interface MealType {
@@ -31,6 +32,19 @@ interface FoodItem {
   weirdName: string;
   weirdEmoji: string;
   description?: string;
+}
+
+// Loading skeleton component for lazy-loaded routes
+function RouteLoadingSkeleton() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-cyan-900 to-purple-900 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin mx-auto mb-4"></div>
+        <div className="text-cyan-400 font-mono text-lg">加载中...</div>
+        <div className="text-cyber-cyan/60 font-mono text-xs mt-2">[ Loading Component ]</div>
+      </div>
+    </div>
+  );
 }
 
 // 主页面组件
@@ -179,6 +193,15 @@ function Home() {
           ⚙️ 设置
         </button>
 
+        {/* 意见反馈按钮 */}
+        <button
+          onClick={() => navigate('/feedbacks')}
+          disabled={isSpinning}
+          className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-purple-700/20 text-purple-400 hover:bg-purple-700 hover:shadow-[0_0_15px_#a855f7]"
+        >
+          💬 反馈
+        </button>
+
         {/* 用户/登录按钮 */}
         {isAuthenticated ? (
           <>
@@ -288,22 +311,27 @@ function App() {
     return (
       <div className="h-screen flex items-center justify-center bg-cyber-dark text-white">
         <div className="text-center">
-          <div className="text-2xl font-mono text-cyan-400 mb-2">加载用户信息...</div>
-          <div className="text-cyber-cyan/60 font-mono text-xs">[ Neural Link Initializing ]</div>
+          <div className="w-12 h-12 border-4 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="text-cyan-400 font-mono text-lg">加载用户信息...</div>
+          <div className="text-cyber-cyan/60 font-mono text-xs mt-2">[ Neural Link Initializing ]</div>
         </div>
       </div>
     );
   }
 
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/feedbacks" element={<MyFeedbacks />} />
-      <Route path="/admin" element={<Admin />} />
-      <Route path="/" element={<Home />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <Suspense fallback={<RouteLoadingSkeleton />}>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/feedbacks" element={<MyFeedbacks />} />
+        <Route path="/feedbacks/admin" element={<FeedbackAdmin />} />
+        <Route path="/feedbacks/stats" element={<FeedbackStats />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/" element={<Home />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 

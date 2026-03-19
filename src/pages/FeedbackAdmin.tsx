@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAllFeedbacks, updateFeedback, type Feedback } from '../lib/feedbackService';
@@ -32,15 +32,17 @@ export default function FeedbackAdmin() {
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   const [replyText, setReplyText] = useState('');
 
+  // Optimized: Only load when user/isAdmin changes, not on every filter change
   useEffect(() => {
     if (!user || !isAdmin) {
       navigate('/');
       return;
     }
     loadFeedbacks();
-  }, [user, isAdmin, navigate, filterStatus, filterType]);
+  }, [user, isAdmin, navigate]);
 
-  const loadFeedbacks = async () => {
+  // Optimized: Load feedbacks with filters as parameters, not dependencies
+  const loadFeedbacks = useCallback(async () => {
     setIsLoading(true);
     try {
       const filters: any = {};
@@ -54,9 +56,16 @@ export default function FeedbackAdmin() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filterStatus, filterType]);
 
-  const handleReply = async () => {
+  // Reload when filters change
+  useEffect(() => {
+    if (user && isAdmin) {
+      loadFeedbacks();
+    }
+  }, [loadFeedbacks, user, isAdmin]);
+
+  const handleReply = useCallback(async () => {
     if (!selectedFeedback || !replyText.trim()) return;
 
     try {
@@ -78,9 +87,9 @@ export default function FeedbackAdmin() {
     } catch (error: any) {
       alert('回复失败：' + error.message);
     }
-  };
+  }, [selectedFeedback, replyText, user, loadFeedbacks]);
 
-  const handleStatusChange = async (id: string, newStatus: string) => {
+  const handleStatusChange = useCallback(async (id: string, newStatus: string) => {
     try {
       const result = await updateFeedback(id, { status: newStatus as any });
       if (result.success) {
@@ -92,20 +101,24 @@ export default function FeedbackAdmin() {
     } catch (error: any) {
       alert('更新失败：' + error.message);
     }
-  };
+  }, [loadFeedbacks]);
 
-  const filteredFeedbacks = feedbacks.filter(f => {
-    if (filterStatus !== 'all' && f.status !== filterStatus) return false;
-    if (filterType !== 'all' && f.type !== filterType) return false;
-    return true;
-  });
+  // Optimized: Use useMemo for filtered data to avoid recalculation on every render
+  const filteredFeedbacks = useMemo(() => {
+    return feedbacks.filter(f => {
+      if (filterStatus !== 'all' && f.status !== filterStatus) return false;
+      if (filterType !== 'all' && f.type !== filterType) return false;
+      return true;
+    });
+  }, [feedbacks, filterStatus, filterType]);
 
-  const stats = {
+  // Optimized: Use useMemo for stats calculation
+  const stats = useMemo(() => ({
     total: feedbacks.length,
     pending: feedbacks.filter(f => f.status === 'pending').length,
     processing: feedbacks.filter(f => f.status === 'processing').length,
     resolved: feedbacks.filter(f => f.status === 'resolved').length
-  };
+  }), [feedbacks]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-cyan-900 to-purple-900 p-8">
@@ -179,7 +192,25 @@ export default function FeedbackAdmin() {
 
         {/* 反馈列表 */}
         {isLoading ? (
-          <div className="text-center text-gray-400 py-12">加载中...</div>
+          <div className="space-y-4">
+            {/* Skeleton loading state */}
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-gray-800 rounded-lg p-6 border border-gray-700 animate-pulse">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gray-700 rounded-full"></div>
+                    <div>
+                      <div className="w-20 h-6 bg-gray-700 rounded-full mb-2"></div>
+                      <div className="w-32 h-4 bg-gray-700 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="w-24 h-8 bg-gray-700 rounded"></div>
+                </div>
+                <div className="w-full h-16 bg-gray-700 rounded mb-4"></div>
+                <div className="w-32 h-8 bg-gray-700 rounded"></div>
+              </div>
+            ))}
+          </div>
         ) : filteredFeedbacks.length === 0 ? (
           <div className="text-center text-gray-400 py-12">暂无反馈</div>
         ) : (
@@ -230,7 +261,7 @@ export default function FeedbackAdmin() {
 
                 {feedback.admin_reply ? (
                   <div className="bg-gray-700/50 rounded p-4 mt-4">
-                    <p className="text-cyan-400 text-sm font-bold mb-2">👨‍💼 已回复</p>
+                    <p className="text-cyan-400 text-sm font-bold mb-2">👨💼 已回复</p>
                     <p className="text-gray-300">{feedback.admin_reply}</p>
                     {feedback.replied_at && (
                       <p className="text-gray-500 text-xs mt-2">
