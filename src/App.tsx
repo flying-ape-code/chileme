@@ -162,8 +162,8 @@ function Home() {
         <WeatherInsight temperature={6} condition="小雨" />
       </header>
 
-      {/* Navigation */}
-      <nav className="flex flex-wrap justify-center gap-3 relative z-20">
+      {/* Navigation - Meal Type Buttons (Centered) */}
+      <nav className="flex flex-wrap justify-center gap-3 relative z-20 mb-2">
         {mealTypes.map((meal) => (
           <button
             key={meal.id}
@@ -174,47 +174,54 @@ function Home() {
             {meal.name}
           </button>
         ))}
+      </nav>
 
+      {/* Action Buttons (Top Right) */}
+      <div className="absolute top-4 right-4 flex gap-2 z-20">
         {/* 历史记录按钮 */}
         <button
           onClick={() => !isSpinning && setShowHistory(true)}
           disabled={isSpinning}
-          className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-cyber-pink/20 text-cyber-pink hover:bg-cyber-pink hover:shadow-[0_0_15px_#ff00ea]"
+          className="px-3 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-cyber-pink/20 text-cyber-pink hover:bg-cyber-pink hover:shadow-[0_0_15px_#ff00ea]"
+          title="历史记录"
         >
-          📋 历史
+          📋
         </button>
 
         {/* 设置按钮 */}
         <button
           onClick={() => !isSpinning && setShowSettings(true)}
           disabled={isSpinning}
-          className={`px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover} hover:shadow-[0_0_15px_rgba(0,247,255,0.5)]`}
+          className={`px-3 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover} hover:shadow-[0_0_15px_rgba(0,247,255,0.5)]`}
+          title="设置"
         >
-          ⚙️ 设置
+          ⚙️
         </button>
 
         {/* 意见反馈按钮 */}
         <button
           onClick={() => navigate('/feedbacks')}
           disabled={isSpinning}
-          className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-purple-700/20 text-purple-400 hover:bg-purple-700 hover:shadow-[0_0_15px_#a855f7]"
+          className="px-3 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-purple-700/20 text-purple-400 hover:bg-purple-700 hover:shadow-[0_0_15px_#a855f7]"
+          title="意见反馈"
         >
-          💬 反馈
+          💬
         </button>
 
         {/* 用户/登录按钮 */}
         {isAuthenticated ? (
           <>
-            <span className={`px-6 py-1.5 font-mono text-xs border ${theme.bg} text-${theme.primary}`}>
-              👤 {user?.username || '用户'}
+            <span className={`px-3 py-1.5 font-mono text-xs border ${theme.bg} text-${theme.primary}`} title={user?.username || '用户'}>
+              👤
             </span>
             {isAdmin && (
               <button
                 onClick={() => navigate('/admin')}
                 disabled={isSpinning}
-                className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-green-700/20 text-green-400 hover:bg-green-700 hover:text-white hover:shadow-[0_0_15px_#22c55e]"
+                className="px-3 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-green-700/20 text-green-400 hover:bg-green-700 hover:text-white hover:shadow-[0_0_15px_#22c55e]"
+                title="管理后台"
               >
-                🔐 管理
+                🔐
               </button>
             )}
           </>
@@ -222,19 +229,22 @@ function Home() {
           <>
             <button
               onClick={() => navigate('/login')}
-              className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-gray-700/20 text-gray-400 hover:bg-gray-700 hover:text-white"
+              className="px-3 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-gray-700/20 text-gray-400 hover:bg-gray-700 hover:text-white"
+              title="登录"
             >
-              🔐 登录
+              🔐
             </button>
             <button
               onClick={() => navigate('/register')}
-              className={`px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover}`}
+              className={`px-3 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover}`}
+              title="注册"
             >
-              📝 注册
+              📝
             </button>
           </>
         )}
-      </nav>
+      </div>
+
 
       {/* Main Content */}
       <main className="relative flex flex-col items-center flex-1 justify-center py-2 max-h-[70vh]">

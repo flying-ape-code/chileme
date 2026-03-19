@@ -1,7 +1,7 @@
 {
   "project": "chileme-app (吃了么)",
-  "version": "2.0.3",
-  "updated_at": "2026-02-09T22:45:00Z",
+  "version": "2.5.3",
+  "updated_at": "2026-03-19T17:32:00Z",
   "developer": "Robin & AI Assistant",
   "tasks": [
     {
@@ -173,6 +173,20 @@
         "task-8"
       ],
       "files": []
+    },
+    {
+      "id": "task-11",
+      "title": "优化首页按钮布局",
+      "description": "将餐别按钮以外的功能按钮移到右上角，提升视觉焦点。餐别按钮居中显示，功能按钮右上角对齐（图标形式）",
+      "status": "done",
+      "created_at": "2026-03-19T17:00:00Z",
+      "updated_at": "2026-03-19T17:32:00Z",
+      "assigned_to": "AI Assistant (Subagent)",
+      "dependencies": [],
+      "files": [
+        "src/App.tsx"
+      ],
+      "notes": "✅ 已完成：首页按钮布局优化。餐别按钮居中突出显示，功能按钮移至右上角并改为图标形式。已添加 tooltip 提示。构建成功，已部署到 Vercel。"
     }
   ],
   "settings": {
