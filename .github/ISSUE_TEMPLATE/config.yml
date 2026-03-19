@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📖 任务管理指南
+    url: https://github.com/flying-ape-code/chileme/blob/main/GITHUB-ISSUES-TASK-MANAGEMENT.md
+    about: 查看完整的任务管理流程和模板使用说明
+  - name: 💬 问题讨论
+    url: https://github.com/flying-ape-code/chileme/discussions
+    about: 在 Discussions 中提问或讨论
+  - name: 📧 联系方式
+    url: https://github.com/flying-ape-code/chileme
+    about: 通过 GitHub Issues 联系我们
