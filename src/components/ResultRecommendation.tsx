@@ -1,52 +1,73 @@
-import React, { useEffect, useState } from 'react';
-import { CouponCard } from './CouponCard';
-import { getCoupons, Coupon } from '../services/meituan-cps';
+import React, { useState, useEffect } from 'react';
+import { getCoupons, type Coupon } from '../services/meituan-cps';
+import CouponCard from './CouponCard';
+import { CPS_CONFIG } from '../config/cps';
 
 interface ResultRecommendationProps {
-  category: string;
+  mealId?: string;
+  mealName?: string;
 }
 
-export const ResultRecommendation: React.FC<ResultRecommendationProps> = ({ category }) => {
+export default function ResultRecommendation({ mealId, mealName }: ResultRecommendationProps) {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    async function fetchCoupons() {
-      try {
-        const data = await getCoupons(undefined, 5);
-        setCoupons(data);
-      } catch (error) {
-        console.error('获取优惠券失败:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchCoupons();
-  }, [category]);
+    if (!CPS_CONFIG.enabled) return;
+    
+    loadCoupons();
+  }, [mealId]);
 
-  if (loading) return <div className="mt-8 pt-6 border-t border-gray-200 text-center py-4 text-gray-500">加载中...</div>;
-  if (coupons.length === 0) return null;
+  const loadCoupons = async () => {
+    setIsLoading(true);
+    try {
+      const response = await getCoupons(undefined, 3);
+      if (response.code === 0) {
+        setCoupons(response.data);
+      }
+    } catch (error) {
+      console.error('加载优惠券失败:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!CPS_CONFIG.enabled) {
+    return null;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+        <div className="text-center text-gray-500">加载中...</div>
+      </div>
+    );
+  }
+
+  if (coupons.length === 0) {
+    return null;
+  }
 
   return (
-    <div className="mt-8 pt-6 border-t border-gray-200">
-      <h2 className="text-xl font-bold mb-4 flex items-center">
-        <span className="mr-2">🎁</span>
-        为你推荐附近美食
+    <div className="mt-8">
+      <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <span className="text-2xl">🎁</span>
+        外卖优惠券
       </h2>
-      <div className="space-y-3">
-        {coupons.map((coupon) => (
+      
+      <div className="space-y-4">
+        {coupons.map(coupon => (
           <CouponCard
             key={coupon.id}
-            title={coupon.title}
-            amount={coupon.amount}
-            threshold={coupon.threshold}
-            description={coupon.description}
-            couponId={coupon.id}
-            source="result_page"
+            coupon={coupon}
+            source="result"
           />
         ))}
       </div>
-      <p className="text-xs text-gray-500 mt-3 text-center">点击领取优惠券，下单更优惠 💰</p>
+
+      <p className="mt-4 text-xs text-gray-500 text-center">
+        点击优惠券跳转美团小程序，享受优惠价格
+      </p>
     </div>
   );
-};
+}

@@ -13,34 +13,53 @@ export interface Coupon {
   platform: 'meituan';
 }
 
-export async function getCoupons(categoryId?: string, limit: number = 10): Promise<Coupon[]> {
+export interface CouponListResponse {
+  code: number;
+  message: string;
+  data: Coupon[];
+}
+
+/**
+ * 获取优惠券列表
+ */
+export async function getCoupons(
+  categoryId?: string,
+  limit: number = 10
+): Promise<CouponListResponse> {
   const timestamp = getTimestamp();
   const nonce = getNonce();
   
   const params = {
     appkey: CPS_CONFIG.appkey,
-    position_id: CPS_CONFIG.positionId,
-    channel_id: CPS_CONFIG.channelId,
-    category_id: categoryId || '',
-    limit: limit.toString(),
-    timestamp: timestamp.toString(),
+    timestamp,
     nonce,
+    positionId: CPS_CONFIG.positionId,
+    channelId: CPS_CONFIG.channelId,
+    categoryId: categoryId || '',
+    limit,
   };
   
   const sign = generateSign(params, CPS_CONFIG.secret);
   
+  const url = `${MEITUAN_API_BASE}/coupon/get?${new URLSearchParams({
+    ...params,
+    sign,
+  }).toString()}`;
+  
   try {
-    const response = await fetch(
-      `${MEITUAN_API_BASE}/v2/coupon/list?${new URLSearchParams({ ...params, sign })}`
-    );
+    const response = await fetch(url);
     const data = await response.json();
-    
-    if (data.code === 200) {
-      return data.data.map((item: any) => ({ ...item, platform: 'meituan' as const }));
-    }
-    return [];
+    return data;
   } catch (error) {
     console.error('获取优惠券失败:', error);
-    return [];
+    return { code: -1, message: '网络错误', data: [] };
   }
+}
+
+/**
+ * 获取优惠券详情
+ */
+export async function getCouponDetail(couponId: string): Promise<Coupon | null> {
+  const coupons = await getCoupons();
+  return coupons.data.find(c => c.id === couponId) || null;
 }

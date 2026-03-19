@@ -1,40 +1,48 @@
 import React from 'react';
-import { jumpToMeituan } from '../services/cps-jump';
+import { Coupon } from '../services/meituan-cps';
+import { jumpToCoupon } from '../services/cps-jump';
 
 interface CouponCardProps {
-  title: string;
-  amount: number;
-  threshold: number;
-  description?: string;
-  imageUrl?: string;
-  couponId?: string;
-  source?: 'result_page' | 'home_banner' | 'coupon_list';
+  coupon: Coupon;
+  source?: 'result' | 'detail' | 'list';
 }
 
-export const CouponCard: React.FC<CouponCardProps> = ({
-  title, amount, threshold, description, couponId, source = 'result_page',
-}) => {
-  const handleClick = () => jumpToMeituan(source, couponId);
+export default function CouponCard({ coupon, source = 'list' }: CouponCardProps) {
+  const handleClick = () => {
+    jumpToCoupon({
+      couponId: coupon.id,
+      couponLink: coupon.link,
+      source,
+    });
+  };
 
   return (
     <div
-      className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl p-4 cursor-pointer transform hover:scale-105 transition-all shadow-lg"
       onClick={handleClick}
+      className="coupon-card cursor-pointer bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-4 border border-orange-200 hover:border-orange-400 transition-all"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        {/* 优惠券图标 */}
+        <div className="w-16 h-16 bg-orange-500 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
+          ¥{coupon.amount}
+        </div>
+
+        {/* 优惠券信息 */}
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-2xl">🟡</span>
-            <h3 className="text-white font-bold text-lg">{title}</h3>
+          <h3 className="font-bold text-gray-800 mb-1">{coupon.title}</h3>
+          <p className="text-sm text-gray-600 mb-2">{coupon.description}</p>
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <span>满{coupon.threshold}可用</span>
+            <span>•</span>
+            <span>有效期至{new Date(coupon.expireTime).toLocaleDateString('zh-CN')}</span>
           </div>
-          {description && <p className="text-white/90 text-sm mb-2">{description}</p>}
-          <p className="text-white/70 text-xs">满 ¥{threshold} 可用</p>
         </div>
-        <div className="text-right">
-          <div className="text-white font-bold text-4xl">¥{amount}</div>
-          <div className="text-white/90 text-sm font-medium">立即领取</div>
-        </div>
+
+        {/* 立即使用按钮 */}
+        <button className="px-4 py-2 bg-orange-500 text-white rounded-full text-sm font-bold hover:bg-orange-600 transition-colors">
+          立即使用
+        </button>
       </div>
     </div>
   );
-};
+}
