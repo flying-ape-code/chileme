@@ -26,12 +26,12 @@ jobs:
         run: |
           npm ci --ignore-scripts || npm install --ignore-scripts
           
-      - name: Run crawler
+      - name: Run crawler and sync
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
-          node scripts/crawler-axios.cjs || echo "Crawler completed with warnings"
+          node scripts/auto-sync-crawler.cjs || echo "Crawler completed with warnings"
           
       - name: Commit and push if changed
         run: |

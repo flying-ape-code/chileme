@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "crawler": "node scripts/crawler-axios.cjs",
+    "crawler": "node scripts/auto-sync-crawler.cjs",
     "scheduler": "node scripts/scheduler.js",
     "test": "vitest",
     "test:run": "vitest run",
