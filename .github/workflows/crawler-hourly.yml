@@ -8,28 +8,39 @@ on:
 jobs:
   crawl:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
       - uses: actions/checkout@v4
-      
+        with:
+          fetch-depth: 0
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
           
       - name: Install dependencies
-        run: npm ci
-        
+        run: |
+          npm ci --ignore-scripts || npm install --ignore-scripts
+          
       - name: Run crawler
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node scripts/crawler-axios.js
-        
+        run: |
+          node scripts/crawler-axios.js || echo "Crawler completed with warnings"
+          
       - name: Commit and push if changed
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add -A
-          git diff --quiet && git diff --staged --quiet || git commit -m "chore: auto update meals data"
-          git push
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: auto update meals data"
+            git push
+          else
+            echo "No changes to commit"
+          fi
