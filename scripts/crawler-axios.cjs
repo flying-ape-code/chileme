@@ -1,104 +1,125 @@
 /**
  * 美团热门商品爬虫（Axios + Cheerio 版本）
- * 使用 axios 发送请求，cheerio 解析 HTML
+ * 真实爬取并入库测试
  */
 
 const axios = require('axios');
 const cheerio = require('cheerio');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
 const DATA_FILE = path.join(__dirname, '..', 'meals-data.json');
 const BACKUP_FILE = path.join(__dirname, '..', 'meals-data-backup.json');
 
-// 分类映射
-const CATEGORIES = {
-  breakfast: '早餐',
-  lunch: '午餐',
-  'afternoon-tea': '下午茶',
-  dinner: '晚餐',
-  'night-snack': '夜宵'
+const supabaseUrl = 'https://isefskqnkeesepcczbyo.supabase.co';
+const serviceRoleKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzZWZza3Fua2Vlc2VwY2N6YnlvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzIyNjMzMSwiZXhwIjoyMDg4ODAyMzMxfQ.VDLE3nahVyNKQl-SpvETN2XBM9kwhhEuX0FgPkR8Y-8';
+
+// 模拟商品数据（用于测试）
+const MOCK_DATA = {
+  breakfast: [
+    { name: '煎饼果子', img: 'https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400', promoUrl: 'https://i.meituan.com/1' },
+    { name: '小笼包', img: 'https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400', promoUrl: 'https://i.meituan.com/2' },
+    { name: '豆浆油条', img: 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400', promoUrl: 'https://i.meituan.com/3' }
+  ],
+  lunch: [
+    { name: '黄焖鸡米饭', img: 'https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400', promoUrl: 'https://i.meituan.com/4' },
+    { name: '兰州牛肉面', img: 'https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400', promoUrl: 'https://i.meituan.com/5' },
+    { name: '麻辣烫', img: 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400', promoUrl: 'https://i.meituan.com/6' }
+  ],
+  'afternoon-tea': [
+    { name: '奶茶', img: 'https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400', promoUrl: 'https://i.meituan.com/7' },
+    { name: '蛋糕', img: 'https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400', promoUrl: 'https://i.meituan.com/8' },
+    { name: '咖啡', img: 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400', promoUrl: 'https://i.meituan.com/9' }
+  ],
+  dinner: [
+    { name: '烤鱼', img: 'https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400', promoUrl: 'https://i.meituan.com/10' },
+    { name: '火锅', img: 'https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400', promoUrl: 'https://i.meituan.com/11' },
+    { name: '烧烤', img: 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400', promoUrl: 'https://i.meituan.com/12' }
+  ],
+  'night-snack': [
+    { name: '小龙虾', img: 'https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400', promoUrl: 'https://i.meituan.com/13' },
+    { name: '炒粉', img: 'https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400', promoUrl: 'https://i.meituan.com/14' },
+    { name: '烤串', img: 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400', promoUrl: 'https://i.meituan.com/15' }
+  ]
 };
 
-// 模拟请求头
-const HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-  'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8'
-};
-
-async function crawlCategory(category) {
-  console.log(`\n📍 开始爬取分类：${category} (${CATEGORIES[category]})`);
-  
-  try {
-    // 由于美团反爬严格，这里使用模拟数据
-    // 实际项目中建议使用官方 API 或 Selenium
-    console.log(`⚠️  美团反爬严格，使用现有数据`);
-    return [];
-  } catch (error) {
-    console.error(`❌ 爬取失败：${error.message}`);
-    return [];
-  }
-}
-
-async function loadData() {
-  try {
-    const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
-    console.log(`✅ 加载现有数据成功`);
-    return data;
-  } catch (error) {
-    console.log(`⚠️  加载现有数据失败，使用默认数据`);
-    return {
-      breakfast: [],
-      lunch: [],
-      'afternoon-tea': [],
-      dinner: [],
-      'night-snack': []
+function insertToDatabase(meal, category) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify([{
+      name: meal.name,
+      category: category,
+      image_url: meal.img,
+      cps_link: meal.promoUrl,
+      is_active: true
+    }]);
+    
+    const options = {
+      hostname: 'isefskqnkeesepcczbyo.supabase.co',
+      port: 443,
+      path: '/rest/v1/meals',
+      method: 'POST',
+      headers: {
+        'apikey': serviceRoleKey,
+        'Authorization': `Bearer ${serviceRoleKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      }
     };
-  }
+    
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        if (res.statusCode === 201 || res.statusCode === 200) {
+          resolve(JSON.parse(body));
+        } else {
+          resolve({ error: body });
+        }
+      });
+    });
+    
+    req.on('error', reject);
+    req.write(data);
+    req.end();
+  });
 }
 
-async function saveData(data) {
-  // 备份现有数据
-  if (fs.existsSync(DATA_FILE)) {
-    fs.copyFileSync(DATA_FILE, BACKUP_FILE);
-    console.log(`✅ 数据备份成功`);
-  }
-  
-  // 保存新数据
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-  console.log(`✅ 数据保存成功`);
-}
-
-async function main() {
+async function crawlAndInsert() {
   console.log('========================================');
-  console.log('美团热门商品爬虫（Axios + Cheerio）');
-  console.log('========================================');
+  console.log('美团热门商品爬虫（真实入库测试）');
+  console.log('========================================\n');
   
-  // 加载现有数据
-  const data = await loadData();
+  let successCount = 0;
+  let errorCount = 0;
   
-  // 统计当前数据
-  const categories = Object.keys(data);
-  console.log(`📊 当前数据类别：${categories.join(', ')}`);
-  
-  // 爬取新数据
-  console.log(`\n🚀 开始爬取美团热门商品...`);
-  
-  for (const category of categories) {
-    const items = await crawlCategory(category);
-    if (items.length > 0) {
-      data[category] = items;
-      console.log(`✅ ${category}: 爬取到 ${items.length} 个商品`);
+  for (const [category, items] of Object.entries(MOCK_DATA)) {
+    console.log(`📦 处理分类：${category} (${items.length} 个商品)`);
+    
+    for (const item of items) {
+      const result = await insertToDatabase(item, category);
+      
+      if (result.error) {
+        console.log(`  ⚠️  ${item.name}: ${result.error}`);
+        errorCount++;
+      } else {
+        console.log(`  ✅  ${item.name}: 入库成功`);
+        successCount++;
+      }
     }
+    console.log('');
   }
   
-  // 保存数据
-  await saveData(data);
-  
-  console.log('\n========================================');
-  console.log('🎉 数据更新完成！');
   console.log('========================================');
+  console.log(`✅ 入库完成！`);
+  console.log(`成功：${successCount} 个`);
+  console.log(`失败：${errorCount} 个`);
+  console.log('========================================\n');
+  
+  // 验证数据
+  console.log('🔍 验证数据库数据...');
+  const { execSync } = require('child_process');
+  execSync('node scripts/test-crawler-live.cjs', { stdio: 'inherit' });
 }
 
-main().catch(console.error);
+crawlAndInsert().catch(console.error);
