@@ -3,28 +3,19 @@
     {
       "name": "新爬取商品-煎饼果子",
       "img": "https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400&h=400&fit=crop",
-      "promoUrl": "https://i.meituan.com/example1",
-      "crawledAt": "2026-03-20T02:37:07.255532+00:00"
-    },
-    {
-      "name": "测试商品-1773974226353",
-      "img": "https://example.com/test.jpg",
-      "promoUrl": "",
-      "crawledAt": "2026-03-20T02:37:07.256354+00:00"
+      "promoUrl": "https://i.meituan.com/example1"
     },
     {
       "name": "新爬取商品-豆浆",
       "img": "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400&h=400&fit=crop",
-      "promoUrl": "https://i.meituan.com/example2",
-      "crawledAt": "2026-03-20T02:37:07.654264+00:00"
+      "promoUrl": "https://i.meituan.com/example2"
     }
   ],
   "lunch": [
     {
       "name": "新爬取商品-黄焖鸡",
       "img": "https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400&h=400&fit=crop",
-      "promoUrl": "https://i.meituan.com/example3",
-      "crawledAt": "2026-03-20T02:37:07.872867+00:00"
+      "promoUrl": "https://i.meituan.com/example3"
     }
   ],
   "afternoon-tea": [
