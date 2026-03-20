@@ -3,57 +3,66 @@
     {
       "name": "新爬取商品-煎饼果子",
       "img": "https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400&h=400&fit=crop",
-      "promoUrl": "https://i.meituan.com/example1"
+      "promoUrl": "https://i.meituan.com/example1",
+      "crawledAt": "2026-03-20T02:37:07.255532+00:00"
+    },
+    {
+      "name": "测试商品-1773974226353",
+      "img": "https://example.com/test.jpg",
+      "promoUrl": "",
+      "crawledAt": "2026-03-20T02:37:07.256354+00:00"
     },
     {
       "name": "新爬取商品-豆浆",
       "img": "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400&h=400&fit=crop",
-      "promoUrl": "https://i.meituan.com/example2"
+      "promoUrl": "https://i.meituan.com/example2",
+      "crawledAt": "2026-03-20T02:37:07.654264+00:00"
     }
   ],
   "lunch": [
     {
       "name": "新爬取商品-黄焖鸡",
       "img": "https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400&h=400&fit=crop",
-      "promoUrl": "https://i.meituan.com/example3"
+      "promoUrl": "https://i.meituan.com/example3",
+      "crawledAt": "2026-03-20T02:37:07.872867+00:00"
     }
   ],
   "afternoon-tea": [
     {
-      "name": "奶茶",
-      "img": "https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400&h=400&fit=crop",
-      "promoUrl": "https://i.meituan.com/afternoon-tea/奶茶",
-      "crawledAt": "2026-02-02T02:15:42.244Z"
-    },
-    {
       "name": "水果茶",
       "img": "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400&h=400&fit=crop",
       "promoUrl": "https://i.meituan.com/afternoon-tea/水果茶",
-      "crawledAt": "2026-02-02T02:15:42.244Z"
-    },
-    {
-      "name": "蛋糕",
-      "img": "https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400&h=400&fit=crop",
-      "promoUrl": "https://i.meituan.com/afternoon-tea/蛋糕",
-      "crawledAt": "2026-02-02T02:15:42.244Z"
-    },
-    {
-      "name": "三明治",
-      "img": "https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=400&h=400&fit=crop",
-      "promoUrl": "https://i.meituan.com/afternoon-tea/三明治",
-      "crawledAt": "2026-02-02T02:15:42.244Z"
+      "crawledAt": "2026-03-20T02:37:08.311776+00:00"
     },
     {
       "name": "沙拉",
       "img": "https://images.unsplash.com/photo-1526777563695-e8467e7c5952?w=400&h=400&fit=crop",
       "promoUrl": "https://i.meituan.com/afternoon-tea/沙拉",
-      "crawledAt": "2026-02-02T02:15:42.244Z"
+      "crawledAt": "2026-03-20T02:37:08.988339+00:00"
+    },
+    {
+      "name": "奶茶",
+      "img": "https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/afternoon-tea/奶茶",
+      "crawledAt": "2026-03-20T02:37:08.090329+00:00"
+    },
+    {
+      "name": "蛋糕",
+      "img": "https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/afternoon-tea/蛋糕",
+      "crawledAt": "2026-03-20T02:37:08.530756+00:00"
+    },
+    {
+      "name": "三明治",
+      "img": "https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/afternoon-tea/三明治",
+      "crawledAt": "2026-03-20T02:37:08.761157+00:00"
     },
     {
       "name": "咖啡",
       "img": "https://images.unsplash.com/photo-1534422298391-e4f8c170db06?w=400&h=400&fit=crop",
       "promoUrl": "https://i.meituan.com/afternoon-tea/咖啡",
-      "crawledAt": "2026-02-02T02:15:42.244Z"
+      "crawledAt": "2026-03-20T02:37:09.213302+00:00"
     }
   ],
   "dinner": [
@@ -61,37 +70,37 @@
       "name": "烤鱼",
       "img": "https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400&h=400&fit=crop",
       "promoUrl": "https://i.meituan.com/dinner/烤鱼",
-      "crawledAt": "2026-02-02T02:15:42.244Z"
-    },
-    {
-      "name": "火锅",
-      "img": "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400&h=400&fit=crop",
-      "promoUrl": "https://i.meituan.com/dinner/火锅",
-      "crawledAt": "2026-02-02T02:15:42.244Z"
+      "crawledAt": "2026-03-20T02:37:09.442273+00:00"
     },
     {
       "name": "烧烤",
       "img": "https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400&h=400&fit=crop",
       "promoUrl": "https://i.meituan.com/dinner/烧烤",
-      "crawledAt": "2026-02-02T02:15:42.244Z"
-    },
-    {
-      "name": "炸鸡",
-      "img": "https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=400&h=400&fit=crop",
-      "promoUrl": "https://i.meituan.com/dinner/炸鸡",
-      "crawledAt": "2026-02-02T02:15:42.244Z"
+      "crawledAt": "2026-03-20T02:37:09.891932+00:00"
     },
     {
       "name": "麻辣香锅",
       "img": "https://images.unsplash.com/photo-1526777563695-e8467e7c5952?w=400&h=400&fit=crop",
       "promoUrl": "https://i.meituan.com/dinner/麻辣香锅",
-      "crawledAt": "2026-02-02T02:15:42.244Z"
+      "crawledAt": "2026-03-20T02:37:10.344873+00:00"
+    },
+    {
+      "name": "火锅",
+      "img": "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/dinner/火锅",
+      "crawledAt": "2026-03-20T02:37:09.66973+00:00"
+    },
+    {
+      "name": "炸鸡",
+      "img": "https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/dinner/炸鸡",
+      "crawledAt": "2026-03-20T02:37:10.11242+00:00"
     },
     {
       "name": "水煮鱼",
       "img": "https://images.unsplash.com/photo-1534422298391-e4f8c170db06?w=400&h=400&fit=crop",
       "promoUrl": "https://i.meituan.com/dinner/水煮鱼",
-      "crawledAt": "2026-02-02T02:15:42.244Z"
+      "crawledAt": "2026-03-20T02:37:10.566503+00:00"
     }
   ],
   "night-snack": [
@@ -99,37 +108,37 @@
       "name": "烧烤",
       "img": "https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400&h=400&fit=crop",
       "promoUrl": "https://i.meituan.com/night-snack/烧烤",
-      "crawledAt": "2026-02-02T02:15:42.245Z"
-    },
-    {
-      "name": "小龙虾",
-      "img": "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400&h=400&fit=crop",
-      "promoUrl": "https://i.meituan.com/night-snack/小龙虾",
-      "crawledAt": "2026-02-02T02:15:42.245Z"
+      "crawledAt": "2026-03-20T02:37:10.782898+00:00"
     },
     {
       "name": "炒粉",
       "img": "https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400&h=400&fit=crop",
       "promoUrl": "https://i.meituan.com/night-snack/炒粉",
-      "crawledAt": "2026-02-02T02:15:42.245Z"
-    },
-    {
-      "name": "关东煮",
-      "img": "https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=400&h=400&fit=crop",
-      "promoUrl": "https://i.meituan.com/night-snack/关东煮",
-      "crawledAt": "2026-02-02T02:15:42.245Z"
+      "crawledAt": "2026-03-20T02:37:11.219457+00:00"
     },
     {
       "name": "烤串",
       "img": "https://images.unsplash.com/photo-1526777563695-e8467e7c5952?w=400&h=400&fit=crop",
       "promoUrl": "https://i.meituan.com/night-snack/烤串",
-      "crawledAt": "2026-02-02T02:15:42.245Z"
+      "crawledAt": "2026-03-20T02:37:11.660803+00:00"
+    },
+    {
+      "name": "小龙虾",
+      "img": "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/night-snack/小龙虾",
+      "crawledAt": "2026-03-20T02:37:10.997689+00:00"
+    },
+    {
+      "name": "关东煮",
+      "img": "https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=400&h=400&fit=crop",
+      "promoUrl": "https://i.meituan.com/night-snack/关东煮",
+      "crawledAt": "2026-03-20T02:37:11.439227+00:00"
     },
     {
       "name": "炸鸡块",
       "img": "https://images.unsplash.com/photo-1534422298391-e4f8c170db06?w=400&h=400&fit=crop",
       "promoUrl": "https://i.meituan.com/night-snack/炸鸡块",
-      "crawledAt": "2026-02-02T02:15:42.245Z"
+      "crawledAt": "2026-03-20T02:37:11.87824+00:00"
     }
   ]
 }

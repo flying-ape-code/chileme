@@ -17,7 +17,7 @@ async function syncMealsData() {
   // 获取所有商品
   const { data: meals, error } = await supabase
     .from('meals')
-    .select('name, image_url as img, cps_link as promoUrl, category, created_at as crawledAt')
+    .select('name, image_url, cps_link, category, created_at')
     .eq('is_active', true);
   
   if (error) {
@@ -39,9 +39,9 @@ async function syncMealsData() {
     if (mealsData[category]) {
       mealsData[category].push({
         name: meal.name,
-        img: meal.img,
-        promoUrl: meal.promoUrl || '',
-        crawledAt: meal.crawledAt
+        img: meal.image_url,
+        promoUrl: meal.cps_link || '',
+        crawledAt: meal.created_at
       });
     }
   }
