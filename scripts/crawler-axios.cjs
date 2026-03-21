@@ -10,8 +10,15 @@ const path = require('path');
 const DATA_FILE = path.join(__dirname, '..', 'meals-data.json');
 const BACKUP_FILE = path.join(__dirname, '..', 'meals-data-backup.json');
 
-const supabaseUrl = 'https://isefskqnkeesepcczbyo.supabase.co';
-const serviceRoleKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzZWZza3Fua2Vlc2VwY2N6YnlvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzIyNjMzMSwiZXhwIjoyMDg4ODAyMzMxfQ.VDLE3nahVyNKQl-SpvETN2XBM9kwhhEuX0FgPkR8Y-8';
+// 使用环境变量（GitHub Secrets 配置）
+const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://isefskqnkeesepcczbyo.supabase.co';
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzZWZza3Fua2Vlc2VwY2N6YnlvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzIyNjMzMSwiZXhwIjoyMDg4ODAyMzMxfQ.VDLE3nahVyNKQl-SpvETN2XBM9kwhhEuX0FgPkR8Y-8';
+
+// 检查环境变量是否配置
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.warn('⚠️  警告：SUPABASE_SERVICE_ROLE_KEY 未配置，使用默认值（仅本地测试）');
+  console.warn('⚠️  请在 GitHub Secrets 中配置 VITE_SUPABASE_URL 和 SUPABASE_SERVICE_ROLE_KEY');
+}
 
 // 模拟商品数据
 const MOCK_DATA = {

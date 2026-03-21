@@ -31,7 +31,7 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
-          node scripts/auto-sync-crawler.cjs || echo "Crawler completed with warnings"
+          node scripts/crawler-axios.cjs || echo "Crawler completed with warnings"
           
       - name: Commit and push if changed
         run: |
