@@ -18,6 +18,9 @@ const Register = lazy(() => import('./pages/Register'));
 const MyFeedbacks = lazy(() => import('./pages/MyFeedbacks'));
 const FeedbackAdmin = lazy(() => import('./pages/FeedbackAdmin'));
 const FeedbackStats = lazy(() => import('./pages/FeedbackStats'));
+const FeedbackSubmit = lazy(() => import('./pages/FeedbackSubmit'));
+const Settings = lazy(() => import('./pages/Settings'));
+const HistoryPage = lazy(() => import('./pages/HistoryPage'));
 
 // 类型定义
 interface FoodItem {
@@ -170,6 +173,15 @@ function Home() {
           </button>
         ))}
 
+        {/* 反馈按钮 */}
+        <button
+          onClick={() => !isSpinning && navigate('/feedbacks/submit')}
+          disabled={isSpinning}
+          className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-purple-500/20 text-purple-400 hover:bg-purple-500 hover:shadow-[0_0_15px_#a855f7]"
+        >
+          💬 反馈
+        </button>
+
         {/* 历史记录按钮 */}
         <button
           onClick={() => !isSpinning && setShowHistory(true)}
@@ -315,6 +327,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/feedbacks" element={<MyFeedbacks />} />
+        <Route path="/feedbacks/submit" element={<FeedbackSubmit />} />
         <Route
           path="/admin"
           element={
@@ -323,6 +336,8 @@ function App() {
         />
         <Route path="/feedbacks/admin" element={<FeedbackAdmin />} />
         <Route path="/feedbacks/stats" element={<FeedbackStats />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/history" element={<HistoryPage />} />
         <Route path="/" element={<Home />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
