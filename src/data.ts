@@ -30,45 +30,57 @@ export const productCategories = mealTypes;
  * 获取分类商品（从 meals 表）
  */
 export async function getMealsByCategory(category: string): Promise<Meal[]> {
-  const { data, error } = await supabase
-    .from('meals')
-    .select('*')
-    .eq('category', category)
-    .eq('is_active', true)
-    .order('sort_order', { ascending: true })
-    .order('created_at', { ascending: false });
+  try {
+    const { data, error } = await supabase
+      .from('meals')
+      .select('*')
+      .eq('category', category)
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('获取商品失败:', error.message);
+    if (error) {
+      console.error('获取商品失败:', error.message);
+      return [];
+    }
+
+    // 防御性检查：确保 data 是数组
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error('获取商品异常:', error);
     return [];
   }
-
-  return data || [];
 }
 
 /**
  * 随机获取商品
  */
 export async function getRandomItems(category: string, count: number = 6): Promise<any[]> {
-  const meals = await getMealsByCategory(category);
-  
-  if (meals.length === 0) {
-    console.warn(`分类 ${category} 没有商品数据`);
+  try {
+    const meals = await getMealsByCategory(category);
+    
+    // 防御性检查：确保 meals 是有效数组
+    if (!Array.isArray(meals) || meals.length === 0) {
+      console.warn(`分类 "${category}" 没有商品数据`);
+      return [];
+    }
+    
+    const shuffled = [...meals].sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, count);
+    
+    return selected.map(meal => ({
+      id: meal.id,
+      name: meal.name,
+      img: meal.image_url,
+      promoUrl: meal.cps_link || '',
+      weirdName: meal.name,
+      weirdEmoji: '🍽️',
+      description: meal.cps_link || ''
+    }));
+  } catch (error) {
+    console.error('获取随机商品异常:', error);
     return [];
   }
-  
-  const shuffled = [...meals].sort(() => Math.random() - 0.5);
-  const selected = shuffled.slice(0, count);
-  
-  return selected.map(meal => ({
-    id: meal.id,
-    name: meal.name,
-    img: meal.image_url,
-    promoUrl: meal.cps_link || '',
-    weirdName: meal.name,
-    weirdEmoji: '🍽️',
-    description: meal.cps_link || ''
-  }));
 }
 
 /**
@@ -78,27 +90,32 @@ let cachedData: Record<string, any[]> = {};
 let lastFetchTime = 0;
 
 export const loadFoodData = async () => {
-  const now = Date.now();
-  if (now - lastFetchTime < 5 * 60 * 1000 && Object.keys(cachedData).length > 0) {
+  try {
+    const now = Date.now();
+    if (now - lastFetchTime < 5 * 60 * 1000 && Object.keys(cachedData).length > 0) {
+      return cachedData;
+    }
+
+    const data: Record<string, any[]> = {};
+    for (const category of ['breakfast', 'lunch', 'afternoon-tea', 'dinner', 'night-snack']) {
+      const meals = await getMealsByCategory(category);
+      data[category] = meals.map(meal => ({
+        id: meal.id,
+        name: meal.name,
+        img: meal.image_url,
+        weirdName: meal.name,
+        weirdEmoji: '🍽️',
+        description: meal.cps_link || ''
+      }));
+    }
+
+    cachedData = data;
+    lastFetchTime = now;
+    return data;
+  } catch (error) {
+    console.error('加载食物数据异常:', error);
     return cachedData;
   }
-
-  const data: Record<string, any[]> = {};
-  for (const category of ['breakfast', 'lunch', 'afternoon-tea', 'dinner', 'night-snack']) {
-    const meals = await getMealsByCategory(category);
-    data[category] = meals.map(meal => ({
-      id: meal.id,
-      name: meal.name,
-      img: meal.image_url,
-      weirdName: meal.name,
-      weirdEmoji: '🍽️',
-      description: meal.cps_link || ''
-    }));
-  }
-
-  cachedData = data;
-  lastFetchTime = now;
-  return data;
 };
 
 // 初始加载

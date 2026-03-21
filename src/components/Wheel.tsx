@@ -30,7 +30,10 @@ const funnyPhrases = [
 ];
 
 const Wheel = ({ items, rotation, isSpinning = false }: WheelProps) => {
-  if (!items || items.length === 0) {
+  // 防御性检查：确保 items 是有效数组
+  const safeItems = Array.isArray(items) ? items : [];
+  
+  if (!safeItems || safeItems.length === 0) {
     return (
       <div className="text-center text-gray-400 py-12">
         <p>暂无商品</p>
@@ -38,7 +41,7 @@ const Wheel = ({ items, rotation, isSpinning = false }: WheelProps) => {
     );
   }
 
-  const segmentAngle = 360 / items.length;
+  const segmentAngle = 360 / safeItems.length;
 
   return (
     <div className="relative w-72 h-72 sm:w-96 sm:h-96">
@@ -51,13 +54,18 @@ const Wheel = ({ items, rotation, isSpinning = false }: WheelProps) => {
         }}
       >
         <div className="relative w-full h-full">
-          {items.map((item, index) => {
+          {safeItems.map((item, index) => {
+            // 防御性检查：确保 item 有效
+            if (!item) {
+              return null;
+            }
+            
             const itemColor = index % 2 === 0 ? '#00f7ff' : '#ff00ea';
             const segmentRotation = index * segmentAngle;
 
             return (
               <div
-                key={item.id}
+                key={item.id ?? index}
                 className="absolute w-full h-full"
                 style={{
                   transform: `rotate(${segmentRotation}deg)`,
@@ -70,7 +78,7 @@ const Wheel = ({ items, rotation, isSpinning = false }: WheelProps) => {
                 >
                   <div className="text-2xl sm:text-3xl mb-1">{item.emoji || '🍽️'}</div>
                   <div className="text-[10px] sm:text-xs font-bold text-white whitespace-nowrap drop-shadow-lg">
-                    {item.weirdName}
+                    {item.weirdName || item.name || '未知'}
                   </div>
                 </div>
               </div>
