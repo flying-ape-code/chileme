@@ -1,10 +1,8 @@
 /**
- * 美团热门商品爬虫（Axios + Cheerio 版本）
- * 真实爬取并入库测试
+ * 美团热门商品爬虫（直接存入 products 表）
+ * 统一数据源：products
  */
 
-const axios = require('axios');
-const cheerio = require('cheerio');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -15,7 +13,7 @@ const BACKUP_FILE = path.join(__dirname, '..', 'meals-data-backup.json');
 const supabaseUrl = 'https://isefskqnkeesepcczbyo.supabase.co';
 const serviceRoleKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzZWZza3Fua2Vlc2VwY2N6YnlvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzIyNjMzMSwiZXhwIjoyMDg4ODAyMzMxfQ.VDLE3nahVyNKQl-SpvETN2XBM9kwhhEuX0FgPkR8Y-8';
 
-// 模拟商品数据（用于测试）
+// 模拟商品数据
 const MOCK_DATA = {
   breakfast: [
     { name: '煎饼果子', img: 'https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400', promoUrl: 'https://i.meituan.com/1' },
@@ -44,20 +42,19 @@ const MOCK_DATA = {
   ]
 };
 
-function insertToDatabase(meal, category) {
+function insertToProducts(item, category) {
   return new Promise((resolve, reject) => {
     const data = JSON.stringify([{
-      name: meal.name,
-      category: category,
-      image_url: meal.img,
-      cps_link: meal.promoUrl,
-      is_active: true
+      name: item.name,
+      img: item.img,
+      promo_url: item.promoUrl || '',
+      category: category
     }]);
     
     const options = {
       hostname: 'isefskqnkeesepcczbyo.supabase.co',
       port: 443,
-      path: '/rest/v1/meals',
+      path: '/rest/v1/products',
       method: 'POST',
       headers: {
         'apikey': serviceRoleKey,
@@ -71,10 +68,10 @@ function insertToDatabase(meal, category) {
       let body = '';
       res.on('data', chunk => body += chunk);
       res.on('end', () => {
-        if (res.statusCode === 201 || res.statusCode === 200) {
-          resolve(JSON.parse(body));
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          resolve({ success: true });
         } else {
-          resolve({ error: body });
+          resolve({ success: false, error: body });
         }
       });
     });
@@ -87,7 +84,7 @@ function insertToDatabase(meal, category) {
 
 async function crawlAndInsert() {
   console.log('========================================');
-  console.log('美团热门商品爬虫（真实入库测试）');
+  console.log('美团热门商品爬虫（统一 products 表）');
   console.log('========================================\n');
   
   let successCount = 0;
@@ -97,14 +94,14 @@ async function crawlAndInsert() {
     console.log(`📦 处理分类：${category} (${items.length} 个商品)`);
     
     for (const item of items) {
-      const result = await insertToDatabase(item, category);
+      const result = await insertToProducts(item, category);
       
-      if (result.error) {
+      if (result.success) {
+        console.log(`  ✅  ${item.name}`);
+        successCount++;
+      } else {
         console.log(`  ⚠️  ${item.name}: ${result.error}`);
         errorCount++;
-      } else {
-        console.log(`  ✅  ${item.name}: 入库成功`);
-        successCount++;
       }
     }
     console.log('');
@@ -116,10 +113,28 @@ async function crawlAndInsert() {
   console.log(`失败：${errorCount} 个`);
   console.log('========================================\n');
   
-  // 验证数据
-  console.log('🔍 验证数据库数据...');
+  // 同步到 JSON 文件（用于转盘）
+  console.log('📝 同步到 meals-data.json...');
+  const jsonData = {};
+  for (const [category, items] of Object.entries(MOCK_DATA)) {
+    jsonData[category] = items.map(item => ({
+      name: item.name,
+      img: item.img,
+      promoUrl: item.promoUrl,
+      crawledAt: new Date().toISOString()
+    }));
+  }
+  fs.writeFileSync(DATA_FILE, JSON.stringify(jsonData, null, 2));
+  console.log('✅ 同步完成！\n');
+  
+  // 验证 products 表
+  console.log('🔍 验证 products 表数据...');
   const { execSync } = require('child_process');
-  execSync('node scripts/test-crawler-live.cjs', { stdio: 'inherit' });
+  try {
+    execSync('curl -s "https://isefskqnkeesepcczbyo.supabase.co/rest/v1/products?limit=5" -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzZWZza3Fua2Vlc2VwY2N6YnlvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzIyNjMzMSwiZXhwIjoyMDg4ODAyMzMxfQ.VDLE3nahVyNKQl-SpvETN2XBM9kwhhEuX0FgPkR8Y-8" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzZWZza3Fua2Vlc2VwY2N6YnlvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzIyNjMzMSwiZXhwIjoyMDg4ODAyMzMxfQ.VDLE3nahVyNKQl-SpvETN2XBM9kwhhEuX0FgPkR8Y-8" | jq \'.[] | {name, category}\'', { stdio: 'inherit' });
+  } catch (e) {
+    console.log('⚠️  验证失败');
+  }
 }
 
 crawlAndInsert().catch(console.error);
