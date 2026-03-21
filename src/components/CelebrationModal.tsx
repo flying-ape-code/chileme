@@ -43,13 +43,23 @@ const CelebrationModal = ({ food, category, onClose, onShare }: CelebrationModal
     []
   );
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-gray-900 via-cyan-900 to-purple-900 rounded-2xl max-w-md w-full p-8 border border-cyan-500/50 shadow-[0_0_50px_rgba(0,247,255,0.3)] animate-in zoom-in duration-300">
+    <div 
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      onClick={handleBackdropClick}
+    >
+      <div className="bg-gradient-to-br from-gray-900 via-cyan-900 to-purple-900 rounded-2xl max-w-md w-full p-8 border border-cyan-500/50 shadow-[0_0_50px_rgba(0,247,255,0.3)] animate-in zoom-in duration-300 relative max-h-[80vh] overflow-y-auto">
         {/* 关闭按钮 */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+          className="absolute top-4 right-4 w-9 h-9 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+          aria-label="关闭"
         >
           ✕
         </button>

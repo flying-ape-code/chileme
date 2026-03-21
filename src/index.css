@@ -135,53 +135,98 @@
 }
 
 @layer responsive {
-  /* 移动端优化 (max-width: 640px) */
-  @media (max-width: 640px) {
-    /* 标题缩放 */
+  /* 超小屏幕适配 (320px - 375px) */
+  @media (max-width: 375px) {
     h1 {
-      font-size: 2.5rem !important; /* 40px */
+      font-size: clamp(1.75rem, 5vw, 2.5rem) !important;
     }
     
-    /* 导航按钮优化 */
-    nav button {
-      padding: 0.375rem 0.75rem !important; /* px-3 py-1.5 */
-      font-size: 0.625rem !important; /* text-xs */
-      min-width: 4rem;
+    .weather-insight {
+      font-size: 0.625rem !important;
+    }
+    
+    /* 模态框优化 */
+    .modal-content,
+    [role="dialog"] > div {
+      width: 98% !important;
+      max-height: 85vh !important;
+      padding: 1rem !important;
+    }
+    
+    /* 按钮尺寸 */
+    button,
+    [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+      padding: 0.5rem 0.75rem;
+    }
+  }
+
+  /* 移动端优化 (max-width: 640px) */
+  @media (max-width: 640px) {
+    /* 标题使用 clamp 自适应 */
+    h1 {
+      font-size: clamp(2rem, 6vw, 2.5rem) !important;
+    }
+    
+    /* 副标题字体 */
+    p.font-mono {
+      font-size: clamp(0.625rem, 2vw, 0.75rem) !important;
     }
     
     /* 转盘缩放优化 */
     .wheel-container {
-      transform: scale(0.6) !important;
+      transform: scale(0.65) !important;
     }
     
     /* 按钮触摸优化 */
-    button {
+    button,
+    [role="button"] {
       min-height: 44px; /* iOS 最小触摸目标 */
       min-width: 44px;
+      touch-action: manipulation;
     }
     
     /* 模态框优化 */
-    .modal-content {
+    [role="dialog"] {
+      padding: 0.5rem !important;
+    }
+    
+    [role="dialog"] > div {
       width: 95% !important;
-      max-height: 85vh !important;
+      max-height: 80vh !important;
+    }
+    
+    /* 表单输入优化 */
+    input,
+    textarea,
+    select {
+      font-size: 16px !important; /* 防止 iOS 缩放 */
+      min-height: 44px;
     }
   }
 
   /* 平板优化 (641px - 1024px) */
   @media (min-width: 641px) and (max-width: 1024px) {
     h1 {
-      font-size: 4rem !important; /* 64px */
+      font-size: clamp(3rem, 8vw, 4rem) !important;
     }
     
     .wheel-container {
       transform: scale(0.85) !important;
+    }
+    
+    button,
+    [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
     }
   }
 
   /* 桌面优化 (min-width: 1025px) */
   @media (min-width: 1025px) {
     h1 {
-      font-size: 5rem !important; /* 80px */
+      font-size: clamp(4rem, 10vw, 5rem) !important;
     }
   }
 }
@@ -200,9 +245,39 @@
   }
   
   /* 增大触摸目标 */
-  nav button {
+  nav button,
+  [role="button"] {
     min-height: 48px;
-    padding: 0.5rem 1rem;
+    min-width: 48px;
+    padding: 0.75rem 1rem;
+  }
+  
+  /* 模态框关闭按钮 */
+  [role="dialog"] button[aria-label="关闭"] {
+    min-width: 48px;
+    min-height: 48px;
+  }
+}
+
+/* 移动端对话框优化 */
+@media (max-width: 640px) {
+  [role="dialog"] {
+    padding: 0.5rem;
+  }
+  
+  [role="dialog"] > div {
+    max-height: 80vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* 关闭按钮尺寸 */
+  [role="dialog"] button[aria-label="关闭"] {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -239,8 +314,46 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
   
+  /* 顶部导航安全区域 */
+  header,
   nav {
+    padding-left: max(0.5rem, env(safe-area-inset-left));
+    padding-right: max(0.5rem, env(safe-area-inset-right));
+  }
+  
+  /* 底部导航安全区域 */
+  nav[aria-label="底部导航"],
+  .bottom-tab-bar {
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+  
+  /* 模态框安全区域 */
+  [role="dialog"] > div {
+    margin-left: max(0.25rem, env(safe-area-inset-left));
+    margin-right: max(0.25rem, env(safe-area-inset-right));
+  }
+}
+
+/* 移动端工具类 */
+@layer utilities {
+  .safe-area-bottom {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+  
+  .safe-area-top {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+  }
+  
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .scroll-smooth {
+    -webkit-overflow-scrolling: touch;
   }
 }
 

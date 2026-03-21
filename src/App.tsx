@@ -8,6 +8,9 @@ import WeatherInsight from './components/WeatherInsight';
 import History from './components/History';
 import ShareModal from './components/ShareModal';
 import SettingsModal from './components/SettingsModal';
+import MobileNav from './components/MobileNav';
+import BottomTabBar from './components/BottomTabBar';
+import Toast from './components/Toast';
 import { addSpinHistory } from './history';
 import { getSettings, getThemeConfig, getAnimationDuration, type AppSettings } from './lib/settings';
 
@@ -64,6 +67,13 @@ function Home() {
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [settings, setSettings] = useState<AppSettings>(getSettings());
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Toast 状态
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToast({ message, type });
+  };
 
   const selectedMeal = useMemo(() =>
     mealTypes.find(m => m.id === selectedMealId) || mealTypes[0],
@@ -136,6 +146,14 @@ function Home() {
     setShowShare(true);
   };
 
+  const handleCopySuccess = () => {
+    showToast('链接已复制到剪贴板', 'success');
+  };
+
+  const handleShareSuccess = (platform: string) => {
+    showToast(`正在跳转到${platform}`, 'info');
+  };
+
   const handleSettingsChange = (newSettings: AppSettings) => {
     setSettings(newSettings);
   };
@@ -164,8 +182,27 @@ function Home() {
 
   return (
     <div className="h-screen flex flex-col items-center justify-between py-2 sm:py-4 overflow-hidden font-sans bg-cyber-dark text-white relative z-10">
-      {/* Header */}
-      <header className="text-center animate-in slide-in-from-top duration-700">
+      {/* Toast 提示 */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
+      {/* 移动端导航栏（汉堡菜单） */}
+      <MobileNav
+        selectedMealId={selectedMealId}
+        onMealSelect={setSelectedMealId}
+        isSpinning={isSpinning}
+        onHistoryClick={() => setShowHistory(true)}
+        onSettingsClick={() => setShowSettings(true)}
+        settings={settings}
+      />
+
+      {/* 桌面端 Header */}
+      <header className="hidden md:block text-center animate-in slide-in-from-top duration-700">
         <h1 className="text-4xl sm:text-6xl md:text-7xl font-black mb-2 tracking-tighter glitch-text neon-text-cyan" data-text="吃了么 ?">
           吃了么 <span className={`text-${theme.primary} neon-text-${theme.primary}`}>?</span>
         </h1>
@@ -175,14 +212,16 @@ function Home() {
         <WeatherInsight temperature={6} condition="小雨" />
       </header>
 
-      {/* Navigation */}
-      <nav className="flex flex-wrap justify-center gap-3 relative z-20">
+      {/* 桌面端 Navigation */}
+      <nav className="hidden md:flex flex-wrap justify-center gap-3 relative z-20">
         {mealTypes.map((meal) => (
           <button
             key={meal.id}
             onClick={() => !isSpinning && setSelectedMealId(meal.id)}
             disabled={isSpinning}
-            className={`px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover} hover:shadow-[0_0_15px_rgba(0,247,255,0.5)]`}
+            className={`px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover} hover:shadow-[0_0_15px_rgba(0,247,255,0.5)] ${
+              selectedMealId === meal.id ? `ring-2 ring-${theme.primary} ring-offset-2 ring-offset-cyber-dark` : ''
+            }`}
           >
             {meal.name}
           </button>
@@ -273,10 +312,18 @@ function Home() {
         </button>
       </main>
 
-      {/* Footer */}
-      <footer className="text-cyber-cyan/30 font-mono text-[8px] tracking-[0.2em] uppercase">
+      {/* Footer (桌面端显示) */}
+      <footer className="hidden md:block text-cyber-cyan/30 font-mono text-[8px] tracking-[0.2em] uppercase">
         Ver 2.6.0 // Neural Link Established
       </footer>
+
+      {/* 移动端底部导航栏 */}
+      <BottomTabBar
+        isSpinning={isSpinning}
+        onHistoryClick={() => setShowHistory(true)}
+        onSettingsClick={() => setShowSettings(true)}
+        settings={settings}
+      />
 
       {/* Celebration Modal */}
       {showModal && winner && (
@@ -300,9 +347,9 @@ function Home() {
       {showShare && winner && (
         <ShareModal
           isOpen={showShare}
-          food={winner}
-          category={selectedMeal}
           onClose={() => setShowShare(false)}
+          onCopySuccess={handleCopySuccess}
+          onShareSuccess={handleShareSuccess}
         />
       )}
 

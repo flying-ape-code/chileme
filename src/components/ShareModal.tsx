@@ -8,14 +8,22 @@ interface ShareModalProps {
     description: string;
     url: string;
   };
+  onCopySuccess?: () => void;
+  onShareSuccess?: (platform: string) => void;
 }
 
-export default function ShareModal({ isOpen, onClose, shareContent }: ShareModalProps) {
+export default function ShareModal({ isOpen, onClose, shareContent, onCopySuccess, onShareSuccess }: ShareModalProps) {
   if (!isOpen) return null;
+
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareContent?.url || window.location.href);
-    alert('链接已复制！');
+    onCopySuccess?.();
   };
 
   const handleShare = (platform: string) => {
@@ -29,58 +37,71 @@ export default function ShareModal({ isOpen, onClose, shareContent }: ShareModal
     };
 
     window.open(shareUrls[platform] || '#', '_blank');
+    onShareSuccess?.(platform);
   };
 
   return (
-    <div className="share-modal fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">📤 分享</h2>
+    <div 
+      className="share-modal fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={handleBackdropClick}
+    >
+      <div className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[80vh] overflow-y-auto relative animate-in zoom-in duration-300">
+        {/* 关闭按钮 */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors"
+          aria-label="关闭"
+        >
+          ✕
+        </button>
+
+        <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center pr-8">📤 分享</h2>
         
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-4 gap-3 mb-6">
           <button
             onClick={() => handleShare('wechat')}
-            className="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-gray-100"
+            className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-gray-100 transition-colors min-h-[80px]"
           >
-            <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl">
+            <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl shadow-lg">
               💬
             </div>
-            <span className="text-sm text-gray-600">微信</span>
+            <span className="text-xs text-gray-600 font-medium">微信</span>
           </button>
           
           <button
             onClick={() => handleShare('weibo')}
-            className="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-gray-100"
+            className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-gray-100 transition-colors min-h-[80px]"
           >
-            <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white text-2xl">
+            <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white text-2xl shadow-lg">
               🌊
             </div>
-            <span className="text-sm text-gray-600">微博</span>
+            <span className="text-xs text-gray-600 font-medium">微博</span>
           </button>
           
           <button
             onClick={() => handleShare('qq')}
-            className="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-gray-100"
+            className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-gray-100 transition-colors min-h-[80px]"
           >
-            <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white text-2xl">
+            <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white text-2xl shadow-lg">
               🐧
             </div>
-            <span className="text-sm text-gray-600">QQ</span>
+            <span className="text-xs text-gray-600 font-medium">QQ</span>
           </button>
           
           <button
             onClick={handleCopyLink}
-            className="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-gray-100"
+            className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-gray-100 transition-colors min-h-[80px]"
           >
-            <div className="w-12 h-12 bg-gray-500 rounded-full flex items-center justify-center text-white text-2xl">
+            <div className="w-12 h-12 bg-gray-500 rounded-full flex items-center justify-center text-white text-2xl shadow-lg">
               🔗
             </div>
-            <span className="text-sm text-gray-600">复制链接</span>
+            <span className="text-xs text-gray-600 font-medium">复制链接</span>
           </button>
         </div>
 
         <button
           onClick={onClose}
-          className="w-full py-3 bg-gray-200 text-gray-800 rounded-full font-bold hover:bg-gray-300"
+          className="w-full py-3 bg-gray-200 text-gray-800 rounded-full font-bold hover:bg-gray-300 transition-colors min-h-[48px]"
         >
           取消
         </button>

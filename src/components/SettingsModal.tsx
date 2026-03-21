@@ -59,8 +59,13 @@ function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsModalProps
   const currentTheme = getThemeConfig(settings.themeColor);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-center justify-center">
-      <div className="bg-gray-900 border-2 border-cyber-cyan rounded-lg w-[95%] max-w-md max-h-[90vh] overflow-y-auto shadow-2xl shadow-cyan-500/50">
+    <div 
+      className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-center justify-center"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-gray-900 border-2 border-cyber-cyan rounded-lg w-[95%] max-w-md max-h-[80vh] overflow-y-auto shadow-2xl shadow-cyan-500/50 animate-in zoom-in duration-300">
         {/* Header */}
         <div className="bg-gray-800 px-6 py-4 flex items-center justify-between border-b border-gray-700 sticky top-0">
           <h2 className="text-xl font-bold text-cyan-400">
@@ -68,7 +73,8 @@ function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsModalProps
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors text-xl"
+            className="text-gray-400 hover:text-white transition-colors text-xl min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="关闭"
           >
             ✕
           </button>
