@@ -29,6 +29,20 @@ export async function getProductsByCategory(category: string): Promise<Product[]
 }
 
 /**
+ * 获取所有分类的商品
+ */
+export async function getAllProducts(): Promise<Record<string, Product[]>> {
+  const categories = ['breakfast', 'lunch', 'afternoon-tea', 'dinner', 'night-snack'];
+  const products: Record<string, Product[]> = {};
+
+  for (const category of categories) {
+    products[category] = await getProductsByCategory(category);
+  }
+
+  return products;
+}
+
+/**
  * 随机获取指定数量的商品
  */
 export function getRandomProducts(products: Product[], count: number = 6): Product[] {
