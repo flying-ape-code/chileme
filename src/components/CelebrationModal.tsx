@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { funnyPhrases } from '../data';
+
 
 // 类型定义
 export interface FoodItem {
@@ -29,7 +29,7 @@ interface CelebrationModalProps {
 const CelebrationModal = ({ food, category, onClose, onShare }: CelebrationModalProps) => {
   const phrase = useMemo(() =>
     // eslint-disable-next-line react-hooks/purity
-    funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)],
+    ["恭喜！","太棒了！","命运的选择！"][Math.floor(Math.random() * 3)Math.floor(Math.random() * funnyPhrases.length)],
     []
   );
 
