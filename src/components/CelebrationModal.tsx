@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 
-
 // 类型定义
 export interface FoodItem {
   id: string | number;
@@ -19,90 +18,89 @@ export interface MealType {
   emoji: string;
 }
 
+const funnyPhrases = [
+  '这就是命运的终极代码！',
+  '系统检测到你的胃正在请求这个。',
+  '赛博之神已经为你做出了最优选。',
+  '拒绝无效，请立即前往进食。',
+  '恭喜你，避开了所有黑暗料理。',
+  '数据分析显示，你的卡路里缺口正适合这个。',
+  '这不仅仅是一顿饭，这是一次灵魂的下载。',
+  '检测到高能营养反应，目标已锁定。',
+  '协议已达成：你的胃将归属于它。'
+];
+
 interface CelebrationModalProps {
-  food: FoodItem | null;
+  food: FoodItem;
   category: MealType;
   onClose: () => void;
-  onShare?: () => void;
+  onShare: () => void;
 }
 
 const CelebrationModal = ({ food, category, onClose, onShare }: CelebrationModalProps) => {
-  const phrase = useMemo(() =>
-    // eslint-disable-next-line react-hooks/purity
-    ["恭喜！","太棒了！","命运的选择！"][Math.floor(Math.random() * 3)Math.floor(Math.random() * funnyPhrases.length)],
+  const randomPhrase = useMemo(() => 
+    funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)], 
     []
   );
 
-  if (!food) return null;
-
-  // 处理推广链接：空链接时隐藏，移动端链接转换为PC端
-  const promoUrl = food.promoUrl && food.promoUrl.trim() !== ''
-    ? food.promoUrl.replace('i.meituan.com', 'meituan.com')
-    : null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cyber-dark/80 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="bg-cyber-dark border-2 border-cyber-cyan p-6 max-w-xs w-full text-center shadow-[0_0_30px_rgba(0,247,255,0.3)] scale-up-center animate-in zoom-in-95 duration-300 relative">
-        <div className="absolute top-2 left-2 text-cyber-cyan font-mono text-[6px] opacity-50 uppercase tracking-tighter">
-          Analysis Complete // Target Identified
-        </div>
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-gradient-to-br from-gray-900 via-cyan-900 to-purple-900 rounded-2xl max-w-md w-full p-8 border border-cyan-500/50 shadow-[0_0_50px_rgba(0,247,255,0.3)] animate-in zoom-in duration-300">
+        {/* 关闭按钮 */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+        >
+          ✕
+        </button>
 
-        <div className="text-3xl mb-3 neon-text-pink">⚡</div>
-        <h2 className="text-2xl font-black text-cyber-cyan mb-1 neon-text-cyan glitch-text" data-text="中奖啦！">
-          中奖啦！
-        </h2>
-        <p className="text-cyber-cyan/70 font-mono text-[10px] mb-4 uppercase tracking-widest">
-          {category.name}决选结果：
-        </p>
+        {/* 内容 */}
+        <div className="text-center">
+          {/* 表情符号 */}
+          <div className="text-6xl mb-4 animate-bounce">{food.weirdEmoji || '🍽️'}</div>
 
-        <div className="relative border border-cyber-pink overflow-hidden mb-4 aspect-square shadow-[0_0_15px_rgba(255,0,234,0.2)]">
-          <img
-            src={food.img || ''}
-            alt={food.name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.src = 'https://via.placeholder.com/400x400/ff00ea/ffffff?text=Image+Error';
-              console.error('Image load error:', food.img);
-            }}
-          />
-          <div className="absolute bottom-0 inset-x-0 bg-cyber-dark/90 border-t border-cyber-pink p-2">
-            <span className="text-cyber-pink text-lg font-black tracking-widest uppercase">{food.name}</span>
-          </div>
-        </div>
+          {/* 食物名称 */}
+          <h2 className="text-2xl sm:text-3xl font-black text-white mb-2 glitch-text" data-text={food.weirdName}>
+            {food.weirdName}
+          </h2>
 
-        <p className="text-white font-mono text-xs mb-6 leading-relaxed italic border-l-2 border-cyber-yellow pl-3 text-left">
-          "{phrase}"
-        </p>
+          {/* 分类 */}
+          <p className="text-cyber-cyan/80 font-mono text-sm mb-6">
+            {category.emoji} {category.name}
+          </p>
 
-        {promoUrl && (
-          <a
-            href={promoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full py-3 mb-3 bg-cyber-pink/10 border border-cyber-pink text-cyber-pink font-black tracking-[0.2em] text-xs uppercase hover:bg-cyber-pink hover:text-white transition-all duration-300 shadow-[0_0_10px_rgba(255,0,234,0.5)] active:scale-95 block text-center"
-            style={{ clipPath: 'polygon(5px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 5px) 100%, 0 100%, 0 10px)' }}
-          >
-            去点餐
-          </a>
-        )}
+          {/* 随机短语 */}
+          <p className="text-cyber-pink/90 font-mono text-xs mb-8 leading-relaxed">
+            {randomPhrase}
+          </p>
 
-        <div className="flex gap-2 mb-3">
-          {onShare && (
+          {/* 操作按钮 */}
+          <div className="flex gap-3">
             <button
               onClick={onShare}
-              className="flex-1 py-3 bg-cyber-cyan/10 border border-cyber-cyan text-cyber-cyan font-black tracking-[0.2em] text-xs uppercase hover:bg-cyber-cyan hover:text-cyber-dark transition-all duration-300 shadow-[0_0_10px_rgba(0,247,255,0.5)] active:scale-95"
-              style={{ clipPath: 'polygon(5px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 5px) 100%, 0 100%, 0 10px)' }}
+              className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full font-bold hover:from-cyan-600 hover:to-blue-600 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(0,247,255,0.5)]"
             >
               📤 分享
             </button>
+            <button
+              onClick={onClose}
+              className="flex-1 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold transition-all"
+            >
+              再选一次
+            </button>
+          </div>
+
+          {/* 推广链接 */}
+          {food.promoUrl && (
+            <a
+              href={food.promoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block mt-4 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full font-bold hover:from-orange-600 hover:to-red-600 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(255,100,100,0.5)]"
+            >
+              🎁 立即点餐
+            </a>
           )}
-          <button
-            onClick={onClose}
-            className="flex-1 py-3 bg-transparent border border-cyber-pink text-cyber-pink font-black tracking-[0.2em] text-xs uppercase hover:bg-cyber-pink hover:text-white transition-all duration-300 shadow-[0_0_10px_rgba(255,0,234,0.5)] active:scale-95"
-            style={{ clipPath: 'polygon(5px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 5px) 100%, 0 100%, 0 10px)' }}
-          >
-            关闭
-          </button>
         </div>
       </div>
     </div>
