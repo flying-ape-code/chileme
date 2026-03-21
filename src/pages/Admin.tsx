@@ -3,27 +3,34 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 
-interface Meal {
+interface Product {
   id: string;
   name: string;
-  image_url: string;
-  cps_link: string;
+  img: string;
+  promo_url: string;
   category: string;
   created_at: string;
   updated_at: string;
 }
 
-const categories = ['早餐', '午餐', '下午茶', '晚餐', '夜宵'];
+const categories = ['breakfast', 'lunch', 'afternoon-tea', 'dinner', 'night-snack'];
+const categoryNames: Record<string, string> = {
+  'breakfast': '早餐',
+  'lunch': '午餐',
+  'afternoon-tea': '下午茶',
+  'dinner': '晚餐',
+  'night-snack': '夜宵'
+};
 
 function Admin() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
-  const [meals, setMeals] = useState<Meal[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Meal | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
 
   // 表单状态
@@ -31,7 +38,7 @@ function Admin() {
     name: '',
     img: '',
     promo_url: '',
-    category: '早餐'
+    category: 'breakfast'
   });
 
   // 权限检查
@@ -49,22 +56,22 @@ function Admin() {
   // 加载商品数据
   useEffect(() => {
     if (isAdmin) {
-      loadMeals();
+      loadProducts();
     }
   }, [selectedCategory, isAdmin]);
 
-  const loadMeals = async () => {
+  const loadProducts = async () => {
     setIsLoading(true);
     setError('');
     try {
       const { data, error } = await supabase
-        .from('meals')
+        .from('products')
         .select('*')
         .eq('category', selectedCategory)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setMeals(data || []);
+      setProducts(data || []);
     } catch (err: any) {
       setError('加载商品失败：' + err.message);
       console.error('Error loading products:', err);
@@ -73,18 +80,18 @@ function Admin() {
     }
   };
 
-  const handleAddMeal = async () => {
+  const handleAddProduct = async () => {
     if (!formData.name || !formData.img) {
       setError('请填写商品名称和图片 URL');
       return;
     }
 
     try {
-      const { error } = await supabase.from('meals').insert([
+      const { error } = await supabase.from('products').insert([
         {
           name: formData.name,
-          image_url: formData.img,
-          cps_link: formData.promo_url,
+          img: formData.img,
+          promo_url: formData.promo_url,
           category: formData.category
         }
       ]);
@@ -95,7 +102,7 @@ function Admin() {
       setShowAddModal(false);
       setFormData({ name: '', img: '', promo_url: '', category: '早餐' });
       setError(''); // 清除之前的错误
-      await loadMeals(); // 等待刷新完成
+      await loadProducts(); // 等待刷新完成
       alert('商品添加成功！');
     } catch (err: any) {
       setError('添加商品失败：' + err.message);
@@ -114,14 +121,14 @@ function Admin() {
 
     try {
       const { error } = await supabase
-        .from('meals')
+        .from('products')
         .delete()
         .in('id', Array.from(selectedProducts));
       
       if (error) throw error;
       
       setSelectedProducts(new Set());
-      loadMeals();
+      loadProducts();
       alert(`成功删除 ${selectedProducts.size} 个商品`);
     } catch (err: any) {
       setError('批量删除失败：' + err.message);
@@ -136,14 +143,14 @@ function Admin() {
 
     try {
       const { error } = await supabase
-        .from('meals')
+        .from('products')
         .update({ category: newCategory })
         .in('id', Array.from(selectedProducts));
       
       if (error) throw error;
       
       setSelectedProducts(new Set());
-      loadMeals();
+      loadProducts();
       alert(`成功修改 ${selectedProducts.size} 个商品的分类`);
     } catch (err: any) {
       setError('批量修改分类失败：' + err.message);
@@ -151,7 +158,7 @@ function Admin() {
   };
 
   const handleExportJSON = () => {
-    const dataStr = JSON.stringify(meals, null, 2);
+    const dataStr = JSON.stringify(products, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -166,8 +173,8 @@ function Admin() {
     const rows = products.map(p => [
       p.id,
       `"${p.name}"`,
-      `"${p.image_url}"`,
-      `"${p.cps_link || ''}"`,
+      `"${p.img}"`,
+      `"${p.promo_url || ''}"`,
       p.category,
       p.created_at
     ]);
@@ -204,12 +211,12 @@ function Admin() {
     }
   };
 
-  const handleEditMeal = async () => {
+  const handleEditProduct = async () => {
     if (!editingProduct) return;
 
     try {
       const { error } = await supabase
-        .from('meals')
+        .from('products')
         .update({
           name: editingProduct.name,
           img: editingProduct.img,
@@ -221,19 +228,19 @@ function Admin() {
       if (error) throw error;
       
       setEditingProduct(null);
-      // loadMeals moved above
+      await loadProducts();
     } catch (err: any) {
       setError('更新商品失败：' + err.message);
     }
   };
 
-  const handleDeleteMeal = async (id: string) => {
+  const handleDeleteProduct = async (id: string) => {
     if (!confirm('确定要删除这个商品吗？')) return;
 
     try {
-      const { error } = await supabase.from('meals').delete().eq('id', id);
+      const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) throw error;
-      // loadMeals moved above
+      await loadProducts();
     } catch (err: any) {
       setError('删除商品失败：' + err.message);
     }
@@ -333,7 +340,7 @@ function Admin() {
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
             >
-              {category}
+              {categoryNames[category]}
             </button>
           ))}
         </div>
@@ -363,7 +370,7 @@ function Admin() {
               >
                 <option value="" disabled>批量修改分类...</option>
                 {categories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
+                  <option key={cat} value={cat}>{categoryNames[cat]}</option>
                 ))}
               </select>
               <button
@@ -447,7 +454,7 @@ function Admin() {
                   />
                   <div className="flex-1">
                     <h3 className="text-white font-bold">{product.name}</h3>
-                    <p className="text-gray-400 text-sm">{product.category}</p>
+                    <p className="text-gray-400 text-sm">{categoryNames[product.category] || product.category}</p>
                   </div>
                 </div>
                 
@@ -470,7 +477,7 @@ function Admin() {
                     编辑
                   </button>
                   <button
-                    onClick={() => handleDeleteMeal(product.id)}
+                    onClick={() => handleDeleteProduct(product.id)}
                     className="flex-1 px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
                   >
                     删除
@@ -529,7 +536,7 @@ function Admin() {
                     className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded"
                   >
                     {categories.map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
+                      <option key={cat} value={cat}>{categoryNames[cat]}</option>
                     ))}
                   </select>
                 </div>
@@ -537,7 +544,7 @@ function Admin() {
 
               <div className="flex gap-4 mt-6">
                 <button
-                  onClick={handleAddMeal}
+                  onClick={handleAddProduct}
                   className="flex-1 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                 >
                   添加
@@ -598,7 +605,7 @@ function Admin() {
                     className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded"
                   >
                     {categories.map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
+                      <option key={cat} value={cat}>{categoryNames[cat]}</option>
                     ))}
                   </select>
                 </div>
@@ -606,7 +613,7 @@ function Admin() {
 
               <div className="flex gap-4 mt-6">
                 <button
-                  onClick={handleEditMeal}
+                  onClick={handleEditProduct}
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                 >
                   保存

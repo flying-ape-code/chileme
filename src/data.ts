@@ -1,6 +1,6 @@
 /**
- * 商品数据（从 Supabase meals 表读取）
- * V2.1: 统一商品数据源 - 后台管理和转盘都从数据库读取
+ * 商品数据（从 Supabase products 表读取）
+ * V2.2: 修复商品数据源 - 从 products 表读取（108 条记录）
  */
 
 import { supabase } from './lib/supabaseClient';
@@ -9,10 +9,8 @@ export interface Meal {
   id: string;
   name: string;
   category: string;
-  image_url: string;
-  cps_link: string | null;
-  is_active: boolean;
-  sort_order: number;
+  img: string;
+  promoUrl: string | null;
   created_at: string;
 }
 
@@ -27,16 +25,14 @@ export const mealTypes = [
 export const productCategories = mealTypes;
 
 /**
- * 获取分类商品（从 meals 表）
+ * 获取分类商品（从 products 表）
  */
 export async function getMealsByCategory(category: string): Promise<Meal[]> {
   try {
     const { data, error } = await supabase
-      .from('meals')
+      .from('products')
       .select('*')
       .eq('category', category)
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -71,11 +67,11 @@ export async function getRandomItems(category: string, count: number = 6): Promi
     return selected.map(meal => ({
       id: meal.id,
       name: meal.name,
-      img: meal.image_url,
-      promoUrl: meal.cps_link || '',
+      img: meal.img,
+      promoUrl: meal.promo_url || '',
       weirdName: meal.name,
       weirdEmoji: '🍽️',
-      description: meal.cps_link || ''
+      description: meal.promo_url || ''
     }));
   } catch (error) {
     console.error('获取随机商品异常:', error);
@@ -102,10 +98,10 @@ export const loadFoodData = async () => {
       data[category] = meals.map(meal => ({
         id: meal.id,
         name: meal.name,
-        img: meal.image_url,
+        img: meal.img,
         weirdName: meal.name,
         weirdEmoji: '🍽️',
-        description: meal.cps_link || ''
+        description: meal.promo_url || ''
       }));
     }
 
