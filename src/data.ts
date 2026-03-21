@@ -1,16 +1,19 @@
 /**
- * 商品数据（从 Supabase products 表读取）
- * 不再使用静态 JSON 文件
+ * 商品数据（从 Supabase meals 表读取）
+ * V2.1: 统一商品数据源 - 后台管理和转盘都从数据库读取
  */
 
 import { supabase } from './lib/supabaseClient';
 
-export interface Product {
+export interface Meal {
   id: string;
   name: string;
-  img: string;
-  promo_url: string;
   category: string;
+  image_url: string;
+  cps_link: string | null;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
 }
 
 export const mealTypes = [
@@ -24,13 +27,15 @@ export const mealTypes = [
 export const productCategories = mealTypes;
 
 /**
- * 获取分类商品
+ * 获取分类商品（从 meals 表）
  */
-export async function getProductsByCategory(category: string): Promise<Product[]> {
+export async function getMealsByCategory(category: string): Promise<Meal[]> {
   const { data, error } = await supabase
-    .from('products')
+    .from('meals')
     .select('*')
     .eq('category', category)
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true })
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -45,18 +50,24 @@ export async function getProductsByCategory(category: string): Promise<Product[]
  * 随机获取商品
  */
 export async function getRandomItems(category: string, count: number = 6): Promise<any[]> {
-  const products = await getProductsByCategory(category);
-  const shuffled = [...products].sort(() => Math.random() - 0.5);
+  const meals = await getMealsByCategory(category);
+  
+  if (meals.length === 0) {
+    console.warn(`分类 ${category} 没有商品数据`);
+    return [];
+  }
+  
+  const shuffled = [...meals].sort(() => Math.random() - 0.5);
   const selected = shuffled.slice(0, count);
   
-  return selected.map(p => ({
-    id: p.id,
-    name: p.name,
-    img: p.img,
-    promoUrl: p.promo_url,
-    weirdName: p.name,
+  return selected.map(meal => ({
+    id: meal.id,
+    name: meal.name,
+    img: meal.image_url,
+    promoUrl: meal.cps_link || '',
+    weirdName: meal.name,
     weirdEmoji: '🍽️',
-    description: p.promo_url
+    description: meal.cps_link || ''
   }));
 }
 
@@ -74,13 +85,14 @@ export const loadFoodData = async () => {
 
   const data: Record<string, any[]> = {};
   for (const category of ['breakfast', 'lunch', 'afternoon-tea', 'dinner', 'night-snack']) {
-    const products = await getProductsByCategory(category);
-    data[category] = products.map(p => ({
-      name: p.name,
-      img: p.img,
-      weirdName: p.name,
+    const meals = await getMealsByCategory(category);
+    data[category] = meals.map(meal => ({
+      id: meal.id,
+      name: meal.name,
+      img: meal.image_url,
+      weirdName: meal.name,
       weirdEmoji: '🍽️',
-      description: p.promo_url
+      description: meal.cps_link || ''
     }));
   }
 
