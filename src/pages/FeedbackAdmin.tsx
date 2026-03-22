@@ -31,6 +31,8 @@ export default function FeedbackAdmin() {
   const [filterType, setFilterType] = useState<string>('all');
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [isReplying, setIsReplying] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Optimized: Only load when user/isAdmin changes, not on every filter change
   useEffect(() => {
@@ -68,6 +70,7 @@ export default function FeedbackAdmin() {
   const handleReply = useCallback(async () => {
     if (!selectedFeedback || !replyText.trim()) return;
 
+    setIsReplying(true);
     try {
       const result = await updateFeedback(selectedFeedback.id, {
         admin_reply: replyText,
@@ -77,15 +80,17 @@ export default function FeedbackAdmin() {
       });
 
       if (result.success) {
-        alert('回复成功！');
+        setToast({ message: '回复成功！', type: 'success' });
         setReplyText('');
         setSelectedFeedback(null);
         loadFeedbacks();
       } else {
-        alert('回复失败：' + result.error);
+        setToast({ message: '回复失败：' + result.error, type: 'error' });
       }
     } catch (error: any) {
-      alert('回复失败：' + error.message);
+      setToast({ message: '回复失败：' + error.message, type: 'error' });
+    } finally {
+      setIsReplying(false);
     }
   }, [selectedFeedback, replyText, user, loadFeedbacks]);
 
@@ -93,15 +98,28 @@ export default function FeedbackAdmin() {
     try {
       const result = await updateFeedback(id, { status: newStatus as any });
       if (result.success) {
-        alert('状态已更新');
+        setToast({ message: '状态已更新', type: 'success' });
         loadFeedbacks();
       } else {
-        alert('更新失败：' + result.error);
+        setToast({ message: '更新失败：' + result.error, type: 'error' });
       }
     } catch (error: any) {
-      alert('更新失败：' + error.message);
+      setToast({ message: '更新失败：' + error.message, type: 'error' });
     }
   }, [loadFeedbacks]);
+
+  const handleCloseDialog = useCallback(() => {
+    setReplyText('');
+    setSelectedFeedback(null);
+  }, []);
+
+  // Auto-hide toast after 3 seconds
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   // Optimized: Use useMemo for filtered data to avoid recalculation on every render
   const filteredFeedbacks = useMemo(() => {
@@ -284,6 +302,17 @@ export default function FeedbackAdmin() {
           </div>
         )}
 
+        {/* Toast 提示 */}
+        {toast && (
+          <div className={`fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-[100] animate-fade-in ${
+            toast.type === 'success' 
+              ? 'bg-green-500 text-white' 
+              : 'bg-red-500 text-white'
+          }`}>
+            {toast.message}
+          </div>
+        )}
+
         {/* 回复模态框 */}
         {selectedFeedback && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
@@ -310,18 +339,29 @@ export default function FeedbackAdmin() {
               <div className="flex gap-4">
                 <button
                   onClick={handleReply}
-                  disabled={!replyText.trim()}
-                  className={`flex-1 py-3 rounded font-bold ${
-                    replyText.trim()
+                  disabled={!replyText.trim() || isReplying}
+                  className={`flex-1 py-3 rounded font-bold flex items-center justify-center gap-2 ${
+                    replyText.trim() && !isReplying
                       ? 'bg-cyan-500 text-white hover:bg-cyan-600'
                       : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  发送回复
+                  {isReplying ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      发送中...
+                    </>
+                  ) : (
+                    '发送回复'
+                  )}
                 </button>
                 <button
-                  onClick={() => setSelectedFeedback(null)}
-                  className="px-6 py-3 bg-gray-600 text-white rounded hover:bg-gray-700"
+                  onClick={handleCloseDialog}
+                  disabled={isReplying}
+                  className="px-6 py-3 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   取消
                 </button>
