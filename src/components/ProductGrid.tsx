@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getProductsByCategory, getRandomProducts, type Product } from '../lib/productService';
 import ProductCard from './ProductCard';
+import ProductDetailModal from './ProductDetailModal';
 
 interface ProductGridProps {
   selectedCategory: string;
@@ -10,10 +11,25 @@ export default function ProductGrid({ selectedCategory }: ProductGridProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [count, setCount] = useState(0);
+  
+  // 弹窗状态
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // 收藏状态
+  const [favorites, setFavorites] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('productFavorites');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
 
   useEffect(() => {
     loadProducts();
   }, [selectedCategory]);
+
+  // 保存收藏到 localStorage
+  useEffect(() => {
+    localStorage.setItem('productFavorites', JSON.stringify([...favorites]));
+  }, [favorites]);
 
   const loadProducts = async () => {
     setIsLoading(true);
@@ -22,6 +38,31 @@ export default function ProductGrid({ selectedCategory }: ProductGridProps) {
     setProducts(randomProducts);
     setCount(categoryProducts.length);
     setIsLoading(false);
+  };
+
+  // 打开商品详情弹窗
+  const handleCardClick = (product: Product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  // 关闭弹窗
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedProduct(null), 300); // 等待动画结束
+  };
+
+  // 切换收藏状态
+  const handleToggleFavorite = (productId: string) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(productId)) {
+        newFavorites.delete(productId);
+      } else {
+        newFavorites.add(productId);
+      }
+      return newFavorites;
+    });
   };
 
   if (isLoading) {
@@ -54,9 +95,21 @@ export default function ProductGrid({ selectedCategory }: ProductGridProps) {
           <ProductCard
             key={product.id}
             product={product}
+            onCardClick={handleCardClick}
           />
         ))}
       </div>
+
+      {/* 商品详情弹窗 */}
+      {selectedProduct && (
+        <ProductDetailModal
+          product={selectedProduct}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          isFavorite={favorites.has(selectedProduct.id)}
+          onToggleFavorite={handleToggleFavorite}
+        />
+      )}
 
       {/* 空状态 */}
       {products.length === 0 && (

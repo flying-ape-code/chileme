@@ -4,10 +4,12 @@ import { Product } from '../lib/productService';
 interface ProductCardProps {
   product: Product;
   onOrderClick?: (product: Product) => void;
+  onCardClick?: (product: Product) => void;
 }
 
-export default function ProductCard({ product, onOrderClick }: ProductCardProps) {
-  const handleOrderClick = () => {
+export default function ProductCard({ product, onOrderClick, onCardClick }: ProductCardProps) {
+  const handleOrderClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 阻止事件冒泡
     if (product.promo_url && onOrderClick) {
       onOrderClick(product);
     } else if (product.promo_url) {
@@ -15,8 +17,17 @@ export default function ProductCard({ product, onOrderClick }: ProductCardProps)
     }
   };
 
+  const handleCardClick = () => {
+    if (onCardClick) {
+      onCardClick(product);
+    }
+  };
+
   return (
-    <div className="product-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+    <div 
+      className="product-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+      onClick={handleCardClick}
+    >
       {/* 商品图片 */}
       <div className="relative">
         <img
