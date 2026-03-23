@@ -15,12 +15,14 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@prisma/client": "^7.5.0",
     "@supabase/supabase-js": "^2.99.1",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.7.9",
     "cheerio": "^1.0.0-rc.12",
     "html2canvas": "^1.4.1",
     "node-cron": "^3.0.3",
+    "prisma": "^7.5.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.0",
