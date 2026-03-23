@@ -1,1 +1,88 @@
+/* V2.0 商品卡片样式优化 */
 
+.product-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 247, 255, 0.15);
+}
+
+.product-card img {
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover img {
+  transform: scale(1.05);
+}
+
+/* 加载动画 */
+.product-grid-loading {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 分类切换动画 */
+.category-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-button.active {
+  transform: scale(1.05);
+}
+
+/* CPS 按钮动画 */
+.cps-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.cps-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.cps-button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* 响应式优化 */
+@media (max-width: 640px) {
+  .product-card {
+    max-width: 100%;
+  }
+  
+  .product-card img {
+    height: 12rem;
+  }
+}
+
+/* 暗色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .product-card {
+    background: rgba(31, 41, 55, 0.9);
+    border: 1px solid rgba(75, 85, 99, 0.5);
+  }
+  
+  .product-card h3 {
+    color: #f3f4f6;
+  }
+}

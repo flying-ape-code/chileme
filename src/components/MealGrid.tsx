@@ -1,27 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { getMealsByCategory, getRandomMeals, type Meal } from '../lib/mealsService';
-import MealCard from './MealCard';
+import { getProductsByCategory, getRandomProducts, type Product } from '../lib/productsService';
+import ProductCard from './ProductCard';
+import ProductDetailModal from './ProductDetailModal';
 
 interface MealGridProps {
   selectedCategory: string;
 }
 
 export default function MealGrid({ selectedCategory }: MealGridProps) {
-  const [meals, setMeals] = useState<Meal[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    loadMeals();
+    loadProducts();
   }, [selectedCategory]);
 
-  const loadMeals = async () => {
+  const loadProducts = async () => {
     setIsLoading(true);
-    const categoryMeals = await getMealsByCategory(selectedCategory);
-    const randomMeals = getRandomMeals(categoryMeals, 6);
-    setMeals(randomMeals);
-    setCount(categoryMeals.length);
+    const categoryProducts = await getProductsByCategory(selectedCategory);
+    const randomProducts = getRandomProducts(categoryProducts, 6);
+    setProducts(randomProducts);
+    setCount(categoryProducts.length);
     setIsLoading(false);
+  };
+
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const handleOrderClick = (product: Product) => {
+    console.log('Order clicked:', product);
+    // 这里可以添加订单追踪逻辑
+  };
+
+  const handleFavorite = (productId: string) => {
+    console.log('Favorite toggled:', productId);
+    // TODO: 实现收藏功能（保存到数据库或 localStorage）
   };
 
   if (isLoading) {
@@ -50,17 +68,23 @@ export default function MealGrid({ selectedCategory }: MealGridProps) {
 
       {/* 商品网格 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {meals.map(meal => (
-          <MealCard
-            key={meal.id}
-            id={meal.id}
-            name={meal.name}
-            image_url={meal.image_url}
-            cps_link={meal.cps_link || ''}
-            category={meal.category}
+        {products.map(product => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onProductClick={handleProductClick}
+            onOrderClick={handleOrderClick}
           />
         ))}
       </div>
+
+      {/* 商品详情弹窗 */}
+      <ProductDetailModal
+        product={selectedProduct}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onFavorite={handleFavorite}
+      />
 
       {/* 空状态 */}
       {meals.length === 0 && (

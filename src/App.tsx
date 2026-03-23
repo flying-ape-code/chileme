@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, Suspense, lazy } from 'react';
-import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { mealTypes, getRandomItems, loadFoodData } from './data';
 import Wheel from './components/Wheel';
 import CelebrationModal from './components/CelebrationModal';
@@ -17,13 +16,14 @@ import { getSettings, getThemeConfig, getAnimationDuration, type AppSettings } f
 // Lazy load heavy page components for code splitting
 const Admin = lazy(() => import('./pages/Admin'));
 const Login = lazy(() => import('./pages/Login'));
-const Register = lazy(() => import('./pages/Register'));
+const Register = lazy(() => import('./pages/Login'));
 const MyFeedbacks = lazy(() => import('./pages/MyFeedbacks'));
 const FeedbackAdmin = lazy(() => import('./pages/FeedbackAdmin'));
 const FeedbackStats = lazy(() => import('./pages/FeedbackStats'));
 const FeedbackSubmit = lazy(() => import('./pages/FeedbackSubmit'));
 const Settings = lazy(() => import('./pages/Settings'));
 const HistoryPage = lazy(() => import('./pages/HistoryPage'));
+const CPSManagement = lazy(() => import('./components/admin/CPSManagement'));
 
 // 类型定义
 interface FoodItem {
@@ -55,7 +55,6 @@ function Home() {
       navigate('/feedbacks');
     }
   }, [location.search]);
-  const { user, isAuthenticated, isAdmin } = useAuth();
   const [selectedMealId, setSelectedMealId] = useState<string>(mealTypes[0].id);
   const [currentItems, setCurrentItems] = useState<FoodItem[]>([]);
   const [rotation, setRotation] = useState<number>(0);
@@ -132,10 +131,19 @@ function Home() {
     }, spinDuration + 500);
   };
 
-  const saveSpinHistory = (category: typeof mealTypes[0], winner: FoodItem): void => {
+  const saveSpinHistory = async (category: typeof mealTypes[0], winner: FoodItem): Promise<void> => {
     try {
-      const result = addSpinHistory(category, currentItems, winner);
-      console.log('历史记录已保存，当前记录数:', result.length);
+      // 使用新的 historyService 记录
+      const { recordSelectionLocal } = await import('./lib/historyService');
+      
+      recordSelectionLocal({
+        id: winner.id.toString(),
+        name: winner.name,
+        img: winner.img,
+        category: category.id
+      });
+      
+      console.log('历史记录已保存');
     } catch (error) {
       console.error('保存历史记录失败：', error);
     }
@@ -158,17 +166,6 @@ function Home() {
     setSettings(newSettings);
   };
 
-  // 动态生成主题类名
-  const themeClasses = {
-    primary: `text-${theme.primary}`,
-    border: `border-${theme.primary}`,
-    shadow: `shadow-${theme.primary}/50`,
-    gradient: `bg-gradient-to-r ${theme.gradient}`,
-    bg: `bg-${theme.primary}/20`,
-    hover: `hover:bg-${theme.primary}`,
-    neon: `neon-text-${theme.primary}`
-  };
-
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-cyber-dark text-white">
@@ -181,7 +178,7 @@ function Home() {
   }
 
   return (
-    <div className="h-screen flex flex-col items-center justify-between py-2 sm:py-4 overflow-hidden font-sans bg-cyber-dark text-white relative z-10">
+    <div className="h-screen flex flex-col items-center justify-between py-2 sm:py-4 overflow-hidden font-sans bg-cyber-dark text-white relative z-10 safe-area-top safe-area-bottom">
       {/* Toast 提示 */}
       {toast && (
         <Toast
@@ -203,98 +200,44 @@ function Home() {
 
       {/* 桌面端 Header */}
       <header className="hidden md:block text-center animate-in slide-in-from-top duration-700">
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black mb-2 tracking-tighter glitch-text neon-text-cyan" data-text="吃了么 ?">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-2 tracking-tighter glitch-text neon-text-cyan" data-text="吃了么 ?">
           吃了么 <span className={`text-${theme.primary} neon-text-${theme.primary}`}>?</span>
         </h1>
-        <p className="text-cyber-cyan/80 font-mono text-xs tracking-[0.2em] sm:tracking-[0.4em] uppercase">
+        <p className="text-cyber-cyan/80 font-mono text-xs sm:text-sm tracking-[0.2em] sm:tracking-[0.4em] uppercase">
           [ 潜运算法启动中... ]
         </p>
         <WeatherInsight temperature={6} condition="小雨" />
       </header>
 
-      {/* 桌面端 Navigation */}
-      <nav className="hidden md:flex flex-wrap justify-center gap-3 relative z-20">
-        {mealTypes.map((meal) => (
-          <button
-            key={meal.id}
-            onClick={() => !isSpinning && setSelectedMealId(meal.id)}
-            disabled={isSpinning}
-            className={`px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover} hover:shadow-[0_0_15px_rgba(0,247,255,0.5)] ${
-              selectedMealId === meal.id ? `ring-2 ring-${theme.primary} ring-offset-2 ring-offset-cyber-dark` : ''
-            }`}
-          >
-            {meal.name}
-          </button>
-        ))}
 
-        {/* 反馈按钮 */}
-        <button
-          onClick={() => !isSpinning && navigate('/feedbacks/submit')}
-          disabled={isSpinning}
-          className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-purple-500/20 text-purple-400 hover:bg-purple-500 hover:shadow-[0_0_15px_#a855f7]"
-        >
-          💬 反馈
-        </button>
 
-        {/* 历史记录按钮 */}
-        <button
-          onClick={() => !isSpinning && setShowHistory(true)}
-          disabled={isSpinning}
-          className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-cyber-pink/20 text-cyber-pink hover:bg-cyber-pink hover:shadow-[0_0_15px_#ff00ea]"
-        >
-          📋 历史
-        </button>
-
-        {/* 设置按钮 */}
-        <button
-          onClick={() => !isSpinning && setShowSettings(true)}
-          disabled={isSpinning}
-          className={`px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover} hover:shadow-[0_0_15px_rgba(0,247,255,0.5)]`}
-        >
-          ⚙️ 设置
-        </button>
-
-        {/* 用户/登录按钮 */}
-        {isAuthenticated ? (
-          <>
-            <span className={`px-6 py-1.5 font-mono text-xs border ${theme.bg} text-${theme.primary}`}>
-              👤 {user?.username || '用户'}
-            </span>
-            {isAdmin && (
-              <button
-                onClick={() => navigate('/admin')}
-                disabled={isSpinning}
-                className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-green-700/20 text-green-400 hover:bg-green-700 hover:text-white hover:shadow-[0_0_15px_#22c55e]"
-              >
-                🔐 管理
-              </button>
-            )}
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => navigate('/login')}
-              className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-gray-700/20 text-gray-400 hover:bg-gray-700 hover:text-white"
-            >
-              🔐 登录
-            </button>
-            <button
-              onClick={() => navigate('/register')}
-              className={`px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover}`}
-            >
-              📝 注册
-            </button>
-          </>
-        )}
-      </nav>
-
-      {/* Main Content */}
-      <main className="relative flex flex-col items-center flex-1 justify-center py-2 max-h-[70vh]">
+      {/* Main Content - 响应式布局 */}
+      <main className="relative flex flex-col items-center flex-1 justify-center py-1 sm:py-2 max-h-[65vh] sm:max-h-[70vh] w-full max-w-md mx-auto px-2">
         {/* Decorative Element */}
         <div className={`absolute top-[2%] z-50 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[24px] border-t-${theme.primary} drop-shadow-[0_0_8px_rgba(0,247,255,0.8)] filter`}></div>
 
-        {/* Wheel Container */}
-        <div className="p-1 rounded-full border border-cyber-cyan/10 shadow-[0_0_30px_rgba(0,247,255,0.1)] bg-black/40 backdrop-blur-sm transform scale-[0.75] sm:scale-90 md:scale-100 origin-center">
+        {/* 【顶部】分类导航（移动端可横向滚动） - 触摸优化 */}
+        <div className="w-full mb-3 sm:mb-4 overflow-x-auto scrollbar-hide px-2">
+          <div className="flex justify-center md:justify-start gap-2 min-w-max">
+            {mealTypes.map((meal) => (
+              <button
+                key={meal.id}
+                onClick={() => !isSpinning && setSelectedMealId(meal.id)}
+                disabled={isSpinning}
+                className={`px-3 sm:px-4 py-2 sm:py-3 font-mono text-xs sm:text-sm border rounded-lg transition-all duration-300 whitespace-nowrap min-h-[44px] min-w-[44px] touch-manipulation ${
+                  selectedMealId === meal.id
+                    ? `bg-${theme.primary}/20 border-${theme.primary} text-${theme.primary} shadow-lg shadow-${theme.primary}/30`
+                    : 'border-gray-700 bg-gray-800/50 text-gray-400 hover:border-gray-600'
+                }`}
+              >
+                {meal.emoji} {meal.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 【中部】转盘（主视觉焦点） - 移除固定缩放，由 Wheel 组件自适应 */}
+        <div className="p-1 rounded-full border border-cyber-cyan/10 shadow-[0_0_30px_rgba(0,247,255,0.1)] bg-black/40 backdrop-blur-sm mb-6">
           <Wheel
             items={currentItems}
             rotation={rotation}
@@ -302,13 +245,13 @@ function Home() {
           />
         </div>
 
-        {/* Spin Button */}
+        {/* 【底部】主按钮（突出显示） - 触摸优化 */}
         <button
           onClick={handleSpin}
           disabled={isSpinning || currentItems.length === 0}
-          className={`mt-4 cyber-button py-2 px-6 text-sm bg-gradient-to-r ${theme.gradient} shadow-lg ${theme.shadow}`}
+          className={`w-full max-w-xs cyber-button py-3 sm:py-4 px-6 sm:px-8 text-base sm:text-lg font-bold rounded-xl bg-gradient-to-r ${theme.gradient} shadow-lg ${theme.shadow} transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 min-h-[56px] touch-manipulation`}
         >
-          {isSpinning ? '计算中...' : currentItems.length === 0 ? '暂无商品' : '启动命运'}
+          {isSpinning ? '🎯 计算中...' : currentItems.length === 0 ? '暂无商品' : '🎯 启动命运'}
         </button>
       </main>
 
@@ -337,10 +280,7 @@ function Home() {
 
       {/* History Modal */}
       {showHistory && (
-        <History
-          isOpen={showHistory}
-          onClose={() => setShowHistory(false)}
-        />
+        <HistoryPage />
       )}
 
       {/* Share Modal */}
@@ -396,6 +336,7 @@ function App() {
             <Admin />
           }
         />
+        <Route path="/admin/cps" element={<CPSManagement />} />
         <Route path="/feedbacks/admin" element={<FeedbackAdmin />} />
         <Route path="/feedbacks/stats" element={<FeedbackStats />} />
         <Route path="/settings" element={<Settings />} />

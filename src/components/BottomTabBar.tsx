@@ -70,8 +70,8 @@ const BottomTabBar = ({ isSpinning, onHistoryClick, onSettingsClick, settings }:
       {/* 桌面端隐藏 */}
       <div className="hidden md:block" aria-hidden="true" />
       
-      {/* 移动端底部导航栏 */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-cyber-dark/95 backdrop-blur-sm border-t border-cyan-500/20 safe-area-bottom">
+      {/* 移动端底部导航栏 - 安全区域适配 */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-cyber-dark/95 backdrop-blur-sm border-t border-cyan-500/20 safe-area-bottom" style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}>
         <div className="grid grid-cols-5 gap-1 px-2 py-2">
           {tabs.map((tab) => {
             const active = isActive(tab.path);

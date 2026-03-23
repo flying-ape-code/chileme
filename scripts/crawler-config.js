@@ -1,31 +1,42 @@
 #!/usr/bin/env node
 
 /**
- * 美团热门商品爬虫 - 配置版本
- * 用途：从配置文件加载商品数据，支持手动管理
+ * 美团热门商品爬虫 - 数据库版本
+ * 用途：从配置文件加载商品数据，写入 Supabase products 表
  * 说明：由于美团外卖需要登录且反爬严格，本方案采用手动维护数据的方式
  */
 
 import fs from 'fs/promises';
 import path from 'path';
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: '.env' });
+
+const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+  console.error('❌ 错误：缺少 Supabase 配置');
+  console.error('   请确保 .env 文件中包含 VITE_SUPABASE_URL 和 SUPABASE_SERVICE_ROLE_KEY');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 // 配置
 const CONFIG = {
-  // 数据文件路径
-  dataFilePath: path.join(process.cwd(), 'meals-data.json'),
-  // 备份路径
-  backupPath: path.join(process.cwd(), 'meals-data.json.backup'),
   // 配置文件路径
   configPath: path.join(process.cwd(), 'crawler-config.json'),
-  // Unsplash图片模板
+  // Unsplash 图片模板
   imageTemplate: 'https://images.unsplash.com/photo-{id}?w=400&h=400&fit=crop',
-  // Unsplash图片ID池
+  // Unsplash 图片 ID 池
   imageIds: [
     '1619096252214-ef06c45683e3', // 煎饼果子
     '1625220194771-7ebdea0b70b9', // 皮蛋瘦肉粥
     '1541696432-82c6da8ce7bf', // 小笼包
     '1526318896980-cf78c088247c', // 小馄饨
-    '1526777563695-e8467e7c5952', // 热干面
+    '1526777563695-e4f8c170db06', // 热干面
     '1534422298391-e4f8c170db06', // 生煎包
     '1541832676-9b763b0239ab', // 黄焖鸡米饭
     '1625657101903-3f71b3a0794e', // 兰州牛肉面
@@ -37,182 +48,192 @@ const CONFIG = {
 };
 
 /**
- * 备份当前数据
+ * 加载配置
  */
-async function backupData() {
-  try {
-    const data = await fs.readFile(CONFIG.dataFilePath, 'utf8');
-    await fs.writeFile(CONFIG.backupPath, data);
-    console.log('✅ 数据备份成功');
-    return true;
-  } catch (error) {
-    console.error('❌ 数据备份失败:', error.message);
-    return false;
-  }
-}
-
-/**
- * 加载当前数据
- */
-async function loadCurrentData() {
-  try {
-    const data = await fs.readFile(CONFIG.dataFilePath, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('❌ 加载数据失败:', error.message);
-    return null;
-  }
-}
-
-/**
- * 加载爬虫配置
- */
-async function loadCrawlerConfig() {
+async function loadConfig() {
   try {
     const data = await fs.readFile(CONFIG.configPath, 'utf8');
     return JSON.parse(data);
   } catch (error) {
-    // 如果配置文件不存在，返回默认配置
-    console.log('📝 配置文件不存在，使用默认配置');
-    return {
-      enabled: true,
-      autoUpdate: false,
-      categories: ['breakfast', 'lunch', 'afternoon-tea', 'dinner', 'night-snack'],
-      updateInterval: '0 * * * *' // 每小时
-    };
+    console.error('❌ 加载配置失败:', error.message);
+    return { products: [] };
   }
 }
 
 /**
- * 保存数据
+ * 从数据库加载商品
  */
-async function saveData(data) {
-  try {
-    await fs.writeFile(
-      CONFIG.dataFilePath,
-      JSON.stringify(data, null, 2),
-      'utf8'
-    );
-    console.log('✅ 数据保存成功');
-    return true;
-  } catch (error) {
-    console.error('❌ 数据保存失败:', error.message);
-    return false;
+async function loadProductsFromDB() {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .order('category', { ascending: true })
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('❌ 加载商品失败:', error.message);
+    return [];
   }
+
+  return data || [];
 }
 
 /**
- * 生成模拟商品数据
- * 说明：用于测试和演示，实际使用时应该替换为真实爬取的数据
+ * 保存商品到数据库
  */
-function generateMockProducts(category, count = 6) {
-  const products = [];
-
-  const categoryNames = {
-    'breakfast': ['煎饼果子', '小笼包', '豆浆', '油条', '皮蛋瘦肉粥', '烧麦'],
-    'lunch': ['黄焖鸡米饭', '兰州牛肉面', '麻辣烫', '盖浇饭', '木桶饭', '煲仔饭'],
-    'afternoon-tea': ['奶茶', '水果茶', '蛋糕', '三明治', '沙拉', '咖啡'],
-    'dinner': ['烤鱼', '火锅', '烧烤', '炸鸡', '麻辣香锅', '水煮鱼'],
-    'night-snack': ['烧烤', '小龙虾', '炒粉', '关东煮', '烤串', '炸鸡块']
+async function saveProductsToDB(products) {
+  const stats = {
+    inserted: 0,
+    updated: 0,
+    failed: 0
   };
 
-  const categoryProducts = categoryNames[category] || categoryNames['lunch'];
+  for (const product of products) {
+    try {
+      // 检查是否已存在
+      const { data: existing } = await supabase
+        .from('products')
+        .select('id')
+        .eq('name', product.name)
+        .eq('category', product.category)
+        .single();
 
-  for (let i = 0; i < count; i++) {
-    const name = categoryProducts[i % categoryProducts.length];
-    products.push({
-      name: name,
-      img: CONFIG.imageTemplate.replace('{id}', CONFIG.imageIds[i % CONFIG.imageIds.length]),
-      promoUrl: `https://i.meituan.com/${category}/${name}`,
-      crawledAt: new Date().toISOString()
-    });
+      if (existing) {
+        // 更新现有商品
+        const { error } = await supabase
+          .from('products')
+          .update({
+            img: product.img,
+            promoUrl: product.promoUrl,
+            cpsLink: product.cpsLink,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existing.id);
+
+        if (error) {
+          console.error(`❌ 更新失败 ${product.name}: ${error.message}`);
+          stats.failed++;
+        } else {
+          stats.updated++;
+        }
+      } else {
+        // 插入新商品
+        const { error } = await supabase
+          .from('products')
+          .insert([{
+            name: product.name,
+            category: product.category,
+            img: product.img,
+            promoUrl: product.promoUrl || null,
+            cpsLink: product.cpsLink || null,
+            isActive: true,
+            sortOrder: 0
+          }]);
+
+        if (error) {
+          console.error(`❌ 插入失败 ${product.name}: ${error.message}`);
+          stats.failed++;
+        } else {
+          stats.inserted++;
+        }
+      }
+    } catch (error) {
+      console.error(`❌ 处理失败 ${product.name}: ${error.message}`);
+      stats.failed++;
+    }
   }
 
-  return products;
+  return stats;
 }
 
 /**
- * 更新商品数据
+ * 显示帮助信息
  */
-async function updateMealsData(currentData, category, products) {
-  if (!currentData) {
-    console.error('❌ 当前数据为空');
-    return null;
-  }
+function showHelp() {
+  console.log(`
+美团商品管理工具 - 数据库版本
 
-  const updatedData = {
-    ...currentData,
-    [category]: products
-  };
+用法:
+  node scripts/crawler-config.js <command>
 
-  console.log(`📝 已更新类别: ${category}`);
-  console.log(`📦 新商品数量: ${products.length}`);
+命令:
+  list     - 列出所有商品
+  add      - 添加商品 (需要配置)
+  sync     - 从配置同步到数据库
+  backup   - 备份数据库数据到 JSON
 
-  return updatedData;
+示例:
+  node scripts/crawler-config.js list
+  node scripts/crawler-config.js sync
+`);
 }
 
 /**
  * 主函数
  */
 async function main() {
-  console.log('========================================');
-  console.log('美团热门商品爬虫 - 配置版');
-  console.log('========================================');
+  const command = process.argv[2];
 
-  // 加载配置
-  const crawlerConfig = await loadCrawlerConfig();
-  console.log(`📝 爬虫配置:`);
-  console.log(`   启用: ${crawlerConfig.enabled}`);
-  console.log(`   自动更新: ${crawlerConfig.autoUpdate}`);
-  console.log(`   更新类别: ${crawlerConfig.categories.join(', ')}`);
+  switch (command) {
+    case 'list': {
+      console.log('📦 加载商品列表...\n');
+      const products = await loadProductsFromDB();
+      
+      const grouped = products.reduce((acc, p) => {
+        if (!acc[p.category]) acc[p.category] = [];
+        acc[p.category].push(p);
+        return acc;
+      }, {});
 
-  if (!crawlerConfig.enabled) {
-    console.log('⚠️  爬虫已禁用，退出');
-    process.exit(0);
+      for (const [category, items] of Object.entries(grouped)) {
+        console.log(`\n${category.toUpperCase()} (${items.length} 个商品):`);
+        items.forEach((p, i) => {
+          console.log(`  ${i + 1}. ${p.name}`);
+        });
+      }
+      break;
+    }
+
+    case 'sync': {
+      console.log('🔄 从配置同步到数据库...\n');
+      const config = await loadConfig();
+      const stats = await saveProductsToDB(config.products || []);
+      
+      console.log('\n✅ 同步完成:');
+      console.log(`   新增：${stats.inserted}`);
+      console.log(`   更新：${stats.updated}`);
+      console.log(`   失败：${stats.failed}`);
+      break;
+    }
+
+    case 'backup': {
+      console.log('💾 备份数据库数据...\n');
+      const products = await loadProductsFromDB();
+      
+      const backupData = products.reduce((acc, p) => {
+        if (!acc[p.category]) acc[p.category] = [];
+        acc[p.category].push({
+          name: p.name,
+          img: p.img,
+          promoUrl: p.promoUrl || p.cpsLink,
+          cpsLink: p.cpsLink,
+          originalUrl: p.originalUrl,
+          cpsGeneratedAt: p.cpsGeneratedAt,
+          clickCount: p.clickCount
+        });
+        return acc;
+      }, {});
+
+      const backupPath = path.join(process.cwd(), `meals-data-backup-${Date.now()}.json`);
+      await fs.writeFile(backupPath, JSON.stringify(backupData, null, 2));
+      
+      console.log(`✅ 备份完成：${backupPath}`);
+      break;
+    }
+
+    default:
+      showHelp();
   }
-
-  // 备份当前数据
-  await backupData();
-
-  // 加载当前数据
-  const currentData = await loadCurrentData();
-  if (!currentData) {
-    console.error('❌ 无法加载当前数据，退出');
-    process.exit(1);
-  }
-
-  console.log(`📊 当前数据类别: ${Object.keys(currentData).join(', ')}`);
-
-  // 模拟爬取数据（实际应用中应该替换为真实爬取逻辑）
-  console.log('🚀 开始爬取/生成商品数据...');
-
-  // 为每个类别生成/爬取数据
-  let updatedData = { ...currentData };
-
-  for (const category of crawlerConfig.categories) {
-    console.log(`\n📍 处理类别: ${category}`);
-
-    // 这里调用实际爬虫，暂时使用模拟数据
-    // const products = await crawlMeituanProducts(category);
-    const products = generateMockProducts(category, 6);
-
-    updatedData = await updateMealsData(updatedData, category, products);
-  }
-
-  // 保存更新后的数据
-  if (updatedData) {
-    await saveData(updatedData);
-    console.log('\n🎉 所有类别数据更新完成！');
-  } else {
-    console.log('\n❌ 数据更新失败');
-  }
-
-  console.log('========================================');
-  console.log('执行完成');
 }
 
-// 执行主函数
-main().catch(error => {
-  console.error('❌ 程序异常:', error);
-  process.exit(1);
-});
+main().catch(console.error);

@@ -135,10 +135,10 @@
 }
 
 @layer responsive {
-  /* 超小屏幕适配 (320px - 375px) */
+  /* 超小屏幕适配 (320px - 375px) - iPhone SE */
   @media (max-width: 375px) {
     h1 {
-      font-size: clamp(1.75rem, 5vw, 2.5rem) !important;
+      font-size: clamp(1.5rem, 5vw, 2rem) !important;
     }
     
     .weather-insight {
@@ -160,13 +160,19 @@
       min-width: 44px;
       padding: 0.5rem 0.75rem;
     }
+    
+    /* 导航按钮缩小 */
+    nav button {
+      padding: 0.5rem 0.75rem !important;
+      font-size: 0.75rem !important;
+    }
   }
 
-  /* 移动端优化 (max-width: 640px) */
+  /* 移动端优化 (max-width: 640px) - iPhone 12/13, 小屏手机 */
   @media (max-width: 640px) {
     /* 标题使用 clamp 自适应 */
     h1 {
-      font-size: clamp(2rem, 6vw, 2.5rem) !important;
+      font-size: clamp(1.75rem, 6vw, 2.5rem) !important;
     }
     
     /* 副标题字体 */
@@ -174,16 +180,11 @@
       font-size: clamp(0.625rem, 2vw, 0.75rem) !important;
     }
     
-    /* 转盘缩放优化 */
-    .wheel-container {
-      transform: scale(0.65) !important;
-    }
-    
     /* 按钮触摸优化 */
     button,
     [role="button"] {
-      min-height: 44px; /* iOS 最小触摸目标 */
-      min-width: 44px;
+      min-height: 48px; /* iOS 最小触摸目标 */
+      min-width: 48px;
       touch-action: manipulation;
     }
     
@@ -203,17 +204,19 @@
     select {
       font-size: 16px !important; /* 防止 iOS 缩放 */
       min-height: 44px;
+      padding: 0.75rem;
+    }
+    
+    /* 横向滚动优化 */
+    .overflow-x-auto {
+      -webkit-overflow-scrolling: touch;
     }
   }
 
-  /* 平板优化 (641px - 1024px) */
+  /* 平板优化 (641px - 1024px) - iPad */
   @media (min-width: 641px) and (max-width: 1024px) {
     h1 {
-      font-size: clamp(3rem, 8vw, 4rem) !important;
-    }
-    
-    .wheel-container {
-      transform: scale(0.85) !important;
+      font-size: clamp(2.5rem, 8vw, 4rem) !important;
     }
     
     button,
@@ -221,12 +224,18 @@
       min-height: 44px;
       min-width: 44px;
     }
+    
+    /* 模态框适中大小 */
+    [role="dialog"] > div {
+      width: 85% !important;
+      max-height: 85vh !important;
+    }
   }
 
   /* 桌面优化 (min-width: 1025px) */
   @media (min-width: 1025px) {
     h1 {
-      font-size: clamp(4rem, 10vw, 5rem) !important;
+      font-size: clamp(3.5rem, 10vw, 5rem) !important;
     }
   }
 }

@@ -1,20 +1,28 @@
 /**
- * 商品数据（从 Supabase products 表读取）
- * V2.2: 修复商品数据源 - 从 products 表读取（108 条记录）
+ * 商品数据（从 products 表读取）
+ * V3.0: 统一商品数据源 - 从 products 表读取
  */
 
 import { supabase } from './lib/supabaseClient';
 
-export interface Meal {
+export interface Product {
   id: string;
   name: string;
   category: string;
-  img: string;
-  promoUrl: string | null;
-  created_at: string;
+  img?: string;
+  promoUrl?: string | null;
+  cpsLink?: string;
+  priceMin?: number;
+  priceMax?: number;
+  rating?: number;
+  distance?: string;
+  deliveryTime?: string;
+  createdAt: string;
+  isActive?: boolean;
+  sortOrder?: number;
 }
 
-export const mealTypes = [
+export const productTypes = [
   { id: 'breakfast', name: '早餐', emoji: '🌅' },
   { id: 'lunch', name: '午餐', emoji: '🍜' },
   { id: 'afternoon-tea', name: '下午茶', emoji: '☕' },
@@ -22,17 +30,22 @@ export const mealTypes = [
   { id: 'night-snack', name: '夜宵', emoji: '🌙' }
 ];
 
-export const productCategories = mealTypes;
+// 向后兼容：mealTypes 别名
+export const mealTypes = productTypes;
+export const productCategories = productTypes;
 
 /**
  * 获取分类商品（从 products 表）
+ * V3.0: 统一数据源，仅返回 isActive=true 的商品
  */
-export async function getMealsByCategory(category: string): Promise<Meal[]> {
+export async function getProductsByCategory(category: string): Promise<Product[]> {
   try {
     const { data, error } = await supabase
       .from('products')
       .select('*')
       .eq('category', category)
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -50,28 +63,33 @@ export async function getMealsByCategory(category: string): Promise<Meal[]> {
 
 /**
  * 随机获取商品
+ * V3.0: 从 products 表读取，支持 isActive 过滤
  */
 export async function getRandomItems(category: string, count: number = 6): Promise<any[]> {
   try {
-    const meals = await getMealsByCategory(category);
+    const products = await getProductsByCategory(category);
     
-    // 防御性检查：确保 meals 是有效数组
-    if (!Array.isArray(meals) || meals.length === 0) {
+    // 防御性检查：确保 products 是有效数组
+    if (!Array.isArray(products) || products.length === 0) {
       console.warn(`分类 "${category}" 没有商品数据`);
       return [];
     }
     
-    const shuffled = [...meals].sort(() => Math.random() - 0.5);
+    const shuffled = [...products].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, count);
     
-    return selected.map(meal => ({
-      id: meal.id,
-      name: meal.name,
-      img: meal.img,
-      promoUrl: meal.promo_url || '',
-      weirdName: meal.name,
+    return selected.map(product => ({
+      id: product.id,
+      name: product.name,
+      img: product.img,
+      promoUrl: product.cpsLink || product.promoUrl || '',
+      price: product.priceMin || product.priceMax,
+      rating: product.rating,
+      distance: product.distance,
+      deliveryTime: product.deliveryTime,
+      weirdName: product.name,
       weirdEmoji: '🍽️',
-      description: meal.promo_url || ''
+      description: product.cpsLink || product.promoUrl || ''
     }));
   } catch (error) {
     console.error('获取随机商品异常:', error);
@@ -81,6 +99,7 @@ export async function getRandomItems(category: string, count: number = 6): Promi
 
 /**
  * 加载所有数据（缓存）
+ * V3.0: 从 products 表读取，5 分钟缓存
  */
 let cachedData: Record<string, any[]> = {};
 let lastFetchTime = 0;
@@ -94,20 +113,27 @@ export const loadFoodData = async () => {
 
     const data: Record<string, any[]> = {};
     for (const category of ['breakfast', 'lunch', 'afternoon-tea', 'dinner', 'night-snack']) {
-      const meals = await getMealsByCategory(category);
-      data[category] = meals.map(meal => ({
-        id: meal.id,
-        name: meal.name,
-        img: meal.img,
-        weirdName: meal.name,
+      const products = await getProductsByCategory(category);
+      data[category] = products.map(product => ({
+        id: product.id,
+        name: product.name,
+        img: product.img,
+        promoUrl: product.cpsLink || product.promoUrl || '',
+        price: product.priceMin || product.priceMax,
+        rating: product.rating,
+        distance: product.distance,
+        deliveryTime: product.deliveryTime,
+        weirdName: product.name,
         weirdEmoji: '🍽️',
-        description: meal.promo_url || ''
+        description: product.cpsLink || product.promoUrl || '',
+        is_active: product.isActive,
+        sort_order: product.sortOrder
       }));
     }
 
     cachedData = data;
     lastFetchTime = now;
-    return data;
+    return cachedData;
   } catch (error) {
     console.error('加载食物数据异常:', error);
     return cachedData;

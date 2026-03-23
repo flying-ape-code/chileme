@@ -6,6 +6,10 @@ export interface Product {
   img: string;
   promo_url: string;
   category: string;
+  price?: number;
+  rating?: number;
+  distance?: string;
+  delivery_time?: string;
   created_at: string;
   updated_at: string;
 }

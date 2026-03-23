@@ -1,0 +1,147 @@
+{
+  "breakfast": [
+    {
+      "name": "煎饼果子",
+      "img": "https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400",
+      "promoUrl": "https://u.meituan.com/cps/shipinwaimai/exghia?url=https%3A%2F%2Fi.meituan.com%2Fbreakfast%2F%25E7%2585%258E%25E9%25A5%25BC%25E6%259E%259C%25E5%25AD%2590&ch=473920&ts=1774226251100",
+      "crawledAt": "2026-03-21T23:19:31.500Z",
+      "originalUrl": "https://i.meituan.com/breakfast/%E7%85%8E%E9%A5%BC%E6%9E%9C%E5%AD%90",
+      "cpsGeneratedAt": "2026-03-23T00:37:31.100Z",
+      "clickCount": 0
+    },
+    {
+      "name": "小笼包",
+      "img": "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400",
+      "promoUrl": "https://u.meituan.com/cps/shipinwaimai/e2u8o?url=https%3A%2F%2Fi.meituan.com%2Fbreakfast%2F%25E5%25B0%258F%25E7%25AC%25BC%25E5%258C%2585&ch=473920&ts=1774226251101",
+      "crawledAt": "2026-03-21T23:19:31.500Z",
+      "originalUrl": "https://i.meituan.com/breakfast/%E5%B0%8F%E7%AC%BC%E5%8C%85",
+      "cpsGeneratedAt": "2026-03-23T00:37:31.101Z",
+      "clickCount": 0
+    },
+    {
+      "name": "豆浆油条",
+      "img": "https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400",
+      "promoUrl": "https://u.meituan.com/cps/shipinwaimai/i5go7c?url=https%3A%2F%2Fi.meituan.com%2Fbreakfast%2F%25E8%25B1%2586%25E6%25B5%2586%25E6%25B2%25B9%25E6%259D%25A1&ch=473920&ts=1774226251101",
+      "crawledAt": "2026-03-21T23:19:31.500Z",
+      "originalUrl": "https://i.meituan.com/breakfast/%E8%B1%86%E6%B5%86%E6%B2%B9%E6%9D%A1",
+      "cpsGeneratedAt": "2026-03-23T00:37:31.101Z",
+      "clickCount": 0
+    }
+  ],
+  "lunch": [
+    {
+      "name": "黄焖鸡米饭",
+      "img": "https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400",
+      "promoUrl": "https://u.meituan.com/cps/shipinwaimai/3l1hav?url=https%3A%2F%2Fi.meituan.com%2Flunch%2F%25E9%25BB%2584%25E7%2584%2596%25E9%25B8%25A1%25E7%25B1%25B3%25E9%25A5%25AD&ch=473920&ts=1774226251101",
+      "crawledAt": "2026-03-21T23:19:31.500Z",
+      "originalUrl": "https://i.meituan.com/lunch/%E9%BB%84%E7%84%96%E9%B8%A1%E7%B1%B3%E9%A5%AD",
+      "cpsGeneratedAt": "2026-03-23T00:37:31.101Z",
+      "clickCount": 0
+    },
+    {
+      "name": "兰州牛肉面",
+      "img": "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400",
+      "promoUrl": "https://u.meituan.com/cps/shipinwaimai/oew3ve?url=https%3A%2F%2Fi.meituan.com%2Flunch%2F%25E5%2585%25B0%25E5%25B7%259E%25E7%2589%259B%25E8%2582%2589%25E9%259D%25A2&ch=473920&ts=1774226251101",
+      "crawledAt": "2026-03-21T23:19:31.500Z",
+      "originalUrl": "https://i.meituan.com/lunch/%E5%85%B0%E5%B7%9E%E7%89%9B%E8%82%89%E9%9D%A2",
+      "cpsGeneratedAt": "2026-03-23T00:37:31.101Z",
+      "clickCount": 0
+    },
+    {
+      "name": "麻辣烫",
+      "img": "https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400",
+      "promoUrl": "https://u.meituan.com/cps/shipinwaimai/ny17n?url=https%3A%2F%2Fi.meituan.com%2Flunch%2F%25E9%25BA%25BB%25E8%25BE%25A3%25E7%2583%25AB&ch=473920&ts=1774226251101",
+      "crawledAt": "2026-03-21T23:19:31.500Z",
+      "originalUrl": "https://i.meituan.com/lunch/%E9%BA%BB%E8%BE%A3%E7%83%AB",
+      "cpsGeneratedAt": "2026-03-23T00:37:31.101Z",
+      "clickCount": 0
+    }
+  ],
+  "afternoon-tea": [
+    {
+      "name": "奶茶",
+      "img": "https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400",
+      "promoUrl": "https://u.meituan.com/cps/shipinwaimai/fxq8?url=https%3A%2F%2Fi.meituan.com%2Fafternoon%2F%25E5%25A5%25B6%25E8%258C%25B6&ch=473920&ts=1774226251101",
+      "crawledAt": "2026-03-21T23:19:31.500Z",
+      "originalUrl": "https://i.meituan.com/afternoon/%E5%A5%B6%E8%8C%B6",
+      "cpsGeneratedAt": "2026-03-23T00:37:31.101Z",
+      "clickCount": 0
+    },
+    {
+      "name": "蛋糕",
+      "img": "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400",
+      "promoUrl": "https://u.meituan.com/cps/shipinwaimai/nm22?url=https%3A%2F%2Fi.meituan.com%2Fafternoon%2F%25E8%259B%258B%25E7%25B3%2595&ch=473920&ts=1774226251101",
+      "crawledAt": "2026-03-21T23:19:31.500Z",
+      "originalUrl": "https://i.meituan.com/afternoon/%E8%9B%8B%E7%B3%95",
+      "cpsGeneratedAt": "2026-03-23T00:37:31.101Z",
+      "clickCount": 0
+    },
+    {
+      "name": "咖啡",
+      "img": "https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400",
+      "promoUrl": "https://u.meituan.com/cps/shipinwaimai/eutn?url=https%3A%2F%2Fi.meituan.com%2Fafternoon%2F%25E5%2592%2596%25E5%2595%25A1&ch=473920&ts=1774226251101",
+      "crawledAt": "2026-03-21T23:19:31.500Z",
+      "originalUrl": "https://i.meituan.com/afternoon/%E5%92%96%E5%95%A1",
+      "cpsGeneratedAt": "2026-03-23T00:37:31.101Z",
+      "clickCount": 0
+    }
+  ],
+  "dinner": [
+    {
+      "name": "烤鱼",
+      "img": "https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400",
+      "promoUrl": "https://u.meituan.com/cps/shipinwaimai/k26w?url=https%3A%2F%2Fi.meituan.com%2Fdinner%2F%25E7%2583%25A4%25E9%25B1%25BC&ch=473920&ts=1774226251101",
+      "crawledAt": "2026-03-21T23:19:31.500Z",
+      "originalUrl": "https://i.meituan.com/dinner/%E7%83%A4%E9%B1%BC",
+      "cpsGeneratedAt": "2026-03-23T00:37:31.101Z",
+      "clickCount": 0
+    },
+    {
+      "name": "火锅",
+      "img": "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400",
+      "promoUrl": "https://u.meituan.com/cps/shipinwaimai/jxtm?url=https%3A%2F%2Fi.meituan.com%2Fdinner%2F%25E7%2581%25AB%25E9%2594%2585&ch=473920&ts=1774226251101",
+      "crawledAt": "2026-03-21T23:19:31.500Z",
+      "originalUrl": "https://i.meituan.com/dinner/%E7%81%AB%E9%94%85",
+      "cpsGeneratedAt": "2026-03-23T00:37:31.101Z",
+      "clickCount": 0
+    },
+    {
+      "name": "烧烤",
+      "img": "https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400",
+      "promoUrl": "https://u.meituan.com/cps/shipinwaimai/jtnh?url=https%3A%2F%2Fi.meituan.com%2Fdinner%2F%25E7%2583%25A7%25E7%2583%25A4&ch=473920&ts=1774226251101",
+      "crawledAt": "2026-03-21T23:19:31.500Z",
+      "originalUrl": "https://i.meituan.com/dinner/%E7%83%A7%E7%83%A4",
+      "cpsGeneratedAt": "2026-03-23T00:37:31.101Z",
+      "clickCount": 0
+    }
+  ],
+  "night-snack": [
+    {
+      "name": "小龙虾",
+      "img": "https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=400",
+      "promoUrl": "https://u.meituan.com/cps/shipinwaimai/e9b2s?url=https%3A%2F%2Fi.meituan.com%2Fmidnight%2F%25E5%25B0%258F%25E9%25BE%2599%25E8%2599%25BE&ch=473920&ts=1774226251101",
+      "crawledAt": "2026-03-21T23:19:31.500Z",
+      "originalUrl": "https://i.meituan.com/midnight/%E5%B0%8F%E9%BE%99%E8%99%BE",
+      "cpsGeneratedAt": "2026-03-23T00:37:31.101Z",
+      "clickCount": 0
+    },
+    {
+      "name": "炒粉",
+      "img": "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400",
+      "promoUrl": "https://u.meituan.com/cps/shipinwaimai/jtx3?url=https%3A%2F%2Fi.meituan.com%2Fmidnight%2F%25E7%2582%2592%25E7%25B2%2589&ch=473920&ts=1774226251101",
+      "crawledAt": "2026-03-21T23:19:31.500Z",
+      "originalUrl": "https://i.meituan.com/midnight/%E7%82%92%E7%B2%89",
+      "cpsGeneratedAt": "2026-03-23T00:37:31.101Z",
+      "clickCount": 0
+    },
+    {
+      "name": "烤串",
+      "img": "https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400",
+      "promoUrl": "https://u.meituan.com/cps/shipinwaimai/jmq6?url=https%3A%2F%2Fi.meituan.com%2Fmidnight%2F%25E7%2583%25A4%25E4%25B8%25B2&ch=473920&ts=1774226251101",
+      "crawledAt": "2026-03-21T23:19:31.500Z",
+      "originalUrl": "https://i.meituan.com/midnight/%E7%83%A4%E4%B8%B2",
+      "cpsGeneratedAt": "2026-03-23T00:37:31.101Z",
+      "clickCount": 0
+    }
+  ]
+}

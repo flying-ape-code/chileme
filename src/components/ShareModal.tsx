@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import SharePoster from './SharePoster';
+import PKModal from './PKModal';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -7,12 +9,17 @@ interface ShareModalProps {
     title: string;
     description: string;
     url: string;
+    foodName?: string;
+    category?: string;
+    imageUrl?: string;
   };
   onCopySuccess?: () => void;
   onShareSuccess?: (platform: string) => void;
 }
 
 export default function ShareModal({ isOpen, onClose, shareContent, onCopySuccess, onShareSuccess }: ShareModalProps) {
+  const [showPoster, setShowPoster] = useState(false);
+  const [showPK, setShowPK] = useState(false);
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -57,6 +64,27 @@ export default function ShareModal({ isOpen, onClose, shareContent, onCopySucces
 
         <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center pr-8">📤 分享</h2>
         
+        {/* 特色功能 */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <button
+            onClick={() => setShowPoster(true)}
+            className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gradient-to-br from-cyber-cyan/10 to-cyber-pink/10 border border-cyber-cyan/20 hover:border-cyber-cyan/40 transition-all min-h-[100px]"
+          >
+            <div className="text-3xl">🎨</div>
+            <span className="text-sm font-bold text-gray-800">生成海报</span>
+          </button>
+          
+          <button
+            onClick={() => setShowPK(true)}
+            className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gradient-to-br from-purple-100 to-pink-100 border border-purple-200 hover:border-purple-400 transition-all min-h-[100px]"
+          >
+            <div className="text-3xl">⚔️</div>
+            <span className="text-sm font-bold text-gray-800">好友 PK</span>
+          </button>
+        </div>
+        
+        {/* 社交平台分享 */}
+        <div className="text-sm font-bold text-gray-600 mb-3">分享到</div>
         <div className="grid grid-cols-4 gap-3 mb-6">
           <button
             onClick={() => handleShare('wechat')}
@@ -105,6 +133,36 @@ export default function ShareModal({ isOpen, onClose, shareContent, onCopySucces
         >
           取消
         </button>
+
+        {/* 海报弹窗 */}
+        {showPoster && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto relative">
+              <button
+                onClick={() => setShowPoster(false)}
+                className="absolute top-3 right-3 w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-600"
+              >
+                ✕
+              </button>
+              <SharePoster
+                foodName={shareContent?.foodName || ''}
+                category={shareContent?.category || ''}
+                foodImage={shareContent?.imageUrl}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* PK 弹窗 */}
+        {showPK && (
+          <PKModal
+            isOpen={showPK}
+            onClose={() => setShowPK(false)}
+            foodName={shareContent?.foodName}
+            category={shareContent?.category}
+            foodImage={shareContent?.imageUrl}
+          />
+        )}
       </div>
     </div>
   );

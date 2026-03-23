@@ -35,8 +35,8 @@ const MobileNav = ({
 
   return (
     <>
-      {/* 移动端汉堡菜单按钮 */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-cyber-dark/95 backdrop-blur-sm border-b border-cyan-500/20 px-4 py-3 flex items-center justify-between md:hidden">
+      {/* 移动端汉堡菜单按钮 - 安全区域适配 */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-cyber-dark/95 backdrop-blur-sm border-b border-cyan-500/20 px-4 py-3 flex items-center justify-between md:hidden safe-area-top" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="text-2xl text-cyan-400 hover:text-cyan-300 transition-colors p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
@@ -74,8 +74,8 @@ const MobileNav = ({
             onClick={() => setIsOpen(false)}
           />
           
-          {/* 菜单内容 */}
-          <div className="fixed top-[60px] left-0 right-0 z-40 bg-cyber-dark/98 border-b border-cyan-500/30 md:hidden max-h-[80vh] overflow-y-auto animate-in slide-in-from-top duration-300">
+          {/* 菜单内容 - 安全区域和触摸优化 */}
+          <div className="fixed top-[60px] left-0 right-0 z-40 bg-cyber-dark/98 border-b border-cyan-500/30 md:hidden max-h-[80vh] overflow-y-auto animate-in slide-in-from-top duration-300 safe-area-bottom" style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}>
             {/* 餐别选择 */}
             <div className="p-4 border-b border-cyan-500/20">
               <h3 className="text-xs font-mono text-cyan-400/80 mb-3 uppercase tracking-wider">

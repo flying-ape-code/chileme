@@ -32,13 +32,21 @@ model User {
 
 /// 商品表
 model Product {
-  id        String   @id @default(uuid())
-  name      String
-  img       String
-  promoUrl  String?
-  category  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(uuid())
+  name          String
+  img           String
+  promoUrl      String?
+  cpsLink       String?  // CPS 推广链接
+  category      String
+  priceMin      Float?   // 最低价格
+  priceMax      Float?   // 最高价格
+  rating        Float?   // 评分（0-5）
+  distance      String?  // 距离
+  deliveryTime  String?  // 配送时间
+  isActive      Boolean  @default(true)  // 是否上架
+  sortOrder     Int      @default(0)     // 排序权重
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("products")
 }
