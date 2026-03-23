@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, Suspense, lazy } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
-import { mealTypes, getRandomItems, loadFoodData } from './data';
+import { productTypes, getRandomItems, loadFoodData } from './data';
 import Wheel from './components/Wheel';
 import CelebrationModal from './components/CelebrationModal';
 import WeatherInsight from './components/WeatherInsight';
@@ -35,7 +35,7 @@ interface FoodItem {
 function Home() {
   const navigate = useNavigate();
   const { user, isAuthenticated, isAdmin } = useAuth();
-  const [selectedMealId, setSelectedMealId] = useState<string>(mealTypes[0].id);
+  const [selectedMealId, setSelectedMealId] = useState<string>(productTypes[0].id);
   const [currentItems, setCurrentItems] = useState<FoodItem[]>([]);
   const [rotation, setRotation] = useState<number>(0);
   const [isSpinning, setIsSpinning] = useState<boolean>(false);
@@ -48,7 +48,7 @@ function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   const selectedMeal = useMemo(() =>
-    mealTypes.find(m => m.id === selectedMealId) || mealTypes[0],
+    productTypes.find(m => m.id === selectedMealId) || productTypes[0],
     [selectedMealId]
   );
 
@@ -104,7 +104,7 @@ function Home() {
     }, spinDuration + 500);
   };
 
-  const saveSpinHistory = (category: typeof mealTypes[0], winner: FoodItem): void => {
+  const saveSpinHistory = (category: typeof productTypes[0], winner: FoodItem): void => {
     try {
       const result = addSpinHistory(category, currentItems, winner);
       console.log('历史记录已保存，当前记录数:', result.length);
@@ -159,7 +159,7 @@ function Home() {
 
       {/* Navigation */}
       <nav className="flex flex-wrap justify-center gap-3 relative z-20">
-        {mealTypes.map((meal) => (
+        {productTypes.map((meal) => (
           <button
             key={meal.id}
             onClick={() => !isSpinning && setSelectedMealId(meal.id)}

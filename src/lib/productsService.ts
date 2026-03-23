@@ -1,24 +1,33 @@
 import { supabase } from './supabaseClient';
 
-export interface Meal {
+export interface Product {
   id: string;
   name: string;
+  img: string;
+  promo_url?: string | null;
+  cps_link?: string | null;
   category: string;
-  image_url: string;
-  cps_link: string;
-  price?: number;
+  price_min?: number | null;
+  price_max?: number | null;
+  rating?: number | null;
+  distance?: string | null;
+  delivery_time?: string | null;
   is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 /**
  * 获取指定分类的商品列表
  */
-export async function getMealsByCategory(category: string): Promise<Meal[]> {
+export async function getProductsByCategory(category: string): Promise<Product[]> {
   const { data, error } = await supabase
-    .from('meals')
+    .from('products')
     .select('*')
     .eq('category', category)
     .eq('is_active', true)
+    .order('sort_order', { ascending: true })
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -32,7 +41,7 @@ export async function getMealsByCategory(category: string): Promise<Meal[]> {
 /**
  * 获取所有分类
  */
-export const mealCategories = [
+export const productCategories = [
   { id: 'breakfast', name: '早餐', emoji: '🌅' },
   { id: 'lunch', name: '午餐', emoji: '🍜' },
   { id: 'afternoon-tea', name: '下午茶', emoji: '☕' },
@@ -43,7 +52,7 @@ export const mealCategories = [
 /**
  * 随机获取指定数量的商品
  */
-export function getRandomMeals(meals: Meal[], count: number = 6): Meal[] {
-  const shuffled = [...meals].sort(() => Math.random() - 0.5);
+export function getRandomProducts(products: Product[], count: number = 6): Product[] {
+  const shuffled = [...products].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 }

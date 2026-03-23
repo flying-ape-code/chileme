@@ -1,22 +1,23 @@
 /**
- * 商品数据（从 Supabase meals 表读取）
- * V2.1: 统一商品数据源 - 后台管理和转盘都从数据库读取
+ * 商品数据（从 Supabase products 表读取）
+ * V2.2: 统一使用 products 表
  */
 
 import { supabase } from './lib/supabaseClient';
 
-export interface Meal {
+export interface Product {
   id: string;
   name: string;
   category: string;
-  image_url: string;
-  cps_link: string | null;
+  img: string;
+  promo_url?: string | null;
+  cps_link?: string | null;
   is_active: boolean;
   sort_order: number;
   created_at: string;
 }
 
-export const mealTypes = [
+export const productTypes = [
   { id: 'breakfast', name: '早餐', emoji: '🌅' },
   { id: 'lunch', name: '午餐', emoji: '🍜' },
   { id: 'afternoon-tea', name: '下午茶', emoji: '☕' },
@@ -24,15 +25,15 @@ export const mealTypes = [
   { id: 'night-snack', name: '夜宵', emoji: '🌙' }
 ];
 
-export const productCategories = mealTypes;
+export const productCategories = productTypes;
 
 /**
- * 获取分类商品（从 meals 表）
+ * 获取分类商品（从 products 表）
  */
-export async function getMealsByCategory(category: string): Promise<Meal[]> {
+export async function getProductsByCategory(category: string): Promise<Product[]> {
   try {
     const { data, error } = await supabase
-      .from('meals')
+      .from('products')
       .select('*')
       .eq('category', category)
       .eq('is_active', true)
@@ -57,25 +58,25 @@ export async function getMealsByCategory(category: string): Promise<Meal[]> {
  */
 export async function getRandomItems(category: string, count: number = 6): Promise<any[]> {
   try {
-    const meals = await getMealsByCategory(category);
+    const products = await getProductsByCategory(category);
     
-    // 防御性检查：确保 meals 是有效数组
-    if (!Array.isArray(meals) || meals.length === 0) {
+    // 防御性检查：确保 products 是有效数组
+    if (!Array.isArray(products) || products.length === 0) {
       console.warn(`分类 "${category}" 没有商品数据`);
       return [];
     }
     
-    const shuffled = [...meals].sort(() => Math.random() - 0.5);
+    const shuffled = [...products].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, count);
     
-    return selected.map(meal => ({
-      id: meal.id,
-      name: meal.name,
-      img: meal.image_url,
-      promoUrl: meal.cps_link || '',
-      weirdName: meal.name,
+    return selected.map(product => ({
+      id: product.id,
+      name: product.name,
+      img: product.img,
+      promoUrl: product.cps_link || product.promo_url || '',
+      weirdName: product.name,
       weirdEmoji: '🍽️',
-      description: meal.cps_link || ''
+      description: product.cps_link || product.promo_url || ''
     }));
   } catch (error) {
     console.error('获取随机商品异常:', error);
@@ -98,14 +99,14 @@ export const loadFoodData = async () => {
 
     const data: Record<string, any[]> = {};
     for (const category of ['breakfast', 'lunch', 'afternoon-tea', 'dinner', 'night-snack']) {
-      const meals = await getMealsByCategory(category);
-      data[category] = meals.map(meal => ({
-        id: meal.id,
-        name: meal.name,
-        img: meal.image_url,
-        weirdName: meal.name,
+      const products = await getProductsByCategory(category);
+      data[category] = products.map(product => ({
+        id: product.id,
+        name: product.name,
+        img: product.img,
+        weirdName: product.name,
         weirdEmoji: '🍽️',
-        description: meal.cps_link || ''
+        description: product.cps_link || product.promo_url || ''
       }));
     }
 

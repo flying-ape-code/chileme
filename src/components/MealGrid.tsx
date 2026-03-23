@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getMealsByCategory, getRandomMeals, type Meal } from '../lib/mealsService';
+import { getProductsByCategory, getRandomProducts, type Product } from '../lib/productsService';
 import MealCard from './MealCard';
 
 interface MealGridProps {
@@ -7,20 +7,20 @@ interface MealGridProps {
 }
 
 export default function MealGrid({ selectedCategory }: MealGridProps) {
-  const [meals, setMeals] = useState<Meal[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    loadMeals();
+    loadProducts();
   }, [selectedCategory]);
 
-  const loadMeals = async () => {
+  const loadProducts = async () => {
     setIsLoading(true);
-    const categoryMeals = await getMealsByCategory(selectedCategory);
-    const randomMeals = getRandomMeals(categoryMeals, 6);
-    setMeals(randomMeals);
-    setCount(categoryMeals.length);
+    const categoryProducts = await getProductsByCategory(selectedCategory);
+    const randomProducts = getRandomProducts(categoryProducts, 6);
+    setProducts(randomProducts);
+    setCount(categoryProducts.length);
     setIsLoading(false);
   };
 
@@ -50,20 +50,20 @@ export default function MealGrid({ selectedCategory }: MealGridProps) {
 
       {/* 商品网格 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {meals.map(meal => (
+        {products.map(product => (
           <MealCard
-            key={meal.id}
-            id={meal.id}
-            name={meal.name}
-            image_url={meal.image_url}
-            cps_link={meal.cps_link || ''}
-            category={meal.category}
+            key={product.id}
+            id={product.id}
+            name={product.name}
+            image_url={product.img}
+            cps_link={product.cps_link || product.promo_url || ''}
+            category={product.category}
           />
         ))}
       </div>
 
       {/* 空状态 */}
-      {meals.length === 0 && (
+      {products.length === 0 && (
         <div className="text-center py-12 text-gray-400">
           <p>暂无商品</p>
         </div>

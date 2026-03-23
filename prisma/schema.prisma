@@ -30,15 +30,23 @@ model User {
   @@map("profiles")
 }
 
-/// 商品表
+/// 商品表（统一使用此表）
 model Product {
-  id        String   @id @default(uuid())
-  name      String
-  img       String
-  promoUrl  String?
-  category  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(uuid())
+  name          String
+  img           String
+  promoUrl      String?   @map("promo_url")
+  cpsLink       String?   @map("cps_link")
+  category      String
+  priceMin      Float?    @map("price_min")
+  priceMax      Float?    @map("price_max")
+  rating        Float?
+  distance      String?
+  deliveryTime  String?   @map("delivery_time")
+  isActive      Boolean   @default(true) @map("is_active")
+  sortOrder     Int       @default(0) @map("sort_order")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
   @@map("products")
 }
@@ -46,11 +54,11 @@ model Product {
 /// 抽奖记录表
 model SpinRecord {
   id         String   @id @default(uuid())
-  userId     String
+  userId     String   @map("user_id")
   user       User     @relation(fields: [userId], references: [id])
   result     String
   points     Int
-  createdAt  DateTime @default(now())
+  createdAt  DateTime @default(now()) @map("created_at")
 
   @@map("spin_records")
 }
@@ -58,11 +66,11 @@ model SpinRecord {
 /// 历史操作记录表
 model History {
   id         String   @id @default(uuid())
-  userId     String
+  userId     String   @map("user_id")
   user       User     @relation(fields: [userId], references: [id])
   action     String
   details    String?
-  createdAt  DateTime @default(now())
+  createdAt  DateTime @default(now()) @map("created_at")
 
   @@map("history")
 }
