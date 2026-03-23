@@ -1,6 +1,6 @@
-// 数据迁移工具：将 meals-data.json 迁移到 localStorage
-import mealsData from '../../meals-data.json';
-import { getProducts, saveProducts } from './productManager';
+// 数据迁移工具：从数据库读取数据（已废弃，仅保留用于历史参考）
+// 注意：此文件已不再使用，所有数据现在直接从 Supabase products 表读取
+import { getProducts } from './productManager';
 
 const MIGRATION_KEY = 'chileme_data_migrated';
 
@@ -12,75 +12,23 @@ export const hasMigrated = () => {
 };
 
 /**
- * 执行数据迁移
- * 将 meals-data.json 中的数据迁移到 localStorage
+ * 执行数据迁移（已废弃）
+ * 注意：现在所有数据直接从数据库读取，不再需要迁移
  */
 export const migrateData = () => {
-  // 如果已经迁移过，跳过
-  if (hasMigrated()) {
-    console.log('Data already migrated, skipping...');
-    return { success: true, message: '数据已迁移' };
-  }
-
-  try {
-    // 获取当前 localStorage 中的数据
-    const existingProducts = getProducts();
-
-    // 检查每个分类是否为空
-    const categories = ['breakfast', 'lunch', 'afternoon-tea', 'dinner', 'night-snack'];
-    let migratedCount = 0;
-
-    const migratedData = { ...existingProducts };
-
-    categories.forEach((category) => {
-      // 如果分类为空或商品数量少于 meals-data.json 中的数量，则迁移
-      const sourceData = mealsData[category] || [];
-      const existingCount = existingProducts[category]?.length || 0;
-
-      if (existingCount === 0 || existingCount < sourceData.length) {
-        console.log(`Migrating ${category}: ${sourceData.length} items`);
-
-        migratedData[category] = sourceData.map((item, index) => ({
-          id: `${category}-${Date.now()}-${index}`,
-          name: item.name,
-          img: item.img,
-          promoUrl: item.promoUrl || '',
-          createdAt: new Date().toISOString()
-        }));
-
-        migratedCount += sourceData.length;
-      } else {
-        console.log(`Skipping ${category}: already has ${existingCount} items`);
-      }
-    });
-
-    // 保存迁移后的数据
-    const result = saveProducts(migratedData);
-
-    if (result.success) {
-      // 标记迁移完成
-      localStorage.setItem(MIGRATION_KEY, 'true');
-      console.log('Migration completed successfully!');
-      return {
-        success: true,
-        message: `成功迁移 ${migratedCount} 个商品`,
-        count: migratedCount
-      };
-    } else {
-      console.error('Migration failed:', result.message);
-      return { success: false, message: result.message };
-    }
-  } catch (error) {
-    console.error('Migration error:', error);
-    return { success: false, message: error.message };
-  }
+  console.warn('migrateData is deprecated - data is now loaded directly from database');
+  return { 
+    success: true, 
+    message: '数据已从数据库直接加载，无需迁移',
+    deprecated: true
+  };
 };
 
 /**
- * 强制重新迁移（用于测试或数据恢复）
+ * 强制重新迁移（已废弃）
  */
 export const forceMigrate = () => {
-  localStorage.removeItem(MIGRATION_KEY);
+  console.warn('forceMigrate is deprecated - data is now loaded directly from database');
   return migrateData();
 };
 
@@ -92,8 +40,9 @@ export const getMigrationStatus = () => {
   const totalItems = Object.values(products).reduce((sum, arr) => sum + arr.length, 0);
 
   return {
-    migrated: hasMigrated(),
+    migrated: true, // 现在总是 true，因为直接从数据库读取
     totalItems,
+    usingDatabase: true,
     breakdown: {
       breakfast: products.breakfast?.length || 0,
       lunch: products.lunch?.length || 0,
