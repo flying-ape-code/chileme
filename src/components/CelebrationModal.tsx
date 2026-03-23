@@ -35,9 +35,10 @@ interface CelebrationModalProps {
   category: MealType;
   onClose: () => void;
   onShare: () => void;
+  onPK?: () => void;
 }
 
-const CelebrationModal = ({ food, category, onClose, onShare }: CelebrationModalProps) => {
+const CelebrationModal = ({ food, category, onClose, onShare, onPK }: CelebrationModalProps) => {
   const randomPhrase = useMemo(() => 
     funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)], 
     []
@@ -75,16 +76,26 @@ const CelebrationModal = ({ food, category, onClose, onShare }: CelebrationModal
           </p>
 
           {/* 操作按钮 */}
-          <div className="flex gap-3">
-            <button
-              onClick={onShare}
-              className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full font-bold hover:from-cyan-600 hover:to-blue-600 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(0,247,255,0.5)]"
-            >
-              📤 分享
-            </button>
+          <div className="space-y-3">
+            <div className="flex gap-3">
+              <button
+                onClick={onShare}
+                className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full font-bold hover:from-cyan-600 hover:to-blue-600 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(0,247,255,0.5)]"
+              >
+                📤 分享
+              </button>
+              {onPK && (
+                <button
+                  onClick={onPK}
+                  className="flex-1 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-bold hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(255,0,234,0.5)]"
+                >
+                  ⚔️ PK
+                </button>
+              )}
+            </div>
             <button
               onClick={onClose}
-              className="flex-1 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold transition-all"
+              className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold transition-all"
             >
               再选一次
             </button>
