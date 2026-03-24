@@ -38,83 +38,133 @@ function Admin() {
   const [totalCount, setTotalCount] = useState(0);
   const pageSize = 20;
   const [selectedCategory, setSelectedCategory] = useState('全部');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [formData, setFormData] = useState({ name: '', img: '', promo_url: '', category: 'breakfast' });
 
   useEffect(() => {
+    console.log('===== [Admin Debug] =====');
+    console.log('isAuthenticated:', isAuthenticated);
+    console.log('isAdmin:', isAdmin);
+    
     if (!isAuthenticated || !isAdmin) {
+      console.log('未授权，跳转到登录页');
       navigate('/login');
       return;
     }
-    console.log('[Admin] 初始加载');
+    
+    console.log('开始加载商品');
     loadProducts(1, 'all');
   }, []);
 
   const loadProducts = async (page: number, category: string) => {
-    console.log('[Admin] loadProducts 调用:', { page, category });
+    console.log('\n===== [loadProducts] =====');
+    console.log('参数:', { page, category, pageSize });
+    
     setIsLoading(true);
     setError('');
     
     try {
+      // 构建查询
       let query = supabase
         .from('products')
         .select('*', { count: 'exact', head: false });
       
+      console.log('初始查询:', query);
+      
+      // 分类筛选
       if (category !== 'all') {
+        console.log('添加分类筛选:', category);
         query = query.eq('category', category);
       }
       
+      // 分页参数
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
       
-      console.log('[Admin] 分页参数:', { from, to, pageSize });
+      console.log('分页范围:', { from, to });
       
+      // 应用分页和排序
       query = query
         .order('created_at', { ascending: false })
         .range(from, to);
       
-      console.log('[Admin] 执行查询...');
+      console.log('执行查询...');
       
+      // 执行查询
       const { data, error, count } = await query;
       
-      console.log('[Admin] 查询结果:', {
+      console.log('查询结果:', {
         dataLength: data?.length,
         count,
-        error: error?.message
+        error: error?.message,
+        firstItem: data?.[0]?.name,
+        lastItem: data?.[data.length - 1]?.name
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('查询错误:', error);
+        throw error;
+      }
       
       setProducts(Array.isArray(data) ? data : []);
       setTotalCount(count || 0);
       setTotalPages(Math.ceil((count || 0) / pageSize));
       setCurrentPage(page);
+      
+      console.log('状态已更新:', {
+        products: data?.length,
+        totalCount: count,
+        totalPages: Math.ceil((count || 0) / pageSize)
+      });
+      
     } catch (err: any) {
-      console.error('[Admin] 加载商品失败:', err);
+      console.error('[loadProducts Error]:', err);
       setError(err.message);
       setProducts([]);
       setTotalCount(0);
       setTotalPages(0);
     } finally {
       setIsLoading(false);
+      console.log('===== [loadProducts End] =====\n');
     }
   };
 
   const handleCategoryChange = (category: string) => {
-    console.log('[Admin] 切换分类:', category);
+    console.log('[handleCategoryChange]:', category);
     setSelectedCategory(category);
     const categoryKey = categoryMap[category];
     loadProducts(1, categoryKey);
   };
 
   const handlePageChange = (page: number) => {
-    console.log('[Admin] 切换页码:', page);
+    console.log('[handlePageChange]:', page);
     const categoryKey = categoryMap[selectedCategory];
     loadProducts(page, categoryKey);
   };
 
-  // ... 其他函数省略 ...
+  const handleDeleteProduct = async (id: string) => {
+    if (!confirm('确定要删除这个商品吗？')) return;
+    try {
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) throw error;
+      const categoryKey = categoryMap[selectedCategory];
+      loadProducts(currentPage, categoryKey);
+    } catch (err: any) {
+      setError('删除失败：' + err.message);
+    }
+  };
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
+    let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let end = Math.min(totalPages, start + maxVisible - 1);
+    if (end - start < maxVisible - 1) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
 
   if (!isAuthenticated || !isAdmin) {
     return <div className="min-h-screen flex items-center justify-center">加载中...</div>;
@@ -169,7 +219,7 @@ function Admin() {
           ) : products.length === 0 && totalCount === 0 ? (
             <div className="text-center py-12">
               <div className="text-gray-400 mb-4">暂无商品</div>
-              <button onClick={() => setShowAddModal(true)} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">添加第一个商品</button>
+              <button onClick={() => navigate('/')} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">返回首页</button>
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-12 text-gray-400">当前分类无商品</div>
@@ -180,8 +230,6 @@ function Admin() {
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">商品</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">分类</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">CPS 链接</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">创建时间</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">操作</th>
                   </tr>
@@ -208,6 +256,16 @@ function Admin() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+          
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 px-6 py-4 border-t">
+              <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 rounded border disabled:opacity-50">上一页</button>
+              {getPageNumbers().map(page => (
+                <button key={page} onClick={() => handlePageChange(page)} className={`px-3 py-1 rounded border ${currentPage === page ? 'bg-blue-500 text-white' : ''}`}>{page}</button>
+              ))}
+              <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 py-1 rounded border disabled:opacity-50">下一页</button>
             </div>
           )}
         </div>
