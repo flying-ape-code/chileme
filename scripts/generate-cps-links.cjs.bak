@@ -7,7 +7,7 @@ const https = require('https');
 
 // API 配置
 const API_KEY = process.env.VITE_DINGDANXIA_APIKEY || 'Ww9xkFpD8lfGswr4UleNjsQoxMHyeiWR';
-const API_BASE = 'http://api.tbk.dingdanxia.com';
+const API_BASE = 'https://api.dingdanxia.com';
 
 // 美团联盟官方推广位 ID
 const MEITUAN_POSITION_ID = 'shipinwaimai'; // 食品外卖分类
@@ -31,7 +31,7 @@ async function generateCPSLink(originalUrl, goodsId) {
     });
 
     const options = {
-      hostname: 'api.tbk.dingdanxia.com',
+      hostname: 'api.dingdanxia.com',
       port: 443,
       path: '/api/cps/convert',
       method: 'POST',
