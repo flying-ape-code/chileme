@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 
 interface Product {
@@ -14,58 +16,179 @@ interface Product {
   updated_at: string;
 }
 
-export default function Admin() {
+const categories = ['全部', '早餐', '午餐', '下午茶', '晚餐', '夜宵'];
+const categoryMap: Record<string, string> = {
+  '全部': 'all',
+  '早餐': 'breakfast',
+  '午餐': 'lunch',
+  '下午茶': 'afternoon-tea',
+  '晚餐': 'dinner',
+  '夜宵': 'night-snack'
+};
+
+function Admin() {
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const navigate = useNavigate();
+  
+  // 数据状态
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 20;
   
   // 筛选状态
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState('全部');
   
+  // 模态框状态
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  // 表单状态
+  const [formData, setFormData] = useState({
+    name: '',
+    img: '',
+    promo_url: '',
+    category: 'breakfast'
+  });
+
+  // 权限检查
   useEffect(() => {
-    loadProducts();
-  }, [selectedCategory]);
-  
-  const loadProducts = async () => {
+    if (!isAuthenticated || !isAdmin) {
+      navigate('/login');
+      return;
+    }
+  }, [isAuthenticated, isAdmin, navigate]);
+
+  // 加载数据（仅当点击商品管理时）
+  const loadProducts = async (page: number = 1, category: string = 'all') => {
     setIsLoading(true);
-    setError(null);
+    setError('');
     
     try {
       let query = supabase
         .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*', { count: 'exact', head: false });
       
-      if (selectedCategory !== 'all') {
-        query = query.eq('category', selectedCategory);
+      if (category !== 'all') {
+        query = query.eq('category', category);
       }
       
-      const { data, error } = await query;
+      // 分页查询
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+      
+      query = query
+        .order('created_at', { ascending: false })
+        .range(from, to);
+      
+      const { data, error, count } = await query;
       
       if (error) throw error;
       
-      // 防御性检查：确保 data 是数组
       setProducts(Array.isArray(data) ? data : []);
+      setTotalCount(count || 0);
+      setTotalPages(Math.ceil((count || 0) / pageSize));
+      setCurrentPage(page);
     } catch (err: any) {
       console.error('加载商品失败:', err);
       setError(err.message);
       setProducts([]);
+      setTotalCount(0);
+      setTotalPages(0);
     } finally {
       setIsLoading(false);
     }
   };
-  
-  // 分页计算
-  const totalProducts = Array.isArray(products) ? products.length : 0;
-  const totalPages = Math.ceil(totalProducts / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedProducts = products.slice(startIndex, endIndex);
-  
+
+  // 初始不加载数据，等待用户点击分类
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    const categoryKey = categoryMap[category];
+    loadProducts(1, categoryKey);
+  };
+
+  // 页码变化
+  const handlePageChange = (page: number) => {
+    const categoryKey = categoryMap[selectedCategory];
+    loadProducts(page, categoryKey);
+  };
+
+  // 添加商品
+  const handleAddProduct = async () => {
+    if (!formData.name || !formData.img) {
+      setError('请填写商品名称和图片 URL');
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from('products').insert([{
+        name: formData.name,
+        img: formData.img,
+        promo_url: formData.promo_url || null,
+        category: formData.category
+      }]);
+
+      if (error) throw error;
+
+      setShowAddModal(false);
+      setFormData({ name: '', img: '', promo_url: '', category: 'breakfast' });
+      
+      // 重新加载当前页数据
+      const categoryKey = categoryMap[selectedCategory];
+      loadProducts(currentPage, categoryKey);
+    } catch (err: any) {
+      setError('添加失败：' + err.message);
+    }
+  };
+
+  // 编辑商品
+  const handleEditProduct = async () => {
+    if (!editingProduct) return;
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({
+          name: editingProduct.name,
+          img: editingProduct.img,
+          promo_url: editingProduct.promo_url,
+          category: editingProduct.category
+        })
+        .eq('id', editingProduct.id);
+
+      if (error) throw error;
+
+      setEditingProduct(null);
+      
+      // 重新加载当前页数据
+      const categoryKey = categoryMap[selectedCategory];
+      loadProducts(currentPage, categoryKey);
+    } catch (err: any) {
+      setError('更新失败：' + err.message);
+    }
+  };
+
+  // 删除商品
+  const handleDeleteProduct = async (id: string) => {
+    if (!confirm('确定要删除这个商品吗？')) return;
+
+    try {
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) throw error;
+      
+      // 重新加载当前页数据
+      const categoryKey = categoryMap[selectedCategory];
+      loadProducts(currentPage, categoryKey);
+    } catch (err: any) {
+      setError('删除失败：' + err.message);
+    }
+  };
+
   // 页码生成
   const getPageNumbers = () => {
     const pages = [];
@@ -83,17 +206,7 @@ export default function Admin() {
     
     return pages;
   };
-  
-  const categories = ['all', 'breakfast', 'lunch', 'afternoon-tea', 'dinner', 'night-snack'];
-  const categoryNames: Record<string, string> = {
-    all: '全部',
-    breakfast: '早餐',
-    lunch: '午餐',
-    'afternoon-tea': '下午茶',
-    dinner: '晚餐',
-    'night-snack': '夜宵'
-  };
-  
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
@@ -104,7 +217,7 @@ export default function Admin() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-500 text-sm mb-1">总计商品</p>
-              <p className="text-3xl font-bold text-blue-600">{totalProducts} 个</p>
+              <p className="text-3xl font-bold text-blue-600">{totalCount} 个</p>
             </div>
             <div>
               <p className="text-gray-500 text-sm mb-1">当前页</p>
@@ -119,17 +232,14 @@ export default function Admin() {
             {categories.map(cat => (
               <button
                 key={cat}
-                onClick={() => {
-                  setSelectedCategory(cat);
-                  setCurrentPage(1);
-                }}
+                onClick={() => handleCategoryChange(cat)}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   selectedCategory === cat
                     ? 'bg-blue-500 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {categoryNames[cat]}
+                {cat}
               </button>
             ))}
           </div>
@@ -138,7 +248,7 @@ export default function Admin() {
         {/* 错误提示 */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-            <p className="font-medium">加载失败</p>
+            <p className="font-medium">错误</p>
             <p className="text-sm">{error}</p>
           </div>
         )}
@@ -149,9 +259,19 @@ export default function Admin() {
             <div className="text-center py-12">
               <div className="text-gray-400">加载中...</div>
             </div>
-          ) : paginatedProducts.length === 0 ? (
+          ) : products.length === 0 && totalCount === 0 ? (
             <div className="text-center py-12">
-              <div className="text-gray-400">暂无商品</div>
+              <div className="text-gray-400 mb-4">暂无商品</div>
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                添加第一个商品
+              </button>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-gray-400">当前分类无商品</div>
             </div>
           ) : (
             <>
@@ -164,10 +284,11 @@ export default function Admin() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">CPS 链接</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">创建时间</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">操作</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {paginatedProducts.map(product => (
+                    {products.map(product => (
                       <tr key={product.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <div className="flex items-center">
@@ -184,7 +305,7 @@ export default function Admin() {
                         </td>
                         <td className="px-6 py-4">
                           <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
-                            {categoryNames[product.category] || product.category}
+                            {categoryMap[Object.keys(categoryMap).find(k => categoryMap[k] === product.category)] || product.category}
                           </span>
                         </td>
                         <td className="px-6 py-4">
@@ -206,6 +327,22 @@ export default function Admin() {
                         <td className="px-6 py-4 text-sm text-gray-500">
                           {new Date(product.created_at).toLocaleDateString('zh-CN')}
                         </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => setEditingProduct(product)}
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                            >
+                              编辑
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(product.id)}
+                              className="text-red-600 hover:text-red-800 text-sm"
+                            >
+                              删除
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -216,7 +353,7 @@ export default function Admin() {
               {totalPages > 1 && (
                 <div className="flex justify-center items-center gap-2 px-6 py-4 border-t">
                   <button
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                     className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                   >
@@ -226,7 +363,7 @@ export default function Admin() {
                   {getPageNumbers().map(page => (
                     <button
                       key={page}
-                      onClick={() => setCurrentPage(page)}
+                      onClick={() => handlePageChange(page)}
                       className={`px-3 py-1 rounded border ${
                         currentPage === page
                           ? 'bg-blue-500 text-white border-blue-500'
@@ -238,7 +375,7 @@ export default function Admin() {
                   ))}
                   
                   <button
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                     className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                   >
@@ -249,7 +386,164 @@ export default function Admin() {
             </>
           )}
         </div>
+        
+        {/* 添加商品按钮 */}
+        <div className="mt-6">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium"
+          >
+            + 添加商品
+          </button>
+        </div>
       </div>
+
+      {/* 添加商品模态框 */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold mb-4">添加商品</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">商品名称</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="输入商品名称"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">图片 URL</label>
+                <input
+                  type="url"
+                  value={formData.img}
+                  onChange={(e) => setFormData({...formData, img: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">推广链接</label>
+                <input
+                  type="url"
+                  value={formData.promo_url}
+                  onChange={(e) => setFormData({...formData, promo_url: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://example.com/promo"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">分类</label>
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData({...formData, category: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="breakfast">早餐</option>
+                  <option value="lunch">午餐</option>
+                  <option value="afternoon-tea">下午茶</option>
+                  <option value="dinner">晚餐</option>
+                  <option value="night-snack">夜宵</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleAddProduct}
+                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                添加
+              </button>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 编辑商品模态框 */}
+      {editingProduct && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold mb-4">编辑商品</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">商品名称</label>
+                <input
+                  type="text"
+                  value={editingProduct.name}
+                  onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">图片 URL</label>
+                <input
+                  type="url"
+                  value={editingProduct.img}
+                  onChange={(e) => setEditingProduct({...editingProduct, img: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">推广链接</label>
+                <input
+                  type="url"
+                  value={editingProduct.promo_url || ''}
+                  onChange={(e) => setEditingProduct({...editingProduct, promo_url: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">分类</label>
+                <select
+                  value={editingProduct.category}
+                  onChange={(e) => setEditingProduct({...editingProduct, category: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="breakfast">早餐</option>
+                  <option value="lunch">午餐</option>
+                  <option value="afternoon-tea">下午茶</option>
+                  <option value="dinner">晚餐</option>
+                  <option value="night-snack">夜宵</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleEditProduct}
+                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                保存
+              </button>
+              <button
+                onClick={() => setEditingProduct(null)}
+                className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+export default Admin;
