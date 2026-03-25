@@ -7,250 +7,219 @@ interface Product {
   id: string;
   name: string;
   img: string;
-  promo_url?: string | null;
-  cps_link?: string | null;
   category: string;
   is_active: boolean;
-  sort_order: number;
   created_at: string;
-  updated_at: string;
 }
 
-const categories = ['全部', '早餐', '午餐', '下午茶', '晚餐', '夜宵'];
-const categoryMap: Record<string, string> = {
-  '全部': 'all',
-  '早餐': 'breakfast',
-  '午餐': 'lunch',
-  '下午茶': 'afternoon-tea',
-  '晚餐': 'dinner',
-  '夜宵': 'night-snack'
-};
+const CATEGORIES = [
+  { id: 'all', name: '全部', emoji: '🍱' },
+  { id: 'breakfast', name: '早餐', emoji: '🌅' },
+  { id: 'lunch', name: '午餐', emoji: '🍜' },
+  { id: 'afternoon-tea', name: '下午茶', emoji: '☕' },
+  { id: 'dinner', name: '晚餐', emoji: '🍽️' },
+  { id: 'night-snack', name: '夜宵', emoji: '🌙' }
+];
+
+const PAGE_SIZE = 20;
 
 function Admin() {
   const { isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
   
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
-  const pageSize = 20;
-  const [selectedCategory, setSelectedCategory] = useState('全部');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   useEffect(() => {
-    console.log('===== [Admin Debug] =====');
-    console.log('isAuthenticated:', isAuthenticated);
-    console.log('isAdmin:', isAdmin);
-    
     if (!isAuthenticated || !isAdmin) {
-      console.log('未授权，跳转到登录页');
+      console.log('[Admin Auth] Unauthorized access, redirecting to login');
       navigate('/login');
-      return;
     }
-    
-    console.log('开始加载商品');
-    loadProducts(1, 'all');
-  }, []);
+  }, [isAuthenticated, isAdmin, navigate]);
 
-  const loadProducts = async (page: number, category: string) => {
-    console.log('\n===== [loadProducts] =====');
-    console.log('参数:', { page, category, pageSize });
-    
-    setIsLoading(true);
-    setError('');
-    
+  useEffect(() => {
+    if (isAuthenticated && isAdmin) {
+      fetchProducts(currentPage, selectedCategory);
+    }
+  }, [currentPage, selectedCategory, isAuthenticated, isAdmin]);
+
+  const fetchProducts = async (page: number, category: string) => {
+    console.log(`\n===== [Admin Fetch] Page: ${page}, Category: ${category} =====`);
+    setLoading(true);
+    setError(null);
+
     try {
-      // 构建查询
       let query = supabase
         .from('products')
-        .select('*', { count: 'exact', head: false });
-      
-      console.log('初始查询:', query);
-      
-      // 分类筛选
+        .select('*', { count: 'exact' });
+
       if (category !== 'all') {
-        console.log('添加分类筛选:', category);
+        console.log(`[Admin Query] Applying category filter: ${category}`);
         query = query.eq('category', category);
       }
+
+      const from = (page - 1) * PAGE_SIZE;
+      const to = page * PAGE_SIZE - 1;
+      console.log(`[Admin Query] Pagination range: ${from} to ${to}`);
       
-      // 分页参数
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
-      
-      console.log('分页范围:', { from, to });
-      
-      // 应用分页和排序
       query = query
         .order('created_at', { ascending: false })
         .range(from, to);
-      
-      console.log('执行查询...');
-      
-      // 执行查询
-      const { data, error, count } = await query;
-      
-      console.log('查询结果:', {
-        dataLength: data?.length,
-        count,
-        error: error?.message,
-        firstItem: data?.[0]?.name,
-        lastItem: data?.[data.length - 1]?.name
-      });
-      
-      if (error) {
-        console.error('查询错误:', error);
-        throw error;
+
+      console.log('[Admin Query] Executing Supabase query...');
+      const { data, error: fetchError, count } = await query;
+
+      if (fetchError) {
+        console.error('[Admin Query Error]:', fetchError);
+        throw new Error(fetchError.message);
       }
-      
-      setProducts(Array.isArray(data) ? data : []);
-      setTotalCount(count || 0);
-      setTotalPages(Math.ceil((count || 0) / pageSize));
-      setCurrentPage(page);
-      
-      console.log('状态已更新:', {
-        products: data?.length,
-        totalCount: count,
-        totalPages: Math.ceil((count || 0) / pageSize)
+
+      console.log('[Admin Query Success] Received:', {
+        itemCount: data?.length || 0,
+        totalInDb: count,
+        page: page
       });
-      
+
+      setProducts(data || []);
+      setTotalCount(count || 0);
     } catch (err: any) {
-      console.error('[loadProducts Error]:', err);
-      setError(err.message);
-      setProducts([]);
-      setTotalCount(0);
-      setTotalPages(0);
+      console.error('[Admin Fetch Failed]:', err);
+      setError(err.message || '获取商品数据失败');
     } finally {
-      setIsLoading(false);
-      console.log('===== [loadProducts End] =====\n');
+      setLoading(false);
+      console.log('===== [Admin Fetch End] =====\n');
     }
   };
 
-  const handleCategoryChange = (category: string) => {
-    console.log('[handleCategoryChange]:', category);
-    setSelectedCategory(category);
-    const categoryKey = categoryMap[category];
-    loadProducts(1, categoryKey);
+  const handlePageChange = (newPage: number) => {
+    console.log(`[Admin UI] Changing page to: ${newPage}`);
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handlePageChange = (page: number) => {
-    console.log('[handlePageChange]:', page);
-    const categoryKey = categoryMap[selectedCategory];
-    loadProducts(page, categoryKey);
+  const handleCategoryChange = (catId: string) => {
+    console.log(`[Admin UI] Changing category to: ${catId}`);
+    setSelectedCategory(catId);
+    setCurrentPage(1);
   };
 
-  const handleDeleteProduct = async (id: string) => {
-    if (!confirm('确定要删除这个商品吗？')) return;
-    try {
-      const { error } = await supabase.from('products').delete().eq('id', id);
-      if (error) throw error;
-      const categoryKey = categoryMap[selectedCategory];
-      loadProducts(currentPage, categoryKey);
-    } catch (err: any) {
-      setError('删除失败：' + err.message);
-    }
-  };
-
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisible = 5;
-    let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-    let end = Math.min(totalPages, start + maxVisible - 1);
-    if (end - start < maxVisible - 1) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-    return pages;
-  };
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   if (!isAuthenticated || !isAdmin) {
-    return <div className="min-h-screen flex items-center justify-center">加载中...</div>;
+    return null;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">商品管理后台</h1>
-        
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm mb-1">总计商品</p>
-              <p className="text-3xl font-bold text-blue-600">{totalCount} 个</p>
-            </div>
-            <div>
-              <p className="text-gray-500 text-sm mb-1">当前页</p>
-              <p className="text-3xl font-bold text-green-600">{currentPage}/{totalPages || 1}</p>
+    <div className="min-h-screen bg-cyber-dark text-white p-4 sm:p-8 font-mono">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 border-b border-cyber-cyan/30 pb-6">
+          <div>
+            <h1 className="text-3xl font-black text-cyber-cyan neon-text-cyan uppercase tracking-tighter">
+              Control Panel // 商品管理
+            </h1>
+            <p className="text-gray-500 text-xs mt-1">[ Access Level: Administrator ]</p>
+          </div>
+          <button 
+            onClick={() => navigate('/')}
+            className="px-4 py-2 border border-cyber-pink/50 text-cyber-pink hover:bg-cyber-pink/10 transition-all text-sm uppercase"
+          >
+            返回终端
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+          <div className="lg:col-span-1 bg-black/40 border border-cyber-cyan/20 p-6 rounded-sm backdrop-blur-md">
+            <p className="text-gray-500 text-xs uppercase mb-2">Total Inventory</p>
+            <p className="text-4xl font-black text-cyber-cyan">{totalCount}</p>
+            <p className="text-[10px] text-gray-600 mt-2">DATABASE: products_v1</p>
+          </div>
+
+          <div className="lg:col-span-3 bg-black/40 border border-cyber-cyan/20 p-6 rounded-sm backdrop-blur-md">
+            <p className="text-gray-500 text-xs uppercase mb-4">Sector Filter // 分类筛选</p>
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => handleCategoryChange(cat.id)}
+                  className={`px-4 py-2 text-xs border transition-all ${
+                    selectedCategory === cat.id
+                      ? 'bg-cyber-cyan text-black border-cyber-cyan shadow-[0_0_15px_rgba(0,247,255,0.5)]'
+                      : 'border-cyber-cyan/30 text-cyber-cyan/60 hover:border-cyber-cyan hover:text-cyber-cyan'
+                  }`}
+                >
+                  {cat.emoji} {cat.name}
+                </button>
+              ))}
             </div>
           </div>
         </div>
-        
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <div className="flex gap-2 flex-wrap">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => handleCategoryChange(cat)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedCategory === cat
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-        
+
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-            <p className="font-medium">错误</p>
-            <p className="text-sm">{error}</p>
+          <div className="bg-red-900/20 border border-red-500 text-red-400 p-4 mb-8 flex items-center gap-3">
+            <span className="text-2xl">⚠️</span>
+            <div>
+              <p className="font-bold uppercase text-xs">System Error</p>
+              <p className="text-sm">{error}</p>
+            </div>
           </div>
         )}
-        
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          {isLoading ? (
-            <div className="text-center py-12 text-gray-400">加载中...</div>
-          ) : products.length === 0 && totalCount === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">暂无商品</div>
-              <button onClick={() => navigate('/')} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">返回首页</button>
+
+        <div className="bg-black/60 border border-cyber-cyan/20 rounded-sm overflow-hidden mb-8">
+          {loading ? (
+            <div className="py-20 text-center">
+              <div className="w-10 h-10 border-2 border-cyber-cyan/20 border-t-cyber-cyan rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-cyber-cyan text-xs animate-pulse">SYNCHRONIZING...</p>
             </div>
           ) : products.length === 0 ? (
-            <div className="text-center py-12 text-gray-400">当前分类无商品</div>
+            <div className="py-20 text-center text-gray-500">
+              <p>[ NO DATA FOUND IN CURRENT SECTOR ]</p>
+            </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">商品</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">分类</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">创建时间</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">操作</th>
+              <table className="w-full text-left text-sm border-collapse">
+                <thead>
+                  <tr className="border-b border-cyber-cyan/20 bg-cyber-cyan/5">
+                    <th className="px-6 py-4 text-cyber-cyan font-bold uppercase tracking-wider text-xs">Preview</th>
+                    <th className="px-6 py-4 text-cyber-cyan font-bold uppercase tracking-wider text-xs">Name</th>
+                    <th className="px-6 py-4 text-cyber-cyan font-bold uppercase tracking-wider text-xs">Category</th>
+                    <th className="px-6 py-4 text-cyber-cyan font-bold uppercase tracking-wider text-xs">Timestamp</th>
+                    <th className="px-6 py-4 text-cyber-cyan font-bold uppercase tracking-wider text-xs text-right">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-cyber-cyan/10">
                   {products.map(product => (
-                    <tr key={product.id} className="hover:bg-gray-50">
+                    <tr key={product.id} className="hover:bg-cyber-cyan/5 transition-colors group">
                       <td className="px-6 py-4">
-                        <div className="flex items-center">
-                          <img src={product.img} alt={product.name} className="w-12 h-12 rounded object-cover mr-3" />
-                          <div>
-                            <p className="font-medium text-gray-900">{product.name}</p>
-                          </div>
+                        <div className="w-12 h-12 border border-cyber-cyan/30 p-0.5 group-hover:border-cyber-cyan transition-all">
+                          <img src={product.img} alt={product.name} className="w-full h-full object-cover" />
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">{product.category}</span>
+                        <p className="font-bold text-white group-hover:text-cyber-cyan transition-colors">{product.name}</p>
+                        <p className="text-[10px] text-gray-500 mt-1">ID: {product.id.substring(0, 8)}...</p>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{new Date(product.created_at).toLocaleDateString('zh-CN')}</td>
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-0.5 border border-gray-700 text-[10px] uppercase text-gray-400">
+                          {CATEGORIES.find(c => c.id === product.category)?.name || product.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-500 text-xs font-mono">
+                        {new Date(product.created_at).toLocaleString('zh-CN', { 
+                          year: 'numeric', 
+                          month: '2-digit', 
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </td>
                       <td className="px-6 py-4 text-right">
-                        <button onClick={() => handleDeleteProduct(product.id)} className="text-red-600 hover:text-red-800 text-sm">删除</button>
+                        <span className={`text-[10px] px-2 py-1 ${product.is_active ? 'text-green-400 border border-green-400/30' : 'text-gray-500 border border-gray-500/30'}`}>
+                          {product.is_active ? 'ACTIVE' : 'INACTIVE'}
+                        </span>
                       </td>
                     </tr>
                   ))}
@@ -258,17 +227,56 @@ function Admin() {
               </table>
             </div>
           )}
-          
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 px-6 py-4 border-t">
-              <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 rounded border disabled:opacity-50">上一页</button>
-              {getPageNumbers().map(page => (
-                <button key={page} onClick={() => handlePageChange(page)} className={`px-3 py-1 rounded border ${currentPage === page ? 'bg-blue-500 text-white' : ''}`}>{page}</button>
-              ))}
-              <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 py-1 rounded border disabled:opacity-50">下一页</button>
-            </div>
-          )}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 border-t border-cyber-cyan/20">
+            <p className="text-gray-500 text-xs">
+              SHOWING <span className="text-cyber-cyan">{products.length}</span> OF <span className="text-cyber-cyan">{totalCount}</span> RECORDS
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                disabled={currentPage === 1 || loading}
+                onClick={() => handlePageChange(currentPage - 1)}
+                className="p-2 border border-cyber-cyan/30 text-cyber-cyan disabled:opacity-30 disabled:cursor-not-allowed hover:bg-cyber-cyan/10 transition-all"
+              >
+                ◀ PREV
+              </button>
+              
+              <div className="flex gap-1">
+                {[...Array(totalPages)].map((_, i) => {
+                  const p = i + 1;
+                  if (p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1) {
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => handlePageChange(p)}
+                        className={`w-8 h-8 text-xs border transition-all ${
+                          currentPage === p
+                            ? 'bg-cyber-cyan text-black border-cyber-cyan'
+                            : 'border-cyber-cyan/30 text-cyber-cyan hover:border-cyber-cyan'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    );
+                  } else if (p === currentPage - 2 || p === currentPage + 2) {
+                    return <span key={p} className="text-cyber-cyan/30 px-1">...</span>;
+                  }
+                  return null;
+                })}
+              </div>
+
+              <button
+                disabled={currentPage === totalPages || loading}
+                onClick={() => handlePageChange(currentPage + 1)}
+                className="p-2 border border-cyber-cyan/30 text-cyber-cyan disabled:opacity-30 disabled:cursor-not-allowed hover:bg-cyber-cyan/10 transition-all"
+              >
+                NEXT ▶
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
