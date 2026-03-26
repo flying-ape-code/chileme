@@ -1,4 +1,5 @@
 import { CPS_CONFIG } from '../config/cps';
+import { trackClick, trackJump, isWeChat } from './cps-tracking';
 
 export interface JumpOptions {
   couponId: string;
@@ -10,7 +11,7 @@ export interface JumpOptions {
  * 生成小程序跳转链接
  */
 export function getMiniAppLink(options: JumpOptions): string {
-  const { couponId, couponLink } = options;
+  const { couponLink } = options;
   
   // 美团小程序链接格式
   return `weixin://dl/business/?t=${encodeURIComponent(couponLink)}`;
@@ -25,46 +26,24 @@ export function getH5Link(options: JumpOptions): string {
 }
 
 /**
- * 判断是否在微信环境
- */
-export function isWeChat(): boolean {
-  if (typeof window === 'undefined') return false;
-  const ua = navigator.userAgent.toLowerCase();
-  return ua.includes('micromessenger');
-}
-
-/**
  * 执行跳转
  */
 export function jumpToCoupon(options: JumpOptions): void {
-  // 记录埋点
-  trackClick(options);
+  // 记录点击埋点
+  trackClick(options.couponId, options.source);
   
   // 根据环境选择跳转方式
   if (isWeChat()) {
     // 微信环境：跳转小程序
     window.location.href = getMiniAppLink(options);
+    // 记录跳转埋点（延迟发送，确保跳转已触发）
+    setTimeout(() => trackJump(options.couponId, options.source), 500);
   } else {
     // 非微信环境：跳转 H5
-    window.open(getH5Link(options), '_blank');
+    const newWindow = window.open(getH5Link(options), '_blank');
+    // 记录跳转埋点
+    if (newWindow) {
+      trackJump(options.couponId, options.source);
+    }
   }
-}
-
-/**
- * 埋点记录
- */
-function trackClick(options: JumpOptions): void {
-  const event = {
-    event: 'cps_coupon_click',
-    couponId: options.couponId,
-    source: options.source,
-    timestamp: Date.now(),
-    platform: isWeChat() ? 'miniprogram' : 'h5',
-  };
-  
-  // 发送到分析服务
-  console.log('[CPS Click]', event);
-  
-  // TODO: 发送到实际的分析服务
-  // fetch('/api/analytics', { method: 'POST', body: JSON.stringify(event) });
 }

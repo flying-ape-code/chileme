@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { jumpToCoupon } from '../services/cps-jump';
+import { observeImpression } from '../services/cps-tracking';
 
 interface MealCardProps {
   id: string;
@@ -24,16 +25,30 @@ export default function MealCard({
   deliveryTime,
   category
 }: MealCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // 曝光追踪
+  useEffect(() => {
+    if (!cardRef.current) return;
+    
+    // 使用 Intersection Observer 自动追踪曝光
+    const unobserve = observeImpression(cardRef.current, id, 'list');
+    
+    return () => {
+      unobserve();
+    };
+  }, [id]);
+
   const handleCouponClick = () => {
     jumpToCoupon({
       couponId: id,
       couponLink: cps_link,
-      source: 'card'
+      source: 'list'
     });
   };
 
   return (
-    <div className="meal-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <div ref={cardRef} className="meal-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       {/* 商品图片 */}
       <div className="relative">
         <img

@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { CPS_CONFIG, generateCPSLink, generateCPSLinkWithTracking } from '../config/cps';
 
-// Mock environment variables
+// Mock environment variables - 使用实际默认值
 vi.mock('vite', () => ({
   env: {
-    VITE_MEITUAN_POSITION_ID: 'test_position',
-    VITE_MEITUAN_CHANNEL_ID: 'test_channel',
-    VITE_MEITUAN_MINI_APP_ID: 'test_mini_app',
+    VITE_MEITUAN_POSITION_ID: 'shipinwaimai',
+    VITE_MEITUAN_CHANNEL_ID: '473920',
+    VITE_MEITUAN_MINI_APP_ID: 'wxde8ac0a21135c0',
     VITE_CPS_ENABLED: 'true',
   },
 }));
