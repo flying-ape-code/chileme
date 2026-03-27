@@ -1,0 +1,63 @@
+/* V3.0 深色模式 */
+
+:root.dark {
+  --bg-primary: #0F172A;
+  --bg-secondary: #1E293B;
+  --bg-tertiary: #334155;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --border-light: #334155;
+  --border-medium: #475569;
+}
+
+:root.dark .bg-white {
+  background-color: var(--bg-secondary);
+}
+
+:root.dark .bg-gray-50 {
+  background-color: var(--bg-primary);
+}
+
+:root.dark .bg-gray-100 {
+  background-color: var(--bg-secondary);
+}
+
+:root.dark .text-gray-900 {
+  color: var(--text-primary);
+}
+
+:root.dark .text-gray-700 {
+  color: var(--text-primary);
+}
+
+:root.dark .text-gray-600 {
+  color: var(--text-secondary);
+}
+
+:root.dark .text-gray-500 {
+  color: var(--text-secondary);
+}
+
+:root.dark .border-gray-200 {
+  border-color: var(--border-light);
+}
+
+:root.dark .border-gray-100 {
+  border-color: var(--border-light);
+}
+
+:root.dark .card {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-light);
+}
+
+:root.dark input,
+:root.dark select {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+:root.dark input::placeholder {
+  color: var(--text-secondary);
+}
