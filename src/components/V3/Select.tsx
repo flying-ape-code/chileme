@@ -1,52 +1,37 @@
-import React, { forwardRef, SelectHTMLAttributes } from 'react';
+// V3.0 Select 组件
+import React, { forwardRef } from 'react';
 
-export interface SelectOption {
-  value: string;
-  label: string;
-  disabled?: boolean;
-}
-
-export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
+interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   error?: string;
   helperText?: string;
-  options: SelectOption[];
-  placeholder?: string;
-  fullWidth?: boolean;
+  options: { value: string; label: string; disabled?: boolean }[];
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, helperText, options, placeholder, fullWidth = true, className = '', children, ...props }, ref) => {
-    const baseStyles = `
-      px-4 py-2.5
-      border rounded-lg
-      transition-all duration-200
-      focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent
-      disabled:bg-gray-100 disabled:cursor-not-allowed
-      bg-white
-      cursor-pointer
-      ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'}
-      ${fullWidth ? 'w-full' : ''}
-      ${className}
-    `;
-
+  ({ label, error, helperText, options, className = '', ...props }, ref) => {
     return (
-      <div className={fullWidth ? 'w-full' : ''}>
+      <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             {label}
           </label>
         )}
         <select
           ref={ref}
-          className={baseStyles}
+          className={`
+            block w-full rounded-lg border transition-all duration-200
+            px-4 py-2.5 text-base bg-white
+            ${error 
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+              : 'border-gray-300 focus:border-[#FF6B35] focus:ring-[#FF6B35]'
+            }
+            focus:outline-none focus:ring-1
+            disabled:bg-gray-100 disabled:text-gray-500
+            ${className}
+          `}
           {...props}
         >
-          {placeholder && (
-            <option value="" disabled>
-              {placeholder}
-            </option>
-          )}
           {options.map((option) => (
             <option
               key={option.value}
@@ -56,13 +41,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               {option.label}
             </option>
           ))}
-          {children}
         </select>
-        {helperText && (
-          <p className={`mt-1 text-sm ${error ? 'text-red-500' : 'text-gray-500'}`}>
-            {error || helperText}
-          </p>
-        )}
+        {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+        {helperText && !error && <p className="mt-1 text-sm text-gray-500">{helperText}</p>}
       </div>
     );
   }
