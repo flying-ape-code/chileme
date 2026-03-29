@@ -36,6 +36,10 @@ export const Card: React.FC<CardProps> = ({
   variant = 'primary',
   bordered = true,
 }) => {
+  const handleClick = () => {
+    if (onClick) onClick();
+  };
+
   return (
     <div
       className={`
@@ -47,7 +51,7 @@ export const Card: React.FC<CardProps> = ({
         ${onClick ? 'cursor-pointer' : ''}
         ${className}
       `}
-      onClick={onClick}
+      onClick={handleClick}
     >
       {title && (
         <div className="text-lg font-semibold mb-3">{title}</div>
