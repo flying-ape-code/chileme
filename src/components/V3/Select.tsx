@@ -6,10 +6,18 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   error?: string;
   helperText?: string;
   options: { value: string; label: string; disabled?: boolean }[];
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'outline' | 'filled' | 'underlined';
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, helperText, options, className = '', ...props }, ref) => {
+  ({ label, error, helperText, options, size = 'md', variant = 'outline', className = '', ...props }, ref) => {
+    const sizeClasses = {
+      sm: 'px-3 py-1.5 text-sm',
+      md: 'px-4 py-2 text-base',
+      lg: 'px-4 py-3 text-lg',
+    };
+
     return (
       <div className="w-full">
         {label && (
@@ -20,11 +28,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           className={`
-            block w-full rounded-lg border transition-all duration-200
-            px-4 py-2.5 text-base bg-white
+            block w-full rounded-lg transition-all duration-200
+            ${sizeClasses[size]}
             ${error 
-              ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-              : 'border-gray-300 focus:border-[#FF6B35] focus:ring-[#FF6B35]'
+              ? 'border-[#EF5350] focus:border-[#EF5350] focus:ring-[#EF5350]' 
+              : 'border border-gray-300 bg-white focus:border-[#FF6B35] focus:ring-[#FF6B35]'
             }
             focus:outline-none focus:ring-1
             disabled:bg-gray-100 disabled:text-gray-500

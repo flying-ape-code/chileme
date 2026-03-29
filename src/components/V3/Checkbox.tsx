@@ -22,12 +22,12 @@ export const Checkbox: React.FC<CheckboxProps> = ({
           id={checkboxId}
           type="checkbox"
           className={`
-            w-4 h-4 rounded border-gray-300 
+            w-4 h-4 rounded 
+            ${error ? 'border-[#EF5350]' : 'border-gray-300'}
             text-[#FF6B35] 
             focus:ring-[#FF6B35] 
             focus:ring-2
             disabled:bg-gray-100 disabled:cursor-not-allowed
-            ${error ? 'border-red-500' : ''}
             ${className}
           `}
           {...props}
