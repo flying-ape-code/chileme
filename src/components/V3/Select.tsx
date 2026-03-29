@@ -1,4 +1,3 @@
-// V3.0 Select 组件
 import React, { forwardRef } from 'react';
 
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
@@ -6,12 +5,12 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   error?: string;
   helperText?: string;
   options: { value: string; label: string; disabled?: boolean }[];
+  placeholder?: string;
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'outline' | 'filled' | 'underlined';
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, helperText, options, size = 'md', variant = 'outline', className = '', ...props }, ref) => {
+  ({ label, error, helperText, options, placeholder, size = 'md', className = '', ...props }, ref) => {
     const sizeClasses = {
       sm: 'px-3 py-1.5 text-sm',
       md: 'px-4 py-2 text-base',
@@ -35,17 +34,18 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               : 'border border-gray-300 bg-white focus:border-[#FF6B35] focus:ring-[#FF6B35]'
             }
             focus:outline-none focus:ring-1
-            disabled:bg-gray-100 disabled:text-gray-500
+            disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed
             ${className}
           `}
           {...props}
         >
+          {placeholder && (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          )}
           {options.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-              disabled={option.disabled}
-            >
+            <option key={option.value} value={option.value} disabled={option.disabled}>
               {option.label}
             </option>
           ))}

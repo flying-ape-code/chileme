@@ -1,65 +1,65 @@
-// V3.0 Card 组件
 import React from 'react';
 
 interface CardProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  title?: string;
+  footer?: React.ReactNode;
   className?: string;
   hoverable?: boolean;
   onClick?: () => void;
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'primary' | 'secondary' | 'outline' | 'borderless';
+  bordered?: boolean;
 }
+
+const sizeStyles = {
+  sm: 'p-4',
+  md: 'p-5',
+  lg: 'p-6',
+};
+
+const variantStyles = {
+  primary: 'border-[#FF6B35] bg-[#FFF0EB]',
+  secondary: 'border-gray-300 bg-gray-50',
+  outline: 'border-2 border-[#FF6B35] bg-transparent',
+  borderless: 'border-none shadow-none',
+};
 
 export const Card: React.FC<CardProps> = ({
   children,
+  title,
+  footer,
   className = '',
   hoverable = false,
   onClick,
+  size = 'lg',
+  variant = 'primary',
+  bordered = true,
 }) => {
   return (
     <div
       className={`
-        bg-white rounded-xl border border-gray-200
-        ${hoverable ? 'hover:shadow-lg hover:border-[#FF6B35] cursor-pointer transition-all duration-300' : 'shadow-sm'}
+        bg-white rounded-xl
+        ${bordered && variant !== 'borderless' ? 'border' : ''}
+        ${variantStyles[variant]}
+        ${sizeStyles[size]}
+        ${hoverable ? 'hover:shadow-lg cursor-pointer transition-all duration-300' : 'shadow-sm'}
         ${onClick ? 'cursor-pointer' : ''}
         ${className}
       `}
       onClick={onClick}
     >
+      {title && (
+        <div className="text-lg font-semibold mb-3">{title}</div>
+      )}
       {children}
+      {footer && (
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          {footer}
+        </div>
+      )}
     </div>
   );
 };
-
-interface CardHeaderProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-export const CardHeader: React.FC<CardHeaderProps> = ({ children, className = '' }) => (
-  <div className={`px-4 py-3 border-b border-gray-100 ${className}`}>
-    {children}
-  </div>
-);
-
-interface CardContentProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-export const CardContent: React.FC<CardContentProps> = ({ children, className = '' }) => (
-  <div className={`px-4 py-3 ${className}`}>
-    {children}
-  </div>
-);
-
-interface CardFooterProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-export const CardFooter: React.FC<CardFooterProps> = ({ children, className = '' }) => (
-  <div className={`px-4 py-3 border-t border-gray-100 bg-gray-50 ${className}`}>
-    {children}
-  </div>
-);
 
 export default Card;
