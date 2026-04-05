@@ -324,7 +324,6 @@ function App() {
         />
         <Route path="/feedbacks/admin" element={<FeedbackAdmin />} />
         <Route path="/feedbacks/stats" element={<FeedbackStats />} />
-        <Route path="/preferences" element={<PreferencesPage />} />
         <Route path="/" element={<Home />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
