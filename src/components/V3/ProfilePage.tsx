@@ -123,6 +123,26 @@ export const ProfilePage: React.FC = () => {
           </div>
         </Card>
 
+        {/* 用餐喜好入口 */}
+        <Card hoverable className="mt-4" onClick={() => navigate('/preferences')}>
+          <div className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-[#FF6B35]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900">用餐喜好</h3>
+                <p className="text-xs text-gray-500">个性化推荐</p>
+              </div>
+            </div>
+            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </Card>
+
         <MenuCard title="常用" items={menuItems1} />
         <MenuCard title="其他" items={menuItems2} />
       </main>
