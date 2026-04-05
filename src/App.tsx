@@ -7,6 +7,7 @@ import CelebrationModal from './components/CelebrationModal';
 import WeatherInsight from './components/WeatherInsight';
 import History from './components/History';
 import AdBanner from './components/AdBanner';
+import { fetchActiveAd, type Ad } from './services/adService';
 import ShareModal from './components/ShareModal';
 import SettingsModal from './components/SettingsModal';
 import { addSpinHistory } from './history';
@@ -48,6 +49,7 @@ function Home() {
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [settings, setSettings] = useState<AppSettings>(getSettings());
   const [isLoading, setIsLoading] = useState(true);
+  const [activeAd, setActiveAd] = useState<Ad | null>(null);
 
   const selectedMeal = useMemo(() =>
     productTypes.find(m => m.id === selectedMealId) || productTypes[0],
@@ -61,6 +63,20 @@ function Home() {
   useEffect(() => {
     loadCurrentItems();
   }, [selectedMealId]);
+
+  // 加载广告
+  useEffect(() => {
+    loadActiveAd();
+  }, []);
+
+  const loadActiveAd = async () => {
+    try {
+      const ad = await fetchActiveAd();
+      setActiveAd(ad);
+    } catch (error) {
+      console.error('加载广告失败:', error);
+    }
+  };
 
   const loadCurrentItems = async () => {
     setIsLoading(true);
@@ -160,11 +176,13 @@ function Home() {
       </header>
 
       {/* 广告栏 */}
-      <AdBanner
-        imageUrl="https://via.placeholder.com/600x150/00f7ff/000000?text=活动推广+CLICK+ME"
-        linkUrl="https://example.com/promo"
-        altText="活动推广"
-      />
+      {activeAd && (
+        <AdBanner
+          imageUrl={activeAd.image_url}
+          linkUrl={activeAd.link_url}
+          altText={activeAd.alt_text || activeAd.title}
+        />
+      )}
 
       {/* Navigation */}
       <nav className="flex flex-wrap justify-center gap-3 relative z-20">
