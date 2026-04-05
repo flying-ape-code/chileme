@@ -83,3 +83,94 @@ export function isAdValid(ad: Ad): boolean {
   
   return ad.is_enabled;
 }
+
+/**
+ * 创建新广告
+ */
+export async function createAd(ad: Omit<Ad, 'id'>): Promise<Ad | null> {
+  try {
+    const { data, error } = await supabase
+      .from('ads')
+      .insert([ad])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to create ad:', error);
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error('Error creating ad:', err);
+    return null;
+  }
+}
+
+/**
+ * 更新广告
+ */
+export async function updateAd(id: string, updates: Partial<Ad>): Promise<Ad | null> {
+  try {
+    const { data, error } = await supabase
+      .from('ads')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to update ad:', error);
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error('Error updating ad:', err);
+    return null;
+  }
+}
+
+/**
+ * 删除广告
+ */
+export async function deleteAd(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('ads')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Failed to delete ad:', error);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Error deleting ad:', err);
+    return false;
+  }
+}
+
+/**
+ * 获取所有广告（包括禁用的，用于管理后台）
+ */
+export async function fetchAllAds(): Promise<Ad[]> {
+  try {
+    const { data, error } = await supabase
+      .from('ads')
+      .select('*')
+      .order('priority', { ascending: false });
+
+    if (error) {
+      console.error('Failed to fetch all ads:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (err) {
+    console.error('Error fetching all ads:', err);
+    return [];
+  }
+}
