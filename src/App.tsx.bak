@@ -346,7 +346,7 @@ function App() {
         <Route
           path="/admin"
           element={
-            <AdminDashboard />
+            <Admin />
           }
         />
         <Route path="/feedbacks/admin" element={<FeedbackAdmin />} />
@@ -690,7 +690,7 @@ function App() {
         <Route
           path="/admin"
           element={
-            <AdminDashboard />
+            <Admin />
           }
         />
         <Route path="/feedbacks/admin" element={<FeedbackAdmin />} />
