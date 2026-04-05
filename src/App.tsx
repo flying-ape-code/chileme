@@ -6,6 +6,7 @@ import Wheel from './components/Wheel';
 import CelebrationModal from './components/CelebrationModal';
 import WeatherInsight from './components/WeatherInsight';
 import History from './components/History';
+import AdBanner from './components/AdBanner';
 import ShareModal from './components/ShareModal';
 import SettingsModal from './components/SettingsModal';
 import { addSpinHistory } from './history';
@@ -157,6 +158,13 @@ function Home() {
         </p>
         <WeatherInsight temperature={6} condition="小雨" />
       </header>
+
+      {/* 广告栏 */}
+      <AdBanner
+        imageUrl="https://via.placeholder.com/600x150/00f7ff/000000?text=活动推广+CLICK+ME"
+        linkUrl="https://example.com/promo"
+        altText="活动推广"
+      />
 
       {/* Navigation */}
       <nav className="flex flex-wrap justify-center gap-3 relative z-20">
