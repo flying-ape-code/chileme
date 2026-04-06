@@ -44,7 +44,7 @@ const Wheel = ({ items, rotation, isSpinning = false }: WheelProps) => {
   const segmentAngle = 360 / safeItems.length;
 
   return (
-    <div className="relative w-72 h-72 sm:w-96 sm:h-96">
+    <div className="relative w-80 h-80 sm:w-[28rem] sm:h-[28rem] md:w-[32rem] md:h-[32rem]">
       {/* 转盘主体 */}
       <div
         className="w-full h-full rounded-full overflow-hidden border-4 border-cyber-cyan/30 shadow-[0_0_30px_rgba(0,247,255,0.3)]"
@@ -76,8 +76,8 @@ const Wheel = ({ items, rotation, isSpinning = false }: WheelProps) => {
                   className="absolute top-4 left-1/2 -translate-x-1/2 text-center"
                   style={{ transform: `translateX(-50%) rotate(${-segmentRotation}deg)` }}
                 >
-                  <div className="text-2xl sm:text-3xl mb-1">{item.emoji || '🍽️'}</div>
-                  <div className="text-[10px] sm:text-xs font-bold text-white whitespace-nowrap drop-shadow-lg">
+                  <div className="text-3xl sm:text-4xl mb-1">{item.emoji || '🍽️'}</div>
+                  <div className="text-xs sm:text-sm font-bold text-white whitespace-nowrap drop-shadow-lg">
                     {item.weirdName || item.name || '未知'}
                   </div>
                 </div>

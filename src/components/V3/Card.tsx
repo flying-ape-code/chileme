@@ -66,4 +66,16 @@ export const Card: React.FC<CardProps> = ({
   );
 };
 
+export const CardHeader: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <div className={`px-5 py-4 border-b border-gray-100 ${className}`}>
+    {children}
+  </div>
+);
+
+export const CardContent: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <div className={`px-5 py-4 ${className}`}>
+    {children}
+  </div>
+);
+
 export default Card;
