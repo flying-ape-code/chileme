@@ -1,6 +1,6 @@
 // V3.0 AdminDashboard 管理后台首页
 import React, { useState } from 'react';
-import { Card, CardHeader, CardContent } from '../../components/V3/Card';
+import { Card, CardHeader, CardContent } from '../components/V3/Card';
 import { Button } from '../components/V3/Button';
 
 interface StatCard {
