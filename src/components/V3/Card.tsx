@@ -49,6 +49,7 @@ export const Card: React.FC<CardProps> = ({
         ${sizeStyles[size]}
         ${hoverable ? 'hover:shadow-lg cursor-pointer transition-all duration-300' : 'shadow-sm'}
         ${onClick ? 'cursor-pointer' : ''}
+        overflow-visible
         ${className}
       `}
       onClick={handleClick}
