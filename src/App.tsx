@@ -16,6 +16,7 @@ import { getSettings, getThemeConfig, getAnimationDuration, type AppSettings } f
 // Lazy load heavy page components for code splitting
 const Admin = lazy(() => import('./pages/Admin'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const ProfilePage = lazy(() => import('./components/V3/ProfilePage'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const MyFeedbacks = lazy(() => import('./pages/MyFeedbacks'));
@@ -351,7 +352,9 @@ function App() {
         />
         <Route path="/feedbacks/admin" element={<FeedbackAdmin />} />
         <Route path="/feedbacks/stats" element={<FeedbackStats />} />
-        <Route path="/preferences" element={<PreferencesPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route
+          path="/preferences" element={<PreferencesPage />} />
         <Route path="/" element={<Home />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
