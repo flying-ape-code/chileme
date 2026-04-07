@@ -166,10 +166,10 @@ export const PreferencesPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 pb-24">
       <Navbar title="用餐喜好设置" showBack />
 
-      <main className="p-4 space-y-6">
+      <main className="pt-20 p-4 space-y-6 max-w-2xl mx-auto">
         {/* 饮食类型 */}
         <Card>
-          <h3 className="text-lg font-semibold mb-4">饮食类型</h3>
+          <h3 className="text-lg font-semibold mb-4 overflow-visible">饮食类型</h3>
           <div className="flex gap-3">
             {dietOptions.map(option => (
               <Button
@@ -185,7 +185,7 @@ export const PreferencesPage: React.FC = () => {
 
         {/* 口味偏好 */}
         <Card>
-          <h3 className="text-lg font-semibold mb-4">口味偏好</h3>
+          <h3 className="text-lg font-semibold mb-4 overflow-visible">口味偏好</h3>
           <div className="flex flex-wrap gap-3">
             {tasteOptions.map(option => (
               <Button
@@ -201,7 +201,7 @@ export const PreferencesPage: React.FC = () => {
 
         {/* 喜欢的食材 */}
         <Card>
-          <h3 className="text-lg font-semibold mb-4">喜欢的食材 ❤️</h3>
+          <h3 className="text-lg font-semibold mb-4 overflow-visible">喜欢的食材 ❤️</h3>
           <div className="flex flex-wrap gap-3">
             {ingredientOptions.map(option => (
               <Button
@@ -217,7 +217,7 @@ export const PreferencesPage: React.FC = () => {
 
         {/* 不喜欢的食材 */}
         <Card>
-          <h3 className="text-lg font-semibold mb-4">不喜欢的食材 😐</h3>
+          <h3 className="text-lg font-semibold mb-4 overflow-visible">不喜欢的食材 😐</h3>
           <div className="flex flex-wrap gap-3">
             {ingredientOptions.map(option => (
               <Button
@@ -233,7 +233,7 @@ export const PreferencesPage: React.FC = () => {
 
         {/* 忌口设置 */}
         <Card>
-          <h3 className="text-lg font-semibold mb-4">忌口设置 🚫</h3>
+          <h3 className="text-lg font-semibold mb-4 overflow-visible">忌口设置 🚫</h3>
           <div className="flex flex-wrap gap-3">
             {avoidOptions.map(option => (
               <Button
