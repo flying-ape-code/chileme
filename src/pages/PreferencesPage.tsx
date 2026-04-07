@@ -36,7 +36,7 @@ const avoidOptions = [
   { value: 'cilantro', label: '香菜', emoji: '🌿' },
   { value: 'green_onion', label: '葱', emoji: '🧅' },
   { value: 'garlic', label: '蒜', emoji: '🧄' },
-  { value: 'ginger', label: '姜', emoji: '' },
+  { value: 'ginger', label: '姜', emoji: '🫚' },
   { value: 'chili', label: '辣椒', emoji: '🌶️' },
   { value: 'sesame', label: '芝麻', emoji: '🫘' },
   { value: 'peanut', label: '花生', emoji: '🥜' },
@@ -146,6 +146,14 @@ export const PreferencesPage: React.FC = () => {
     );
   };
 
+  const resetForm = () => {
+    setDiet('omnivore');
+    setTastes([]);
+    setLikedIngredients([]);
+    setDislikedIngredients([]);
+    setAvoidIngredients([]);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -253,7 +261,7 @@ export const PreferencesPage: React.FC = () => {
           <Button
             variant="outline"
             size="lg"
-            onClick={loadPreferences}
+            onClick={resetForm}
           >
             重置
           </Button>
