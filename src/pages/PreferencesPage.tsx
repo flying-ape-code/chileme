@@ -45,7 +45,7 @@ const avoidOptions = [
 
 export const PreferencesPage: React.FC = () => {
   const [diet, setDiet] = useState<DietType>('omnivore');
-  const [tastes, setTastes] = useState<TasteType[]>([]);
+  const [taste, setTaste] = useState<TasteType | ''>('');
   const [likedIngredients, setLikedIngredients] = useState<string[]>([]);
   const [dislikedIngredients, setDislikedIngredients] = useState<string[]>([]);
   const [avoidIngredients, setAvoidIngredients] = useState<string[]>([]);
@@ -74,8 +74,8 @@ export const PreferencesPage: React.FC = () => {
       const dietPref = data?.find(p => p.preference_type === 'diet');
       if (dietPref) setDiet(dietPref.preference_value as DietType);
 
-      const tastePrefs = data?.filter(p => p.preference_type === 'taste');
-      setTastes(tastePrefs?.map(p => p.preference_value as TasteType) || []);
+      const tastePref = data?.find(p => p.preference_type === 'taste');
+      setTaste(tastePref?.preference_value as TasteType || '');
 
       const liked = data?.filter(p => p.preference_type === 'ingredient' && p.weight > 1);
       setLikedIngredients(liked?.map(p => p.preference_value) || []);
@@ -100,7 +100,7 @@ export const PreferencesPage: React.FC = () => {
 
       const preferences = [
         { preference_type: 'diet', preference_value: diet, weight: 1.0 },
-        ...tastes.map(t => ({ preference_type: 'taste' as const, preference_value: t, weight: 1.0 })),
+        ...(taste ? [{ preference_type: 'taste' as const, preference_value: taste, weight: 1.0 }] : []),
         ...likedIngredients.map(i => ({ preference_type: 'ingredient' as const, preference_value: i, weight: 2.0 })),
         ...dislikedIngredients.map(i => ({ preference_type: 'ingredient' as const, preference_value: i, weight: 0.3 })),
         ...avoidIngredients.map(i => ({ preference_type: 'avoid' as const, preference_value: i, weight: 0 })),
@@ -127,12 +127,8 @@ export const PreferencesPage: React.FC = () => {
     }
   };
 
-  const toggleTaste = (taste: TasteType) => {
-    setTastes(prev => 
-      prev.includes(taste) 
-        ? prev.filter(t => t !== taste)
-        : [...prev, taste]
-    );
+  const selectTaste = (newTaste: TasteType) => {
+    setTaste(newTaste);
   };
 
   const toggleIngredient = (
@@ -144,6 +140,14 @@ export const PreferencesPage: React.FC = () => {
         ? prev.filter(i => i !== ingredient)
         : [...prev, ingredient]
     );
+  };
+
+  const resetForm = () => {
+    setDiet('omnivore');
+    setTaste('');
+    setLikedIngredients([]);
+    setDislikedIngredients([]);
+    setAvoidIngredients([]);
   };
 
   if (loading) {
@@ -182,8 +186,8 @@ export const PreferencesPage: React.FC = () => {
             {tasteOptions.map(option => (
               <Button
                 key={option.value}
-                variant={tastes.includes(option.value as TasteType) ? 'primary' : 'outline'}
-                onClick={() => toggleTaste(option.value as TasteType)}
+                variant={taste === option.value ? 'primary' : 'outline'}
+                onClick={() => selectTaste(option.value as TasteType)}
               >
                 {option.emoji} {option.label}
               </Button>
@@ -253,7 +257,7 @@ export const PreferencesPage: React.FC = () => {
           <Button
             variant="outline"
             size="lg"
-            onClick={loadPreferences}
+            onClick={resetForm}
           >
             重置
           </Button>
