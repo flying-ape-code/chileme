@@ -48,6 +48,7 @@ function Home() {
   const [showHistory, setShowHistory] = useState<boolean>(false);
   const [showShare, setShowShare] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
   const [settings, setSettings] = useState<AppSettings>(getSettings());
   const [isLoading, setIsLoading] = useState(true);
   const [activeAd, setActiveAd] = useState<Ad | null>(null);
@@ -166,14 +167,50 @@ function Home() {
   return (
     <div className="h-screen flex flex-col items-center justify-between py-2 sm:py-4 overflow-hidden font-sans bg-cyber-dark text-white relative z-10">
       {/* Header */}
-      <header className="text-center animate-in slide-in-from-top duration-700">
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black mb-2 tracking-tighter glitch-text neon-text-cyan" data-text="吃了么 ?">
-          吃了么 <span className={`text-${theme.primary} neon-text-${theme.primary}`}>?</span>
-        </h1>
-        <p className="text-cyber-cyan/80 font-mono text-xs tracking-[0.2em] sm:tracking-[0.4em] uppercase">
-          [ 潜运算法启动中... ]
-        </p>
+      <header className="relative w-full px-4">
+        <div className="flex items-center justify-between">
+          <div className="w-10"></div>
+          <div className="text-center flex-1 animate-in slide-in-from-top duration-700">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-black mb-2 tracking-tighter glitch-text neon-text-cyan" data-text="吃了么 ?">
+              吃了么 <span className={`text-${theme.primary} neon-text-${theme.primary}`}>?</span>
+            </h1>
+            <p className="text-cyber-cyan/80 font-mono text-xs tracking-[0.2em] sm:tracking-[0.4em] uppercase">
+              [ 潜运算法启动中... ]
+            </p>
+          </div>
+          <div className="relative z-50">
+            {isAuthenticated ? (
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="w-10 h-10 rounded-full bg-cyber-cyan/20 border-2 border-cyber-cyan flex items-center justify-center hover:bg-cyber-cyan/30 transition-all"
+              >
+                <span className="text-lg">👤</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate('/login')}
+                className="w-10 h-10 rounded-full bg-gray-700/50 border-2 border-gray-600 flex items-center justify-center hover:bg-gray-700 transition-all"
+              >
+                <span className="text-lg">🔐</span>
+              </button>
+            )}
+            {showUserMenu && isAuthenticated && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)}></div>
+                <div className="absolute right-0 mt-2 w-48 bg-cyber-dark/95 border border-cyber-cyan/30 rounded-lg shadow-[0_0_20px_rgba(0,247,255,0.3)] z-50 backdrop-blur-sm">
+                  <div className="p-3 border-b border-cyber-cyan/20"><p className="text-sm font-mono text-cyber-cyan">👤 {user?.username || '用户'}</p></div>
+                  <button onClick={() => { navigate('/profile'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>👤</span> 个人中心</button>
+                  <button onClick={() => { setShowHistory(true); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>📋</span> 历史记录</button>
+                  <button onClick={() => { setShowSettings(true); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>⚙️</span> 设置</button>
+                  {isAdmin && (<button onClick={() => { navigate('/admin'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-green-900/20 transition-all flex items-center gap-2 border-t border-cyber-cyan/20"><span>🔐</span> 管理后台</button>)}
+                  <button onClick={() => { navigate('/feedbacks'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2 border-t border-cyber-cyan/20"><span>💬</span> 我的反馈</button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </header>
+
 
       {/* 广告栏 */}
       {activeAd && (
@@ -184,69 +221,18 @@ function Home() {
         />
       )}
 
-      {/* Navigation */}
-      <nav className="flex flex-wrap justify-center gap-3 relative z-20">
+      {/* 餐别选择 - 移动端优化 */}
+      <nav className="flex flex-wrap justify-center gap-2 sm:gap-3 px-2 relative z-20">
         {productTypes.map((meal) => (
           <button
             key={meal.id}
             onClick={() => !isSpinning && setSelectedMealId(meal.id)}
             disabled={isSpinning}
-            className={`px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover} hover:shadow-[0_0_15px_rgba(0,247,255,0.5)]`}
+            className={`px-3 py-1 sm:px-6 sm:py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover} hover:shadow-[0_0_15px_rgba(0,247,255,0.5)]`}
           >
             {meal.name}
           </button>
         ))}
-
-        {/* 历史记录按钮 */}
-        <button
-          onClick={() => !isSpinning && setShowHistory(true)}
-          disabled={isSpinning}
-          className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-cyber-pink/20 text-cyber-pink hover:bg-cyber-pink hover:shadow-[0_0_15px_#ff00ea]"
-        >
-          📋 历史
-        </button>
-
-        {/* 设置按钮 */}
-        <button
-          onClick={() => !isSpinning && setShowSettings(true)}
-          disabled={isSpinning}
-          className={`px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover} hover:shadow-[0_0_15px_rgba(0,247,255,0.5)]`}
-        >
-          ⚙️ 设置
-        </button>
-
-        {/* 用户/登录按钮 */}
-        {isAuthenticated ? (
-          <>
-            <span className={`px-6 py-1.5 font-mono text-xs border ${theme.bg} text-${theme.primary}`}>
-              👤 {user?.username || '用户'}
-            </span>
-            {isAdmin && (
-              <button
-                onClick={() => navigate('/admin')}
-                disabled={isSpinning}
-                className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-green-700/20 text-green-400 hover:bg-green-700 hover:text-white hover:shadow-[0_0_15px_#22c55e]"
-              >
-                🔐 管理
-              </button>
-            )}
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => navigate('/login')}
-              className="px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider bg-gray-700/20 text-gray-400 hover:bg-gray-700 hover:text-white"
-            >
-              🔐 登录
-            </button>
-            <button
-              onClick={() => navigate('/register')}
-              className={`px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover}`}
-            >
-              📝 注册
-            </button>
-          </>
-        )}
       </nav>
 
       {/* Main Content */}
