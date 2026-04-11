@@ -4,7 +4,6 @@ import { useAuth } from './context/AuthContext';
 import { productTypes, getRandomItems, loadFoodData } from './data';
 import Wheel from './components/Wheel';
 import CelebrationModal from './components/CelebrationModal';
-import WeatherInsight from './components/WeatherInsight';
 import History from './components/History';
 import AdBanner from './components/AdBanner';
 import { fetchActiveAd, type Ad } from './services/adService';
@@ -174,7 +173,6 @@ function Home() {
         <p className="text-cyber-cyan/80 font-mono text-xs tracking-[0.2em] sm:tracking-[0.4em] uppercase">
           [ 潜运算法启动中... ]
         </p>
-        <WeatherInsight temperature={6} condition="小雨" />
       </header>
 
       {/* 广告栏 */}

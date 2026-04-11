@@ -174,7 +174,6 @@ function Home() {
         <p className="text-cyber-cyan/80 font-mono text-xs tracking-[0.2em] sm:tracking-[0.4em] uppercase">
           [ 潜运算法启动中... ]
         </p>
-        <WeatherInsight temperature={6} condition="小雨" />
       </header>
 
       {/* 广告栏 */}
@@ -220,10 +219,7 @@ function Home() {
         {/* 用户/登录按钮 */}
         {isAuthenticated ? (
           <>
-            <button
-          onClick={() => navigate('/profile')}
-          className={`px-6 py-1.5 font-mono text-xs border transition-all duration-300 uppercase tracking-wider ${theme.bg} text-${theme.primary} hover:${theme.hover}`}
-        >
+            <span className={`px-6 py-1.5 font-mono text-xs border ${theme.bg} text-${theme.primary}`}>
               👤 {user?.username || '用户'}
             </span>
             {isAdmin && (
