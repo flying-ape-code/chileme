@@ -137,6 +137,9 @@ export function weightedRandomSelect(weightedProducts: WeightedProduct[]): Produ
 /**
  * 执行转盘（带喜好）
  */
+/**
+ * 执行转盘（带喜好）
+ */
 export async function spinWithPreferences(
   userId: string,
   category: string
@@ -144,10 +147,23 @@ export async function spinWithPreferences(
   // 获取用户喜好
   const preferences = await getUserPreferences(userId);
 
-  // 无喜好设置，使用普通转盘
+  // 无喜好设置，使用普通转盘逻辑
   if (preferences.length === 0) {
-    // TODO: 调用原有转盘逻辑
-    return null;
+    // 获取该分类所有商品
+    const { data: products, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('category', category)
+      .eq('is_active', true);
+
+    if (error || !products || products.length === 0) {
+      console.error('获取商品失败或无可用商品');
+      return null;
+    }
+
+    // 简单随机选择
+    const randomIndex = Math.floor(Math.random() * products.length);
+    return products[randomIndex] as Product;
   }
 
   // 获取加权商品池
