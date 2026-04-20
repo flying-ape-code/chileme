@@ -43,12 +43,12 @@ function Home() {
   const [currentItems, setCurrentItems] = useState<FoodItem[]>([]);
   const [rotation, setRotation] = useState<number>(0);
   const [isSpinning, setIsSpinning] = useState<boolean>(false);
-  const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
   const [winner, setWinner] = useState<FoodItem | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showHistory, setShowHistory] = useState<boolean>(false);
   const [showShare, setShowShare] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
   const [settings, setSettings] = useState<AppSettings>(getSettings());
   const [isLoading, setIsLoading] = useState(true);
   const [activeAd, setActiveAd] = useState<Ad | null>(null);
@@ -167,13 +167,9 @@ function Home() {
   return (
     <div className="h-screen flex flex-col items-center justify-between py-2 sm:py-4 overflow-hidden font-sans bg-cyber-dark text-white relative z-10">
       {/* Header */}
-      {/* Header */}
       <header className="relative w-full px-4">
         <div className="flex items-center justify-between">
-          {/* 左侧空白占位 */}
           <div className="w-10"></div>
-          
-          {/* 中间标题 */}
           <div className="text-center flex-1 animate-in slide-in-from-top duration-700">
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-black mb-2 tracking-tighter glitch-text neon-text-cyan" data-text="吃了么 ?">
               吃了么 <span className={`text-${theme.primary} neon-text-${theme.primary}`}>?</span>
@@ -182,8 +178,6 @@ function Home() {
               [ 潜运算法启动中... ]
             </p>
           </div>
-          
-          {/* 右侧用户头像按钮 */}
           <div className="relative z-50">
             {isAuthenticated ? (
               <button
@@ -200,64 +194,23 @@ function Home() {
                 <span className="text-lg">🔐</span>
               </button>
             )}
-            
-            {/* 用户下拉菜单 */}
             {showUserMenu && isAuthenticated && (
               <>
-                {/* 遮罩层 */}
-                <div 
-                  className="fixed inset-0 z-40" 
-                  onClick={() => setShowUserMenu(false)}
-                ></div>
-                
-                {/* 菜单 */}
+                <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)}></div>
                 <div className="absolute right-0 mt-2 w-48 bg-cyber-dark/95 border border-cyber-cyan/30 rounded-lg shadow-[0_0_20px_rgba(0,247,255,0.3)] z-50 backdrop-blur-sm">
-                  <div className="p-3 border-b border-cyber-cyan/20">
-                    <p className="text-sm font-mono text-cyber-cyan">👤 {user?.username || '用户'}</p>
-                  </div>
-                  
-                  <button
-                    onClick={() => { navigate('/profile'); setShowUserMenu(false); }}
-                    className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"
-                  >
-                    <span>👤</span> 个人中心
-                  </button>
-                  
-                  <button
-                    onClick={() => { setShowHistory(true); setShowUserMenu(false); }}
-                    className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"
-                  >
-                    <span>📋</span> 历史记录
-                  </button>
-                  
-                  <button
-                    onClick={() => { setShowSettings(true); setShowUserMenu(false); }}
-                    className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"
-                  >
-                    <span>⚙️</span> 设置
-                  </button>
-                  
-                  {isAdmin && (
-                    <button
-                      onClick={() => { navigate('/admin'); setShowUserMenu(false); }}
-                      className="w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-green-900/20 transition-all flex items-center gap-2 border-t border-cyber-cyan/20"
-                    >
-                      <span>🔐</span> 管理后台
-                    </button>
-                  )}
-                  
-                  <button
-                    onClick={() => { navigate('/feedbacks'); setShowUserMenu(false); }}
-                    className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2 border-t border-cyber-cyan/20"
-                  >
-                    <span>💬</span> 我的反馈
-                  </button>
+                  <div className="p-3 border-b border-cyber-cyan/20"><p className="text-sm font-mono text-cyber-cyan">👤 {user?.username || '用户'}</p></div>
+                  <button onClick={() => { navigate('/profile'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>👤</span> 个人中心</button>
+                  <button onClick={() => { setShowHistory(true); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>📋</span> 历史记录</button>
+                  <button onClick={() => { setShowSettings(true); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>⚙️</span> 设置</button>
+                  {isAdmin && (<button onClick={() => { navigate('/admin'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-green-900/20 transition-all flex items-center gap-2 border-t border-cyber-cyan/20"><span>🔐</span> 管理后台</button>)}
+                  <button onClick={() => { navigate('/feedbacks'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2 border-t border-cyber-cyan/20"><span>💬</span> 我的反馈</button>
                 </div>
               </>
             )}
           </div>
         </div>
       </header>
+
 
       {/* 广告栏 */}
       {activeAd && (
@@ -281,8 +234,6 @@ function Home() {
           </button>
         ))}
       </nav>
-        )}
-      </nav>
 
       {/* Main Content */}
       <main className="relative flex flex-col items-center flex-1 justify-center py-2 max-h-[70vh]">
@@ -290,7 +241,7 @@ function Home() {
         <div className={`absolute top-[2%] z-50 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[24px] border-t-${theme.primary} drop-shadow-[0_0_8px_rgba(0,247,255,0.8)] filter`}></div>
 
         {/* Wheel Container */}
-        <div className="p-1 rounded-full border border-cyber-cyan/10 shadow-[0_0_30px_rgba(0,247,255,0.1)] bg-black/40 backdrop-blur-sm transform scale-[0.75] sm:scale-90 md:scale-100 origin-center">
+        <div className="p-1 rounded-full border border-cyber-cyan/10 shadow-[0_0_30px_rgba(0,247,255,0.1)] bg-black/40 backdrop-blur-sm transform scale-90 sm:scale-100 origin-center">
           <Wheel
             items={currentItems}
             rotation={rotation}

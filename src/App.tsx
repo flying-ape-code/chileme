@@ -196,14 +196,14 @@ function Home() {
             )}
             {showUserMenu && isAuthenticated && (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)}></div>
-                <div className="absolute right-0 mt-2 w-48 bg-cyber-dark/95 border border-cyber-cyan/30 rounded-lg shadow-[0_0_20px_rgba(0,247,255,0.3)] z-50 backdrop-blur-sm">
+                <div className="fixed inset-0 z-[45]" onClick={() => setShowUserMenu(false)}></div>
+                <div className="absolute right-0 mt-2 w-48 bg-cyber-dark/95 border border-cyber-cyan/30 rounded-lg shadow-[0_0_20px_rgba(0,247,255,0.3)] z-[50] backdrop-blur-sm touch-manipulation">
                   <div className="p-3 border-b border-cyber-cyan/20"><p className="text-sm font-mono text-cyber-cyan">👤 {user?.username || '用户'}</p></div>
-                  <button onClick={() => { navigate('/profile'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>👤</span> 个人中心</button>
-                  <button onClick={() => { setShowHistory(true); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>📋</span> 历史记录</button>
-                  <button onClick={() => { setShowSettings(true); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>⚙️</span> 设置</button>
-                  {isAdmin && (<button onClick={() => { navigate('/admin'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-green-900/20 transition-all flex items-center gap-2 border-t border-cyber-cyan/20"><span>🔐</span> 管理后台</button>)}
-                  <button onClick={() => { navigate('/feedbacks'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2 border-t border-cyber-cyan/20"><span>💬</span> 我的反馈</button>
+                  <button onClick={(e) => { e.stopPropagation(); navigate('/profile'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>👤</span> 个人中心</button>
+                  <button onClick={(e) => { e.stopPropagation(); setShowHistory(true); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>📋</span> 历史记录</button>
+                  <button onClick={(e) => { e.stopPropagation(); setShowSettings(true); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>⚙️</span> 设置</button>
+                  {isAdmin && (<button onClick={(e) => { e.stopPropagation(); navigate('/admin'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-green-900/20 transition-all flex items-center gap-2 border-t border-cyber-cyan/20"><span>🔐</span> 管理后台</button>)}
+                  <button onClick={(e) => { e.stopPropagation(); navigate('/feedbacks'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2 border-t border-cyber-cyan/20"><span>💬</span> 我的反馈</button>
                 </div>
               </>
             )}
@@ -238,10 +238,10 @@ function Home() {
       {/* Main Content */}
       <main className="relative flex flex-col items-center flex-1 justify-center py-2 max-h-[70vh]">
         {/* Decorative Element */}
-        <div className={`absolute top-[2%] z-50 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[24px] border-t-${theme.primary} drop-shadow-[0_0_8px_rgba(0,247,255,0.8)] filter`}></div>
+        <div className={`absolute top-[2%] z-50 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[16px] border-t-${theme.primary} drop-shadow-[0_0_8px_rgba(0,247,255,0.8)] filter`}></div>
 
         {/* Wheel Container */}
-        <div className="p-1 rounded-full border border-cyber-cyan/10 shadow-[0_0_30px_rgba(0,247,255,0.1)] bg-black/40 backdrop-blur-sm transform scale-[0.75] sm:scale-90 md:scale-100 origin-center">
+        <div className="p-1 rounded-full border border-cyber-cyan/10 shadow-[0_0_30px_rgba(0,247,255,0.1)] bg-black/40 backdrop-blur-sm transform scale-90 sm:scale-100 origin-center">
           <Wheel
             items={currentItems}
             rotation={rotation}
