@@ -11,6 +11,7 @@ import ShareModal from './components/ShareModal';
 import SettingsModal from './components/SettingsModal';
 import { addSpinHistory } from './history';
 import { getSettings, getThemeConfig, getAnimationDuration, type AppSettings } from './lib/settings';
+import { useReferral } from './hooks/useReferral';
 
 // Lazy load heavy page components for code splitting
 const Admin = lazy(() => import('./pages/Admin'));
@@ -22,6 +23,8 @@ const MyFeedbacks = lazy(() => import('./pages/MyFeedbacks'));
 const FeedbackAdmin = lazy(() => import('./pages/FeedbackAdmin'));
 const FeedbackStats = lazy(() => import('./pages/FeedbackStats'));
 const PreferencesPage = lazy(() => import('./pages/PreferencesPage'));
+const InvitePage = lazy(() => import('./pages/InvitePage'));
+const PointsPage = lazy(() => import('./pages/PointsPage'));
 
 // 类型定义
 interface FoodItem {
@@ -200,6 +203,8 @@ function Home() {
                 <div className="absolute right-0 mt-2 w-48 bg-cyber-dark/95 border border-cyber-cyan/30 rounded-lg shadow-[0_0_20px_rgba(0,247,255,0.3)] z-[50] backdrop-blur-sm touch-manipulation">
                   <div className="p-3 border-b border-cyber-cyan/20"><p className="text-sm font-mono text-cyber-cyan">👤 {user?.username || '用户'}</p></div>
                   <button onClick={(e) => { e.stopPropagation(); navigate('/profile'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>👤</span> 个人中心</button>
+                  <button onClick={(e) => { e.stopPropagation(); navigate('/points'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>💰</span> 积分中心</button>
+                  <button onClick={(e) => { e.stopPropagation(); navigate('/invite'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>🎁</span> 邀请好友</button>
                   <button onClick={(e) => { e.stopPropagation(); setShowHistory(true); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>📋</span> 历史记录</button>
                   <button onClick={(e) => { e.stopPropagation(); setShowSettings(true); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-cyber-cyan/10 transition-all flex items-center gap-2"><span>⚙️</span> 设置</button>
                   {isAdmin && (<button onClick={(e) => { e.stopPropagation(); navigate('/admin'); setShowUserMenu(false); }} className="w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-green-900/20 transition-all flex items-center gap-2 border-t border-cyber-cyan/20"><span>🔐</span> 管理后台</button>)}
@@ -305,6 +310,7 @@ function Home() {
 // App 组件，负责路由配置
 function App() {
   const { isLoading } = useAuth();
+  useReferral();
 
   if (isLoading) {
     return (

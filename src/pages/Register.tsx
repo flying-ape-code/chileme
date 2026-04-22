@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { register } from '../lib/auth';
+import { getInviteCodeOwner } from '../services/invitationService';
+import { processInviteRegistration } from '../services/invitationService';
+import { trackConversion } from '../services/shareService';
 
 function Register() {
   const [username, setUsername] = useState('');
@@ -10,8 +13,22 @@ function Register() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [refCode, setRefCode] = useState<string | null>(null);
+  const [inviterName, setInviterName] = useState<string | null>(null);
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
+
+  // 加载邀请码信息
+  useEffect(() => {
+    const code = localStorage.getItem('chileme_ref_code');
+    if (code) {
+      setRefCode(code);
+      // 获取邀请人信息
+      getInviteCodeOwner(code).then(owner => {
+        if (owner) setInviterName(owner.username);
+      });
+    }
+  }, []);
 
   const validateForm = (): boolean => {
     if (!username.trim()) {
@@ -52,6 +69,19 @@ function Register() {
       
       if (result.success && result.user) {
         authLogin(result.user);
+        
+        // 处理邀请注册奖励
+        if (refCode) {
+          // 记录注册转化
+          await trackConversion(refCode, 'register', result.user.id);
+          
+          // 调用后端处理邀请奖励
+          await processInviteRegistration(result.user.id, refCode);
+          
+          // 清除存储的邀请码
+          localStorage.removeItem('chileme_ref_code');
+        }
+        
         navigate(result.user.role === 'admin' ? '/admin' : '/');
       } else {
         setError(result.message || '注册失败，请重试');
@@ -70,6 +100,18 @@ function Register() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-cyan-400 mb-2">用户注册</h1>
           <p className="text-gray-400 text-sm">创建你的吃了么账号</p>
+          
+          {/* 邀请提示 */}
+          {inviterName && (
+            <div className="mt-3 bg-green-500/20 border border-green-500/50 rounded-lg px-4 py-2">
+              <p className="text-green-400 text-sm">
+                🎁 {inviterName} 邀请你加入吃了么
+              </p>
+              <p className="text-green-400/70 text-xs mt-1">
+                注册后双方均可获得积分奖励！
+              </p>
+            </div>
+          )}
         </div>
 
         {error && (

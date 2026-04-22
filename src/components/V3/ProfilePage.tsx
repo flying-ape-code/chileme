@@ -1,13 +1,16 @@
 // V3.0 ProfilePage 个人中心页组件
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { getUserPoints, VIP_LEVELS } from '../../services/pointsService';
+import { getInviteStats } from '../../services/invitationService';
 import { Navbar } from './Navbar';
 import { BottomTabBar } from './BottomTabBar';
 import { Card } from './Card';
 import { Button } from './Button';
 
 const tabs = [
-  { id: 'home', label: '首页', icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg> },
+  { id: 'home', label: '首页', icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011-1v4a1 1 0 001 1m-6 0h6" /></svg> },
   { id: 'history', label: '历史', icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
   { id: 'profile', label: '我的', icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg> },
 ];
@@ -53,19 +56,59 @@ const MenuCard: React.FC<{ title: string; items: MenuItem[] }> = ({ title, items
 
 export const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
+  const [points, setPoints] = useState<number>(0);
+  const [vipLevel, setVipLevel] = useState<number>(0);
+  const [vipExpire, setVipExpire] = useState<string | null>(null);
+  const [inviteCount, setInviteCount] = useState<number>(0);
+
+  useEffect(() => {
+    loadUserData();
+  }, []);
+
+  const loadUserData = async () => {
+    try {
+      const [ptsData, invData] = await Promise.all([
+        getUserPoints(),
+        getInviteStats(),
+      ]);
+      
+      if (ptsData) {
+        setPoints(ptsData.available_points);
+        setVipLevel(ptsData.vip_level);
+        setVipExpire(ptsData.vip_expire_at || null);
+      }
+      setInviteCount(invData.totalInvited);
+    } catch (err) {
+      console.warn('加载用户数据失败:', err);
+    }
+  };
+
+  const isVip = vipExpire && new Date(vipExpire) > new Date();
+  const vipInfo = VIP_LEVELS[vipLevel as keyof typeof VIP_LEVELS] || VIP_LEVELS[0];
 
   const menuItems1: MenuItem[] = [
     { 
+      icon: <span className="text-lg">💰</span>, 
+      label: '积分中心',
+      badge: points > 0 ? undefined : undefined,
+      onClick: () => navigate('/points')
+    },
+    { 
+      icon: <span className="text-lg">🎁</span>, 
+      label: '邀请好友',
+      badge: inviteCount > 0 ? inviteCount : undefined,
+      onClick: () => navigate('/invite')
+    },
+    { 
       icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>, 
       label: '我的收藏', 
-      badge: 3,
       onClick: () => navigate('/favorites')
     },
     { 
       icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>, 
       label: '消息通知', 
-      badge: 12,
       onClick: () => navigate('/notifications')
     },
   ];
@@ -94,7 +137,7 @@ export const ProfilePage: React.FC = () => {
       
       <main className="p-4">
         {/* 用户信息卡片 */}
-        <Card className="bg-gradient-to-r from-[#FF6B35] to-[#FF8C61] text-white">
+        <Card className={`bg-gradient-to-r ${isVip ? 'from-yellow-400 to-orange-400' : 'from-[#FF6B35] to-[#FF8C61]'} text-white`}>
           <div className="flex items-center gap-4 p-4">
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
               <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,50 +145,54 @@ export const ProfilePage: React.FC = () => {
               </svg>
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-bold">用户</h2>
-              <p className="text-sm text-white/80 mt-1">ID: 12345678</p>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold">{user?.username || '用户'}</h2>
+                {isVip && (
+                  <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-medium">
+                    {vipInfo.name}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-white/80 mt-1">ID: {user?.id?.slice(0, 8) || '---'}</p>
             </div>
-            <Button variant="outline" size="sm" className="border-white text-white hover:bg-white hover:text-[#FF6B35]">
-              编辑
-            </Button>
           </div>
           
           {/* 统计信息 */}
           <div className="flex border-t border-white/20 mt-4 pt-4">
             <div className="flex-1 text-center">
-              <p className="text-2xl font-bold">12</p>
-              <p className="text-xs text-white/80 mt-1">收藏</p>
+              <p className="text-2xl font-bold">{points}</p>
+              <p className="text-xs text-white/80 mt-1">积分</p>
             </div>
             <div className="flex-1 text-center border-l border-white/20">
-              <p className="text-2xl font-bold">48</p>
-              <p className="text-xs text-white/80 mt-1">订单</p>
+              <p className="text-2xl font-bold">{inviteCount}</p>
+              <p className="text-xs text-white/80 mt-1">邀请</p>
             </div>
             <div className="flex-1 text-center border-l border-white/20">
-              <p className="text-2xl font-bold">¥1,280</p>
-              <p className="text-xs text-white/80 mt-1">节省</p>
+              <p className="text-2xl font-bold">{isVip ? vipInfo.name : '普通'}</p>
+              <p className="text-xs text-white/80 mt-1">会员</p>
             </div>
           </div>
         </Card>
 
         {/* VIP 入口 */}
-        <Card hoverable className="mt-4 bg-gradient-to-r from-yellow-400 to-orange-400">
-          <div className="flex items-center justify-between p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                </svg>
+        {!isVip && (
+          <Card hoverable className="mt-4 bg-gradient-to-r from-yellow-400 to-orange-400" onClick={() => navigate('/points')}>
+            <div className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  <span className="text-xl">👑</span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-white">积分兑换 VIP</h3>
+                  <p className="text-xs text-white/80">享专属优惠和特权</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-white">开通 VIP</h3>
-                <p className="text-xs text-white/80">享受专属优惠和特权</p>
-              </div>
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </div>
-            <Button variant="outline" size="sm" className="border-white text-white hover:bg-white hover:text-orange-500">
-              立即开通
-            </Button>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         {/* 用餐喜好入口 */}
         <Card hoverable className="mt-4" onClick={() => navigate('/preferences')}>
